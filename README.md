@@ -36,6 +36,7 @@ Whether you're building a blog, a headless frontend, or a high-performance conte
 | `/tag seo`      | Filter by tag                                |
 | `/fav`          | Show favorite posts                          |
 | `/fav_clear`    | Clear all favorites                          |
+| `/random`       | Open a random published post instantly       |
 
 ## Developer Docs
 
@@ -49,10 +50,15 @@ Whether you're building a blog, a headless frontend, or a high-performance conte
 
 ## Installation
 
-1. Upload to `/wp-content/plugins/init-live-search/` or install via admin
-2. Activate the plugin
-3. Go to **Settings → Init Live Search** and configure
-4. Modal search will auto-attach to all `<input name="s">` fields
+1. Upload the plugin folder to `/wp-content/plugins/` or install via the WordPress admin panel.
+2. Activate the plugin through **Plugins → Installed Plugins**.
+3. Configure options via **Settings → Init Live Search**.
+4. The search modal can be triggered by default through:
+   - Focusing any `<input name="s">` field
+   - Pressing `Ctrl + /` (or `Cmd + /` on Mac)
+   - Triple-clicking anywhere on the page (within 0.5s)
+   - Clicking any element with a `data-ils` attribute
+   - Visiting a URL with `#search` or `?modal=search&term=...`
 
 ## License
 
