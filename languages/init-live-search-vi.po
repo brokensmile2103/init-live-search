@@ -1,0 +1,235 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Init Live Search 1.5\n"
+"Language: vi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "A fast, lightweight, and smart live search modal built with Vanilla JS and powered by the WordPress REST API."
+msgstr "Một hộp tìm kiếm hiện đại, nhẹ và thông minh sử dụng Vanilla JS và REST API của WordPress."
+
+msgid "Init Live Search Settings"
+msgstr "Cài đặt Init Live Search"
+
+msgid "Type to search..."
+msgstr "Nhập để tìm kiếm..."
+
+msgid "Loading..."
+msgstr "Đang tải..."
+
+msgid "No results found."
+msgstr "Không tìm thấy kết quả nào."
+
+msgid "Error loading results."
+msgstr "Lỗi khi tải kết quả."
+
+msgid "All"
+msgstr "Tất cả"
+
+msgid "Post Types to Include"
+msgstr "Loại nội dung cần tìm kiếm"
+
+msgid "Quick open modal triggers"
+msgstr "Phím tắt mở nhanh hộp tìm kiếm"
+
+msgid "Enable fast access to the search modal using simple actions."
+msgstr "Bật các hành động đơn giản để mở nhanh giao diện tìm kiếm."
+
+msgid "Triggers:"
+msgstr "Phím tắt:"
+
+msgid "Click anywhere on the page 3 times within 0.5 seconds"
+msgstr "Nhấp chuột 3 lần liên tiếp vào bất kỳ nơi nào trên trang"
+
+msgid "Or press Ctrl + / (or Cmd + / on Mac)"
+msgstr "Hoặc nhấn Ctrl + / (Cmd + / trên Mac)"
+
+msgid "Trigger methods to open modal"
+msgstr "Cách để mở giao diện tìm kiếm"
+
+msgid "Attach event to input[name=\"s\"]"
+msgstr "Gắn sự kiện vào input[name=\"s\"]"
+
+msgid "Triple click anywhere on the page"
+msgstr "Nhấp chuột 3 lần liên tiếp vào trang"
+
+msgid "Press Ctrl + / (or Cmd + / on Mac)"
+msgstr "Nhấn Ctrl + / (hoặc Cmd + / trên Mac)"
+
+msgid "Select one or more methods to trigger the search modal."
+msgstr "Chọn một hoặc nhiều cách để mở hộp tìm kiếm."
+
+msgid "Debounce Time (ms)"
+msgstr "Thời gian chờ tìm kiếm (ms)"
+
+msgid "Max Results"
+msgstr "Số kết quả tối đa"
+
+msgid "Search Mode"
+msgstr "Chế độ tìm kiếm"
+
+msgid "Title Only"
+msgstr "Chỉ tiêu đề"
+
+msgid "Title and Excerpt"
+msgstr "Tiêu đề và trích đoạn"
+
+msgid "Title, Excerpt and Content"
+msgstr "Tiêu đề, trích đoạn và nội dung"
+
+msgid "Enable fallback matching?"
+msgstr "Bật khớp dự phòng?"
+
+msgid "Try trimming or using bigrams if not enough results are found."
+msgstr "Thử rút gọn hoặc sử dụng cụm từ nếu không đủ kết quả."
+
+msgid "Enqueue default CSS?"
+msgstr "Tải CSS mặc định?"
+
+msgid "Load the built-in style.css file on the front-end."
+msgstr "Tải file style.css tích hợp sẵn ở giao diện người dùng."
+
+msgid "Cache results in localStorage?"
+msgstr "Lưu kết quả vào localStorage?"
+
+msgid "Enable caching search results in localStorage to improve performance and reduce repeated requests."
+msgstr "Lưu kết quả tìm kiếm vào localStorage để tăng hiệu suất và giảm yêu cầu lặp lại."
+
+msgid "Default UTM Parameter"
+msgstr "Tham số UTM mặc định"
+
+msgid "Optional. Set a default UTM parameter to include in search-related requests. Example: utm_source=search&utm_medium=plugin"
+msgstr "Tùy chọn. Thiết lập UTM mặc định thêm vào URL tìm kiếm. Ví dụ: utm_source=search&utm_medium=plugin"
+
+msgid "Suggested Keywords"
+msgstr "Từ khóa gợi ý"
+
+msgid "Generate Automatically"
+msgstr "Tự động tạo"
+
+msgid "Enter default search keywords for suggestions, separated by commas. You can also auto-generate."
+msgstr "Nhập từ khóa mặc định (phân cách bằng dấu phẩy), hoặc dùng nút tạo tự động."
+
+msgid "Failed to generate keywords"
+msgstr "Không tạo được từ khóa"
+
+msgid "Usage Instructions"
+msgstr "Hướng dẫn sử dụng"
+
+msgid "You can change the theme using one of these two ways:"
+msgstr "Bạn có thể đổi giao diện bằng một trong hai cách sau:"
+
+msgid "Add the dark class to the modal container:"
+msgstr "Thêm class dark vào hộp tìm kiếm:"
+
+msgid "Or set the theme using a global config before the plugin initializes:"
+msgstr "Hoặc thiết lập qua cấu hình toàn cục trước khi plugin khởi động:"
+
+msgid "Other values:"
+msgstr "Giá trị khác:"
+
+msgid "light"
+msgstr "sáng"
+
+msgid "auto (default)"
+msgstr "tự động (mặc định)"
+
+msgid "Cache cleared successfully."
+msgstr "Đã xóa cache thành công."
+
+msgid "Failed to clear cache."
+msgstr "Không thể xóa cache."
+
+msgid "Popular feature is not supported. Please install Init View Count plugin."
+msgstr "Chức năng xem nhiều không khả dụng. Hãy cài plugin Init View Count."
+
+msgid "Show latest posts"
+msgstr "Hiển thị bài viết mới nhất"
+
+msgid "Show popular posts (if available)"
+msgstr "Hiển thị bài viết phổ biến (nếu có)"
+
+msgid "Filter by category"
+msgstr "Lọc theo chuyên mục"
+
+msgid "Filter by tag"
+msgstr "Lọc theo thẻ"
+
+msgid "Filter by date (Y/m/d)"
+msgstr "Lọc theo ngày đăng (Y/m/d)"
+
+msgid "Go to post by ID"
+msgstr "Xem bài viết theo ID"
+
+msgid "Clear local cache"
+msgstr "Xóa cache trình duyệt"
+
+msgid "Reset search field"
+msgstr "Đặt lại ô tìm kiếm"
+
+msgid "Supported Commands:"
+msgstr "Câu lệnh hỗ trợ:"
+
+msgid "Find posts related to current page title"
+msgstr "Tìm bài viết liên quan đến tiêu đề trang hiện tại"
+
+msgid "Show posts you recently read (local only)"
+msgstr "Hiển thị các bài bạn đã đọc gần đây (chỉ lưu cục bộ)"
+
+msgid "Open a random post"
+msgstr "Mở một bài viết ngẫu nhiên"
+
+msgid "Show list of categories"
+msgstr "Hiển thị danh sách chuyên mục"
+
+msgid "Show list of tags"
+msgstr "Hiển thị danh sách thẻ"
+
+msgid "Enable Voice Input?"
+msgstr "Bật nhập liệu bằng giọng nói?"
+
+msgid "Enable microphone input using the SpeechRecognition API (if supported)"
+msgstr "Bật nhập liệu bằng micro sử dụng SpeechRecognition API (nếu trình duyệt hỗ trợ)"
+
+msgid "Maximum number of results to display in the modal."
+msgstr "Số lượng kết quả tối đa hiển thị trong hộp tìm kiếm."
+
+msgid "Filter by date (Y, Y/m, or Y/m/d)"
+msgstr "Lọc theo ngày (Y, Y/m hoặc Y/m/d)"
+
+msgid "Enable Slash Commands?"
+msgstr "Bật Slash Command?"
+
+msgid "Allow search commands starting with \"/\" such as /recent, /id, /tag, etc."
+msgstr "Cho phép sử dụng các lệnh tìm kiếm bắt đầu bằng dấu \"/\" như /recent, /id, /tag, v.v."
+
+msgid "Max Words to Trigger Highlight Search"
+msgstr "Số từ tối đa để bật tìm kiếm khi bôi đen"
+
+msgid "Set maximum word count allowed to trigger tooltip search on text selection. Set 0 or 1 to disable."
+msgstr "Thiết lập số từ tối đa được phép để hiển thị nút tìm kiếm khi người dùng bôi đen văn bản. Nhập 0 hoặc 1 để tắt chức năng này."
+
+msgid "Quick search"
+msgstr "Tìm kiếm nhanh"
+
+msgid "Show your favorited posts"
+msgstr "Hiển thị các bài đã lưu"
+
+msgid "Favorite list has been cleared."
+msgstr "Danh sách yêu thích đã được xóa."
+
+msgid "Clear all favorite posts"
+msgstr "Xóa tất cả bài viết yêu thích"
+
+msgid "Search Triggers"
+msgstr "Cách kích hoạt tìm kiếm"
+
+msgid "Search Behavior"
+msgstr "Hành vi tìm kiếm"
+
+msgid "Performance & UX"
+msgstr "Hiệu năng & Trải nghiệm người dùng"
+
+msgid "Styling & Suggestions"
+msgstr "Giao diện & Gợi ý từ khóa"
