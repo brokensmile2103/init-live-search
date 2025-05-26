@@ -42,7 +42,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - Tooltip-based Quick Search (select text → click)
 - LocalStorage-powered favorites and caching
 - Voice input via `SpeechRecognition` API
-- Keyboard navigation: ↑ ↓ → ← Enter Esc
+- Keyboard navigation: `↑` `↓` `→` `←` `Enter` `Esc`
 - Deep linking: open modal with `?modal=search&term=/recent`
 - Adaptive dark mode (`auto`, `dark`, `light`)
 - WooCommerce-ready: prices, badges, and "Add to Cart"
