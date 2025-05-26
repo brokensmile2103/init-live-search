@@ -55,6 +55,12 @@ add_action('rest_api_init', function () {
         'callback' => 'init_plugin_suite_live_search_get_taxonomies_list',
         'permission_callback' => '__return_true',
     ]);
+
+    register_rest_route('initlise/v1', '/product', [
+        'methods'             => 'GET',
+        'callback'            => 'init_plugin_suite_live_search_products',
+        'permission_callback' => '__return_true',
+    ]);
 });
 
 function init_plugin_suite_live_search_search($request) {
@@ -93,10 +99,13 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
     $offset = ($paged - 1) * $limit;
 
     if (!empty($args['force_ids']) && is_array($args['force_ids'])) {
-        $post_ids = array_map('absint', $args['force_ids']);
+        $post_ids = array_filter(array_map('absint', $args['force_ids']), function($id) {
+            return $id > 0;
+        });
     } else {
         if (!$term || strlen($term) < 2) return [];
 
+        // Default search mode fallback is 'title' for clean, fast matching
         $search_mode = !empty($args['force_mode'])
             ? $args['force_mode']
             : (!empty($options['search_mode']) ? $options['search_mode'] : 'title');
@@ -104,7 +113,7 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
         $like = '%' . $wpdb->esc_like($term) . '%';
         $placeholders = implode(', ', array_fill(0, count($post_types), '%s'));
 
-        $cache_key = 'init_plugin_suite_live_search_' . md5($term . serialize($post_types) . $search_mode . $limit);
+        $cache_key = 'init_plugin_suite_live_search_' . md5($term . serialize($post_types) . $search_mode . $limit . $paged);
         $post_ids = ($paged === 1) ? wp_cache_get($cache_key, 'init_plugin_suite_live_search') : false;
 
         if ($post_ids === false) {
@@ -131,7 +140,7 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
 
                 if (count($post_ids) < floor($limit / 2) && str_word_count($term) >= 3) {
                     $bi_terms = init_plugin_suite_live_search_generate_bigrams($term);
-                    foreach ($bi_terms as $bi_term) {
+                    foreach (array_slice($bi_terms, 0, 10) as $bi_term) {
                         $like_bi = '%' . $wpdb->esc_like($bi_term) . '%';
                         $more_ids = init_plugin_suite_live_search_get_post_ids_by_mode(
                             $wpdb, $bi_term, $like_bi, $post_types, $placeholders, $search_mode, 200
@@ -165,34 +174,13 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
     $results = [];
     $post_ids_page = array_slice($post_ids, $offset, $limit);
 
-    foreach ($post_ids_page as $post_id) {
-        if (!empty($args['exclude']) && (int)$post_id === (int)$args['exclude']) {
-            continue;
-        }
-
-        $thumb_id = get_post_thumbnail_id($post_id);
-        $thumb_url = $thumb_id ? wp_get_attachment_image_url($thumb_id, 'thumbnail') : $default_thumb;
-
-        $post_type_slug = get_post_type($post_id);
-        $post_type_obj = get_post_type_object($post_type_slug);
-        $post_type_name = $post_type_obj ? $post_type_obj->labels->singular_name : $post_type_slug;
-
-        $category = get_the_category($post_id);
-        $category_name = ($category && !is_wp_error($category)) ? $category[0]->name : '';
-
-        $item = [
-            'id'       => $post_id,
-            'title'    => init_plugin_suite_live_search_highlight_keyword(esc_html(get_the_title($post_id)), $keywords),
-            'url'      => get_permalink($post_id),
-            'type'     => $post_type_name,
-            'thumb'    => $thumb_url,
-            'date'     => get_the_date('d/m/Y', $post_id),
-            'category' => apply_filters('init_plugin_suite_live_search_category', $category_name, $post_id),
-        ];
-
-        $item = apply_filters('init_plugin_suite_live_search_result_item', $item, $post_id, $term, null);
-        $results[] = $item;
-    }
+    $results = init_plugin_suite_live_search_build_result_list(
+        $post_ids_page,
+        $args,
+        $term,
+        $keywords,
+        $default_thumb
+    );
 
     return apply_filters('init_plugin_suite_live_search_results', $results, $post_ids, $term, null);
 }
@@ -329,9 +317,9 @@ function init_plugin_suite_live_search_get_post_by_id($request) {
         return rest_ensure_response([]);
     }
 
-    return rest_ensure_response([
+    return rest_ensure_response(apply_filters('init_plugin_suite_live_search_post_by_id', [
         'url' => get_permalink($id),
-    ]);
+    ], $id));
 }
 
 function init_plugin_suite_live_search_recent($request) {
@@ -376,26 +364,13 @@ function init_plugin_suite_live_search_recent($request) {
 
     $results = [];
 
-    foreach ($query->posts as $post_id) {
-        $thumb_id = get_post_thumbnail_id($post_id);
-        $thumb_url = $thumb_id ? wp_get_attachment_image_url($thumb_id, 'thumbnail') : $default_thumb;
-
-        $post_type_slug = get_post_type($post_id);
-        $post_type_obj = get_post_type_object($post_type_slug);
-        $post_type_name = $post_type_obj ? $post_type_obj->labels->singular_name : $post_type_slug;
-
-        $category = get_the_category($post_id);
-        $category_name = ($category && !is_wp_error($category)) ? $category[0]->name : '';
-
-        $results[] = [
-            'title'    => get_the_title($post_id),
-            'url'      => get_permalink($post_id),
-            'type'     => $post_type_name,
-            'thumb'    => $thumb_url,
-            'date'     => get_the_date('d/m/Y', $post_id),
-            'category' => apply_filters('init_plugin_suite_live_search_category', $category_name, $post_id),
-        ];
-    }
+    $results = init_plugin_suite_live_search_build_result_list(
+        $query->posts,
+        [],
+        '',
+        [],
+        $default_thumb
+    );
 
     wp_cache_set($cache_key, $results, 'init_plugin_suite_live_search', 300);
 
@@ -447,26 +422,13 @@ function init_plugin_suite_live_search_date($request) {
 
     $results = [];
 
-    foreach ($query->posts as $post_id) {
-        $thumb_id = get_post_thumbnail_id($post_id);
-        $thumb_url = $thumb_id ? wp_get_attachment_image_url($thumb_id, 'thumbnail') : $default_thumb;
-
-        $post_type_slug = get_post_type($post_id);
-        $post_type_obj = get_post_type_object($post_type_slug);
-        $post_type_name = $post_type_obj ? $post_type_obj->labels->singular_name : $post_type_slug;
-
-        $category = get_the_category($post_id);
-        $category_name = ($category && !is_wp_error($category)) ? $category[0]->name : '';
-
-        $results[] = [
-            'title'    => get_the_title($post_id),
-            'url'      => get_permalink($post_id),
-            'type'     => $post_type_name,
-            'thumb'    => $thumb_url,
-            'date'     => get_the_date('d/m/Y', $post_id),
-            'category' => apply_filters('init_plugin_suite_live_search_category', $category_name, $post_id),
-        ];
-    }
+    $results = init_plugin_suite_live_search_build_result_list(
+        $query->posts,
+        [],
+        '',
+        [],
+        $default_thumb
+    );
 
     wp_cache_set($cache_key, $results, 'init_plugin_suite_live_search', 300);
     return rest_ensure_response($results);
@@ -554,26 +516,13 @@ function init_plugin_suite_live_search_tax_query($request) {
 
     $results = [];
 
-    foreach ($query->posts as $post_id) {
-        $thumb_id = get_post_thumbnail_id($post_id);
-        $thumb_url = $thumb_id ? wp_get_attachment_image_url($thumb_id, 'thumbnail') : $default_thumb;
-
-        $post_type_slug = get_post_type($post_id);
-        $post_type_obj  = get_post_type_object($post_type_slug);
-        $post_type_name = $post_type_obj ? $post_type_obj->labels->singular_name : $post_type_slug;
-
-        $terms = get_the_terms($post_id, $taxonomy);
-        $term_name = ($terms && !is_wp_error($terms)) ? $terms[0]->name : '';
-
-        $results[] = [
-            'title'    => get_the_title($post_id),
-            'url'      => get_permalink($post_id),
-            'type'     => $post_type_name,
-            'thumb'    => $thumb_url,
-            'date'     => get_the_date('d/m/Y', $post_id),
-            'category' => apply_filters('init_plugin_suite_live_search_category', $term_name, $post_id),
-        ];
-    }
+    $results = init_plugin_suite_live_search_build_result_list(
+        $query->posts,
+        [],
+        '',
+        [],
+        $default_thumb
+    );
 
     wp_cache_set($cache_key, $results, 'init_plugin_suite_live_search', 300);
     return rest_ensure_response($results);
@@ -698,4 +647,207 @@ function init_plugin_suite_live_search_get_taxonomies_list($request) {
     }
 
     return rest_ensure_response($results);
+}
+
+function init_plugin_suite_live_search_products($request) {
+    if (!function_exists('wc_get_product')) {
+        return rest_ensure_response([]);
+    }
+
+    $options = get_option('init_plugin_suite_live_search_settings', []);
+    $per_page = (!empty($options['max_results']) && is_numeric($options['max_results']) && $options['max_results'] > 0)
+        ? (int) $options['max_results']
+        : 10;
+
+    $paged     = max(1, (int) $request->get_param('page'));
+    $term      = sanitize_text_field($request->get_param('term'));
+    $on_sale   = (bool) $request->get_param('on_sale');
+    $in_stock  = (bool) $request->get_param('in_stock');
+    $sku       = sanitize_text_field($request->get_param('sku'));
+    $min_price = is_numeric($request->get_param('min_price')) ? floatval($request->get_param('min_price')) : null;
+    $max_price = is_numeric($request->get_param('max_price')) ? floatval($request->get_param('max_price')) : null;
+
+    // Tạo cache key
+    $cache_key = 'ils_product_' . md5(json_encode([
+        'term' => $term,
+        'sku' => $sku,
+        'on_sale' => $on_sale,
+        'in_stock' => $in_stock,
+        'min' => $min_price,
+        'max' => $max_price,
+        'paged' => $paged,
+        'per_page' => $per_page
+    ]));
+    $results = wp_cache_get($cache_key, 'init_plugin_suite_live_search');
+    if ($results !== false) {
+        return rest_ensure_response($results);
+    }
+
+    $args = [
+        'post_type'      => 'product',
+        'post_status'    => 'publish',
+        'posts_per_page' => $per_page,
+        'paged'          => $paged,
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'no_found_rows'  => true,
+        'fields'         => 'ids',
+    ];
+
+    $meta_query = [];
+
+    if (!empty($term)) {
+        $args['s'] = $term;
+    }
+
+    if (!empty($sku)) {
+        $meta_query[] = [
+            'key'     => '_sku',
+            'value'   => $sku,
+            'compare' => 'LIKE',
+        ];
+    }
+
+    if ($in_stock) {
+        $meta_query[] = [
+            'key'     => '_stock_status',
+            'value'   => 'instock',
+            'compare' => '=',
+        ];
+    }
+
+    if ($min_price !== null && $max_price !== null) {
+        $meta_query[] = [
+            'key'     => '_price',
+            'value'   => [$min_price, $max_price],
+            'type'    => 'NUMERIC',
+            'compare' => 'BETWEEN',
+        ];
+    } elseif ($min_price !== null) {
+        $meta_query[] = [
+            'key'     => '_price',
+            'value'   => $min_price,
+            'type'    => 'NUMERIC',
+            'compare' => '>=',
+        ];
+    } elseif ($max_price !== null) {
+        $meta_query[] = [
+            'key'     => '_price',
+            'value'   => $max_price,
+            'type'    => 'NUMERIC',
+            'compare' => '<=',
+        ];
+    }
+
+    $meta_query[] = [
+        'key'     => '_price',
+        'compare' => 'EXISTS',
+    ];
+
+    if (!empty($meta_query)) {
+        $args['meta_query'] = [
+            'relation' => 'AND',
+            ...$meta_query
+        ];
+    }
+
+    if ($on_sale) {
+        $product_ids_on_sale = wc_get_product_ids_on_sale();
+        $args['post__in'] = !empty($args['post__in'])
+            ? array_values(array_intersect($args['post__in'], $product_ids_on_sale))
+            : $product_ids_on_sale;
+
+        if (empty($args['post__in'])) {
+            return rest_ensure_response([]);
+        }
+    }
+
+    $args = apply_filters('init_plugin_suite_live_search_query_args', $args, 'product', $request);
+    $query = new WP_Query($args);
+
+    $default_thumb = apply_filters(
+        'init_plugin_suite_live_search_default_thumb',
+        INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'img/thumbnail.svg'
+    );
+
+    $results = [];
+
+    $results = init_plugin_suite_live_search_build_result_list(
+        $query->posts,
+        [],
+        '',
+        [],
+        $default_thumb
+    );
+
+    // Cache kết quả cho 5 phút
+    wp_cache_set($cache_key, $results, 'init_plugin_suite_live_search', 300);
+
+    return rest_ensure_response($results);
+}
+
+function init_plugin_suite_live_search_get_product_data($post_id) {
+    if (!function_exists('wc_get_product')) return [];
+
+    $product = wc_get_product($post_id);
+    if (!$product) return [];
+
+    $data = [
+        'price'         => $product->get_price_html(),
+        'regular_price' => wc_price($product->get_regular_price()),
+        'on_sale'       => $product->is_on_sale(),
+        'stock_status'  => $product->get_stock_status(),
+        'add_to_cart_url' => $product->add_to_cart_url(),
+    ];
+
+    return $data;
+}
+
+function init_plugin_suite_live_search_build_result_item($post_id, $term = '', $keywords = [], $default_thumb = '') {
+    $thumb_id  = get_post_thumbnail_id($post_id);
+    $thumb_url = $thumb_id ? wp_get_attachment_image_url($thumb_id, 'thumbnail') : $default_thumb;
+
+    $post_type_slug = get_post_type($post_id);
+    $post_type_obj  = get_post_type_object($post_type_slug);
+    $post_type_name = $post_type_obj ? $post_type_obj->labels->singular_name : $post_type_slug;
+
+    $taxonomy = apply_filters('init_plugin_suite_live_search_category_taxonomy', 'category', $post_id);
+    $category = get_the_terms($post_id, $taxonomy);
+    $category_name = ($category && !is_wp_error($category)) ? $category[0]->name : '';
+
+    $title = get_the_title($post_id);
+    if (!empty($keywords)) {
+        $title = init_plugin_suite_live_search_highlight_keyword(esc_html($title), $keywords);
+    }
+
+    $item = [
+        'id'        => $post_id,
+        'title'     => $title,
+        'url'       => get_permalink($post_id),
+        'type'      => $post_type_name,
+        'post_type' => $post_type_slug,
+        'thumb'     => $thumb_url,
+        'date'      => get_the_date('d/m/Y', $post_id),
+        'category'  => apply_filters('init_plugin_suite_live_search_category', $category_name, $post_id),
+    ];
+
+    if ($post_type_slug === 'product') {
+        $item = array_merge($item, init_plugin_suite_live_search_get_product_data($post_id));
+    }
+
+    return apply_filters('init_plugin_suite_live_search_result_item', $item, $post_id, $term, null);
+}
+
+function init_plugin_suite_live_search_build_result_list($post_ids, $args = [], $term = '', $keywords = [], $default_thumb = '') {
+    if (!is_array($post_ids)) return [];
+
+    $exclude = !empty($args['exclude']) ? (int)$args['exclude'] : null;
+    $results = [];
+
+    foreach ($post_ids as $post_id) {
+        if ($exclude && $post_id === $exclude) continue;
+        $results[] = init_plugin_suite_live_search_build_result_item($post_id, $term, $keywords, $default_thumb);
+    }
+
+    return $results;
 }

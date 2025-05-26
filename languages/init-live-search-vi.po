@@ -12,6 +12,9 @@ msgstr "Một hộp tìm kiếm hiện đại, nhẹ và thông minh sử dụng
 msgid "Init Live Search Settings"
 msgstr "Cài đặt Init Live Search"
 
+msgid "Settings"
+msgstr "Cài đặt"
+
 msgid "Type to search..."
 msgstr "Nhập để tìm kiếm..."
 
@@ -233,3 +236,24 @@ msgstr "Hiệu năng & Trải nghiệm người dùng"
 
 msgid "Styling & Suggestions"
 msgstr "Giao diện & Gợi ý từ khóa"
+
+msgid "Sale"
+msgstr "Sale"
+
+msgid "Sold out"
+msgstr "Hết hàng"
+
+msgid "Search all products"
+msgstr "Tìm tất cả sản phẩm"
+
+msgid "Show only products on sale"
+msgstr "Chỉ hiển thị sản phẩm đang giảm giá"
+
+msgid "Show only in-stock products"
+msgstr "Chỉ hiển thị sản phẩm còn hàng"
+
+msgid "Search product by SKU"
+msgstr "Tìm sản phẩm theo mã SKU"
+
+msgid "Filter products by price range"
+msgstr "Lọc sản phẩm theo phạm vi giá"

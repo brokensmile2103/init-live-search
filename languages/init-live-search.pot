@@ -12,6 +12,9 @@ msgstr ""
 msgid "Init Live Search Settings"
 msgstr ""
 
+msgid "Settings"
+msgstr ""
+
 msgid "Type to search..."
 msgstr ""
 
@@ -229,4 +232,25 @@ msgid "Performance & UX"
 msgstr ""
 
 msgid "Styling & Suggestions"
+msgstr ""
+
+msgid "Sale"
+msgstr ""
+
+msgid "Sold out"
+msgstr ""
+
+msgid "Search all products"
+msgstr ""
+
+msgid "Show only products on sale"
+msgstr ""
+
+msgid "Show only in-stock products"
+msgstr ""
+
+msgid "Search product by SKU"
+msgstr ""
+
+msgid "Filter products by price range"
 msgstr ""

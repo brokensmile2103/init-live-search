@@ -1,10 +1,10 @@
 === Init Live Search ===
 Contributors: brokensmile.2103  
-Tags: live search, ajax search, wordpress search, rest api, slash command  
+Tags: live search, ajax search, woocommerce, rest api, slash command  
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.5  
+Stable tag: 1.5.1  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -18,8 +18,6 @@ It replaces the default `<input name="s">` with a clean, intuitive modal that re
 
 Designed for both blogs and headless sites, it includes optional features like voice input, dark mode, keyword suggestions, and advanced developer hooks for total flexibility.
 
-When a user focuses on any `<input name="s">`, a sleek modal appears and instantly displays results — no page reloads, no disruption.
-
 The plugin supports:
 - Keyboard navigation (↑ ↓ ← → Enter Esc)
 - Slash commands (e.g. `/recent`, `/id`, `/tag`)
@@ -29,7 +27,9 @@ The plugin supports:
 
 This plugin is part of the [Init Plugin Suite](https://inithtml.com/init-plugin-suite-bo-plugin-wordpress-toi-gian-manh-me-mien-phi/) — a collection of minimalist, fast, and developer-focused tools for WordPress.
 
-== What’s New in Version 1.5 ==
+GitHub repository: [https://github.com/brokensmile2103/init-live-search](https://github.com/brokensmile2103/init-live-search)
+
+== What's New in Version 1.5.x ==
 
 - Quick Search tooltip: select 2–8 words on any page to trigger instant search
 - `data-ils` attribute: open modal and prefill slash commands from any HTML element
@@ -40,6 +40,12 @@ This plugin is part of the [Init Plugin Suite](https://inithtml.com/init-plugin-
 - Consistent modal trigger behavior across all entry points
 - UX boost on mobile: auto-focus and select search input with keyboard support
 - Codebase optimized for future extensibility with minimal API changes
+- WooCommerce integration: support for `/product`, `/on-sale`, `/stock`, `/sku`, and `/price {min} {max}` slash commands
+- Display product prices, sale badges, stock status, and "Add to Cart" button in results
+- Smart badge UI: auto-highlight “Sale” and “Sold out” states
+- Added infinite scroll support for WooCommerce-based slash commands
+- Unified command architecture with pagination support across all slash commands
+- Enhanced keyboard navigation and auto-scrolling for commands and suggestions
 
 == Features ==
 
@@ -49,13 +55,17 @@ Everything you expect from a modern live search — and more:
 - Clean modal interface that works with any theme
 - Fully keyboard accessible (Arrow keys, Enter, Escape)
 - Slash command system (`/recent`, `/popular`, `/tag`, `/id`, `/fav`, etc.)
+- WooCommerce support: search by product, sale status, stock, SKU, or price range
 - Favorites support: manage with slash commands or heart icon in results
 - Quick Search tooltip: select text to trigger instant search
 - Voice input support using built-in SpeechRecognition
 - Smart category filter (client-side, no extra API calls)
+- Infinite scroll for long result lists (search and slash commands)
 - Deep linking: open modal and prefill terms from URL (`?modal=search&term=...`)
 - Custom triggers: Ctrl + /, triple-click, or `data-ils` attribute
+- Local caching with `localStorage` to improve performance
 - Optional keyword suggestions (manual or auto-generated)
+- Developer-friendly with filters and REST API endpoints
 - Built with pure JavaScript — no jQuery required
 
 == Dark Mode Support ==
@@ -74,13 +84,17 @@ Options: `dark`, `light`, `auto`
 
 == Admin Settings ==
 
-- Choose post types to include in search
-- Set debounce time, max results, and search mode
-- Toggle fallback logic (bigrams/trim)
-- Enable/disable default CSS
-- Enable result caching (localStorage)
-- Define or auto-generate keyword suggestions
-- Add default UTM parameter to result links
+- Choose post types to include in search  
+- Configure modal triggers (input focus, triple click, Ctrl+/)  
+- Enable slash commands (e.g. /recent, /tag, /id)  
+- Set debounce time, max results, and search mode  
+- Toggle fallback logic (bigrams/trim)  
+- Set max words for tooltip search  
+- Enable voice input (SpeechRecognition API)  
+- Enable result caching (localStorage)  
+- Enable/disable default CSS  
+- Define or auto-generate keyword suggestions  
+- Add default UTM parameter to result links  
 
 == Keyboard Navigation ==
 
@@ -90,6 +104,8 @@ Options: `dark`, `light`, `auto`
 - Enter — open selected result or submit
 - Escape — close modal and reset state
 - Slash (/) — start a command instantly (e.g., `/recent`, `/id 123`)
+
+== Developer Reference ==
 
 == Filters for Developers ==
 
@@ -181,6 +197,17 @@ All endpoints are under namespace: `initlise/v1`
 - `/taxonomies?taxonomy=category`  
   Return a list of taxonomy terms (e.g., categories, tags), sorted by count.
 
+- `/product?page=1&on_sale=1&in_stock=1&sku=ABC&min_price=100&max_price=500`  
+  Fetch WooCommerce products using flexible query parameters. Supports slash commands like `/product`, `/on-sale`, `/stock`, `/sku`, and `/price`.  
+  Accepts:  
+    - `term`: Search keyword  
+    - `sku`: Partial or full SKU match  
+    - `on_sale`: `1` to filter products on sale  
+    - `in_stock`: `1` to filter products in stock  
+    - `min_price` / `max_price`: Numeric range filter  
+    - `page`: For pagination  
+  Returns basic product info (title, URL, price, category, thumbnail), sale and stock status, and `add_to_cart_url`. Caching is applied per query.
+
 == Screenshots ==
 
 1. Admin settings with search behavior options
@@ -233,6 +260,12 @@ No need — this plugin uses a modal and doesn’t require template overrides. A
 = What is Quick Search tooltip? =  
 When you select 2–8 words on any page, a small tooltip appears allowing you to search instantly — no typing required.
 
+= Does it support WooCommerce products? =  
+Yes. It can search and display WooCommerce products including price, stock status, sale badges, and “Add to Cart” buttons — with support for slash commands like `/product`, `/on-sale`, `/stock`, `/sku`, and `/price`.
+
+= Can I filter products by price or stock? =  
+Yes. Use the slash command `/price 100 500` to filter by price range, or `/stock` to show in-stock products only.
+
 == Installation ==
 
 1. Upload the plugin folder to /wp-content/plugins/ or install via the admin panel.
@@ -242,7 +275,18 @@ When you select 2–8 words on any page, a small tooltip appears allowing you to
 
 == Changelog ==
 
-= 1.5.0 – May 25, 2025 =
+= 1.5.1 – May 26, 2025 =
+- Added WooCommerce product search with slash commands: `/product`, `/on-sale`, `/stock`, `/sku {code}`, `/price {min} {max}`
+- Display prices, sale badges, stock status, and “Add to Cart” links (with out-of-stock detection)
+- Introduced `/price` command with min/max filters powered by REST API
+- Improved infinite scroll behavior for WooCommerce commands
+- Added visual badges for “Sale” and “Sold out” states in results
+- Slash command visibility now respects `product` post type setting in admin
+- Enhanced keyboard navigation for command lists (scroll + max height)
+- Optimized JS rendering logic for cart buttons and stock display
+- Improved SKU matching accuracy and price filter precision
+
+= 1.5 – May 25, 2025 =
 - Added Quick Search tooltip when selecting 2–8 words of text, allowing instant modal activation
 - Added support for `data-ils` attribute to trigger the modal and prefill slash commands from any HTML element
 - Introduced `/fav` and `/fav_clear` commands to manage favorite posts using `localStorage`
@@ -293,30 +337,45 @@ When you select 2–8 words on any page, a small tooltip appears allowing you to
 - Codebase polish and improved JS architecture
 
 = 1.3 – May 22, 2025 =
-- Triple-click to open modal
-- Keyboard shortcut: Ctrl + /
-- Display post type name
-- Client-side category filter UI (based on returned results)
-- Clear icon inside search input
-- New developer filter prefix
+- Added new modal triggers:
+  - Keyboard shortcut: Ctrl + /
+  - Triple-click anywhere on blank space
+- Show post type label (e.g. Post, Page) next to each result
+- Client-side category filter UI: auto-generates from results without extra API calls
+- Improved input UX: search icon becomes clear button when input has value
+- Codebase standardization:
+  - All PHP filters and options now use `init_plugin_suite_live_search_*` prefix
+  - REST API namespace renamed to `initlise/v1`
+  - Global JS config moved to `window.InitPluginSuiteLiveSearch`
 
 = 1.2 – May 20, 2025 =
-- Voice input (SpeechRecognition)
-- Fallback logic and CSS settings
-- Developer filters
+- Added experimental voice input using the SpeechRecognition API (if supported by browser)
+- New settings:
+  - Enable/disable fallback logic (trimmed terms and bigrams)
+  - Enable/disable plugin’s default CSS
+  - Support for dark mode via `.dark` class or global JS config
+- Added developer filters for advanced customization:
+  - `init_plugin_suite_live_search_enable_fallback`
+  - `init_plugin_suite_live_search_post_ids`
+  - `init_plugin_suite_live_search_result_item`
+  - `init_plugin_suite_live_search_results`
 
 = 1.1 – May 18, 2025 =
-- Improved fallback matching
-- Prefill previous term
-- Character limit
-- UTM and cache support
-- Theme control
+- Enhanced fallback logic: trim terms and suggest using bigram strategy if no results found
+- Modal remembers and pre-fills the last search term using `sessionStorage`
+- Enforced character limit: input capped at 100 characters
+- New options added:
+  - Enable result caching via `localStorage`
+  - Auto-append default UTM parameters to result URLs
+  - Theme support: switch between light, dark, or auto mode via class or JS config
 
 = 1.0 – May 17, 2025 =
-- Initial release
-- REST API-powered modal search
-- Manual keyword suggestions
-- No external assets: all icons and fallback thumbnails are inlined SVGs — ultra-fast, zero overhead
+- First stable release of Init Live Search
+- Modal-based search powered entirely by the WordPress REST API
+- Fully keyboard accessible: Arrow keys, Enter, Escape
+- Manual keyword suggestions with optional fallback
+- Lightweight: no external assets, no jQuery — all icons and fallbacks are inlined SVGs
+- Built with Vanilla JavaScript, optimized for performance and accessibility
 
 == License ==
 

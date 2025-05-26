@@ -102,16 +102,31 @@
 
 /* Suggest Keywords */
 .ils-suggestions {
+    display: block;
+}
+.ils-suggestions:not(.ils-command-list) {
     margin: 10px 0;
     padding: 5px 15px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.ils-suggestions:not(.ils-command-list)::-webkit-scrollbar {
+    display: none;
 }
 .ils-suggestions .ils-suggest-pill {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
     background: #f1f1f1;
     border-radius: 20px;
     padding: 5px 12px;
+    margin-right: 10px;
     cursor: pointer;
     font-size: 14px;
     color: #111;
@@ -142,6 +157,9 @@
     display: block;
     padding: 0;
     margin: 0;
+    max-height: 61vh;
+    overflow-y: auto;
+    scroll-behavior: smooth;
 }
 .ils-command-item {
     display: flex;
@@ -303,6 +321,7 @@
 .ils-error,
 .ils-empty {
     padding: 20px;
+    margin-bottom: 0;
     text-align: center;
     color: #888;
     background: transparent;
@@ -311,6 +330,16 @@
 #ils-modal.dark .ils-error,
 #ils-modal.dark .ils-empty {
     color: #aaa;
+}
+.ils-loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+}
+.ils-loading-spinner svg {
+    animation: ils-spin 0.7s linear infinite;
+    display: block;
 }
 
 /* Animations */
@@ -343,16 +372,23 @@
         transform: scale(1);
     }
 }
+@keyframes ils-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(270deg); }
+}
 
 /* Scrollbar (Webkit only) */
-.ils-results::-webkit-scrollbar {
+.ils-results::-webkit-scrollbar,
+.ils-command-list::-webkit-scrollbar {
     width: 6px;
 }
-.ils-results::-webkit-scrollbar-thumb {
+.ils-results::-webkit-scrollbar-thumb,
+.ils-command-list::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.2);
     border-radius: 3px;
 }
-#ils-modal.dark .ils-results::-webkit-scrollbar-thumb {
+#ils-modal.dark .ils-results::-webkit-scrollbar-thumb,
+#ils-modal.dark .ils-command-list::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
 }
 
@@ -401,9 +437,25 @@
     border-style: solid;
     border-color: #1e1e1e transparent transparent transparent;
 }
+.ils-selection-tooltip-mobile {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 10px 10px;
+    font-size: 16px;
+    background: #1e1e1e;
+    color: #eee;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
 
 /* Favourite */
-.ils-meta .ils-fav-btn {
+.ils-meta .ils-fav-btn,
+.ils-meta .ils-cart-btn {
     position: absolute;
     right: 0;
     top: calc(50% - 13px);
@@ -415,13 +467,54 @@
     opacity: 0.6;
     transition: opacity 0.2s ease, color 0.2s ease;
 }
-.ils-meta .ils-fav-btn:hover {
+.ils-meta .ils-fav-btn:hover,
+.ils-meta .ils-cart-btn:hover {
     opacity: 1;
 }
-.ils-meta .ils-fav-btn.active {
+.ils-meta .ils-fav-btn.active,
+.ils-meta .ils-cart-btn.active {
     color: #f1c40f;
     opacity: 1;
 }
-.ils-meta .ils-fav-btn.flash {
+.ils-meta .ils-cart-btn.active {
+    color: #2ecc71;
+}
+.ils-meta .ils-fav-btn.flash,
+.ils-meta .ils-cart-btn.flash {
     animation: favFlash 0.4s ease-out;
+}
+.ils-meta .ils-cart-btn.out-of-stock {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* Product */
+.ils-meta .ils-info .ils-sale-badge,
+.ils-meta .ils-info .ils-stock-badge {
+    display: inline-block;
+    color: #fff;
+    padding: 2px 5px;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1;
+    border-radius: 4px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.ils-meta .ils-info .ils-sale-badge {
+    background: #f57c00; /* cam giảm giá */
+}
+.ils-meta .ils-info .ils-stock-badge {
+    background: #d93025; /* đỏ cảnh báo */
+}
+.ils-meta .ils-info ins {
+    background: none;
+}
+.ils-meta .ils-info ins .amount {
+    background: #ffd;
+    color: #666;
+}
+.ils-meta .ils-info .screen-reader-text {
+    display: none;
 }

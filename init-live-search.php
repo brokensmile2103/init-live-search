@@ -3,7 +3,7 @@
  * Plugin Name: Init Live Search
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
  * Description: A fast, lightweight, and smart live search modal built with Vanilla JS and powered by the WordPress REST API.
- * Version: 1.5
+ * Version: 1.5.1
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-live-search
@@ -18,7 +18,7 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.5');
+define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.5.1');
 define('INIT_PLUGIN_SUITE_LS_SLUG',           'init-live-search');
 define('INIT_PLUGIN_SUITE_LS_OPTION',         'init_plugin_suite_live_search_settings');
 define('INIT_PLUGIN_SUITE_LS_NAMESPACE',      'initlise/v1');
@@ -76,22 +76,42 @@ add_action('wp_enqueue_scripts', function () {
         : [];
 
     // Localized strings for commands
+    $post_types = !empty($options['post_types']) && is_array($options['post_types'])
+        ? array_map('sanitize_key', $options['post_types'])
+        : ['post'];
+
+    $product_enabled = in_array('product', $post_types, true);
+
     $commands = [
-        'recent'    => __('Show latest posts', 'init-live-search'),
-        'popular'   => __('Show popular posts (if available)', 'init-live-search'),
-        'related'   => __('Find posts related to current page title', 'init-live-search'),
-        'read'      => __('Show posts you recently read (local only)', 'init-live-search'),
-        'fav'       => __('Show your favorited posts', 'init-live-search'),
-        'fav_clear' => __('Clear all favorite posts', 'init-live-search'),
-        'random'    => __('Open a random post', 'init-live-search'),
-        'category'  => __('Filter by category', 'init-live-search'),
-        'tag'       => __('Filter by tag', 'init-live-search'),
-        'categories'=> __('Show list of categories', 'init-live-search'),
-        'tags'      => __('Show list of tags', 'init-live-search'),
-        'date'      => __('Filter by date (Y, Y/m, or Y/m/d)', 'init-live-search'),
-        'id'        => __('Go to post by ID', 'init-live-search'),
-        'clear'     => __('Clear local cache', 'init-live-search'),
-        'reset'     => __('Reset search field', 'init-live-search'),
+        'recent'     => __('Show latest posts', 'init-live-search'),
+        'popular'    => __('Show popular posts (if available)', 'init-live-search'),
+        'related'    => __('Find posts related to current page title', 'init-live-search'),
+        'read'       => __('Show posts you recently read (local only)', 'init-live-search'),
+        'fav'        => __('Show your favorited posts', 'init-live-search'),
+        'fav_clear'  => __('Clear all favorite posts', 'init-live-search'),
+    ];
+
+    if (!empty($options['post_types']) && in_array('product', $options['post_types'], true)) {
+        $woo_commands = [
+            'product'  => __('Search all products', 'init-live-search'),
+            'on-sale'  => __('Show only products on sale', 'init-live-search'),
+            'stock'    => __('Show only in-stock products', 'init-live-search'),
+            'sku'      => __('Search product by SKU', 'init-live-search'),
+            'price'    => __('Filter products by price range', 'init-live-search'),
+        ];
+        $commands += $woo_commands;
+    }
+
+    $commands += [
+        'random'     => __('Open a random post', 'init-live-search'),
+        'category'   => __('Filter by category', 'init-live-search'),
+        'tag'        => __('Filter by tag', 'init-live-search'),
+        'categories' => __('Show list of categories', 'init-live-search'),
+        'tags'       => __('Show list of tags', 'init-live-search'),
+        'date'       => __('Filter by date (Y, Y/m, or Y/m/d)', 'init-live-search'),
+        'id'         => __('Go to post by ID', 'init-live-search'),
+        'clear'      => __('Clear local cache', 'init-live-search'),
+        'reset'      => __('Reset search field', 'init-live-search'),
     ];
 
     $enable_slash = !isset($options['enable_slash']) || $options['enable_slash'];
@@ -116,7 +136,6 @@ add_action('wp_enqueue_scripts', function () {
         'default_thumb'      => INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'img/thumbnail.svg',
         'i18n' => [
             'placeholder'           => __('Type to search...', 'init-live-search'),
-            'loading'               => __('Loading...', 'init-live-search'),
             'no_results'            => __('No results found.', 'init-live-search'),
             'error'                 => __('Error loading results.', 'init-live-search'),
             'all'                   => __('All', 'init-live-search'),
@@ -124,12 +143,22 @@ add_action('wp_enqueue_scripts', function () {
             'fav_cleared'           => __('Favorite list has been cleared.', 'init-live-search'),
             'cache_failed'          => __('Failed to clear cache.', 'init-live-search'),
             'quick_search'          => __('Quick search', 'init-live-search'),
+            'on_sale'               => __('Sale', 'init-live-search'),
+            'out_of_stock'          => __('Sold out', 'init-live-search'),
             'supported_commands'    => __('Supported Commands:', 'init-live-search'),
             'popular_not_supported' => __('Popular feature is not supported. Please install Init View Count plugin.', 'init-live-search'),
         ],
         'commands' => $commands,
     ]);
 });
+
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'init_live_search_add_settings_link');
+
+function init_live_search_add_settings_link($links) {
+    $settings_link = '<a href="' . admin_url('options-general.php?page=init-live-search-settings') . '">' . __('Settings', 'init-live-search') . '</a>';
+    array_unshift($links, $settings_link);
+    return $links;
+}
 
 // Includes
 if (is_dir(INIT_PLUGIN_SUITE_LS_INCLUDES_PATH)) {

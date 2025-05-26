@@ -1,3 +1,5 @@
+// ===== Init Live Search – Main Entry Point =====
+// Thiết lập biến toàn cục, xác định trigger, xử lý debounce delay dựa trên thiết bị.
 document.addEventListener('DOMContentLoaded', function () {
     const trigger = InitPluginSuiteLiveSearch?.trigger || {};
     const input = document.querySelector('input[name="s"]');
@@ -17,6 +19,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
     const delay = isMobile ? (InitPluginSuiteLiveSearch.debounce * 1.5) : InitPluginSuiteLiveSearch.debounce;
 
+    // ===== Render Suggestions =====
+    // Xử lý đề xuất từ khóa (hiển thị dưới ô nhập).
     function renderSuggestions() {
         const keywords = (InitPluginSuiteLiveSearch.suggested || []).filter(k => k.trim().length);
         if (!keywords.length) {
@@ -30,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ).join('');
 
         suggestionBox.classList.remove('ils-command-list');
-        suggestionBox.style.display = 'flex';
+        suggestionBox.style.display = 'block';
 
         suggestionBox.querySelectorAll('.ils-suggest-pill').forEach(pill => {
             pill.addEventListener('click', () => {
@@ -46,6 +50,8 @@ document.addEventListener('DOMContentLoaded', function () {
     let commandIndex = -1;
     let suggestionIndex = -1;
 
+    // ===== Slash Commands =====
+    // Xử lý gợi ý slash command (hiển thị dưới ô nhập).
     function renderSlashCommandList(matched) {
         const allCommands = InitPluginSuiteLiveSearch.commands || {};
 
@@ -73,12 +79,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 inputSearch.value = item.getAttribute('data-command') + ' ';
                 inputSearch.focus();
                 handleSearch();
+                suggestionBox.style.display = 'none';
             });
         });
     }
 
     let isRecognizing = false;
 
+    // ===== Modal UI Creation =====
+    // Tạo DOM modal, gắn sự kiện đóng/mở, voice button, input chính và overlay.
     function createModal() {
         if (modalCreated) return;
         modalCreated = true;
@@ -244,9 +253,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 .filter(item => item.style.display !== 'none');
         }
 
+        // ===== Keyboard Navigation (Arrow keys, Enter) =====
+        // Hỗ trợ duyệt kết quả, slash command, và suggestion bằng bàn phím.
         inputSearch.addEventListener('keydown', (e) => {
             const isCommandList = suggestionBox.classList.contains('ils-command-list');
-            const isSuggestionVisible = suggestionBox.style.display === 'flex';
+            const isSuggestionVisible = suggestionBox.style.display === 'block';
             const hasResults = resultsContainer.querySelectorAll('.ils-item').length > 0;
 
             if (isCommandList && !hasResults) {
@@ -274,7 +285,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 items.forEach((item, index) => {
-                    item.classList.toggle('active', index === commandIndex);
+                    const isActive = index === commandIndex;
+                    item.classList.toggle('active', isActive);
+                    if (isActive) {
+                        requestAnimationFrame(() => {
+                            item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        });
+                    }
                 });
 
                 return;
@@ -382,11 +399,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        // ===== Infinite Scroll + Pagination =====
+        // Tự động tải thêm kết quả khi scroll đến cuối container.
+        // Bao gồm các command đặc biệt: /recent, /read, /fav.
         function loadMoreResults() {
             if (!currentCommand || isLoadingMore || !hasMoreResults || activeFilter !== '*') return;
 
             isLoadingMore = true;
-            currentPage++;
 
             const { cmd, param, arg, term } = currentCommand;
 
@@ -409,6 +428,46 @@ document.addEventListener('DOMContentLoaded', function () {
                 isLoadingMore = true;
                 currentPage++;
                 loadMoreFav();
+                return;
+            }
+
+            if (cmd === 'product') {
+                isLoadingMore = true;
+                currentPage++;
+
+                let url = InitPluginSuiteLiveSearch.api.replace('/search', '/product') + `?page=${currentPage}`;
+
+                if (param && arg) {
+                    url += `&${param}=${encodeURIComponent(arg)}`;
+                }
+
+                fetch(url)
+                    .then(res => res.json())
+                    .then(data => {
+                        isLoadingMore = false;
+
+                        if (!Array.isArray(data) || data.length === 0) {
+                            hasMoreResults = false;
+                            return;
+                        }
+
+                        if (data.length < 10) hasMoreResults = false;
+
+                        const prevUrls = new Set(
+                            Array.from(resultsContainer.querySelectorAll('.ils-item'))
+                                .map(el => el.getAttribute('data-url')?.replace(/\/$/, ''))
+                        );
+
+                        const freshItems = data.filter(item => !prevUrls.has((item.url || '').replace(/\/$/, '')));
+                        if (freshItems.length) {
+                            renderResults(freshItems, true);
+                        }
+                    })
+                    .catch(() => {
+                        isLoadingMore = false;
+                        hasMoreResults = false;
+                    });
+
                 return;
             }
 
@@ -562,6 +621,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
+    // ===== Modal Control Functions =====
+    // Xử lý hiển thị và reset modal mỗi lần mở/đóng.
     function openModal() {
         if (!modalInitialized) createModal();
         modal.classList.add('open');
@@ -587,12 +648,19 @@ document.addEventListener('DOMContentLoaded', function () {
         resultsContainer.innerHTML = '';
         inputSearch.value = '';
         hiddenUrl.value = '';
+
+        // Reset trạng thái UI và logic
         suggestionBox.classList.remove('ils-command-list');
-        suggestionBox.style.display = 'flex';
+        suggestionBox.innerHTML = '';
+        activeFilter = '*';
         selectedIndex = -1;
         commandIndex = -1;
         suggestionIndex = -1;
 
+        // Gọi lại gợi ý mặc định nếu có
+        renderSuggestions();
+
+        // Dừng voice recognition nếu đang chạy
         if (recognition && isRecognizing) {
             try {
                 recognition.abort();
@@ -602,8 +670,10 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        // Xoá keyword session
         sessionStorage.removeItem('ils-term');
 
+        // Emit sự kiện đóng modal
         window.dispatchEvent(new Event('ils:modal-closed'));
     }
 
@@ -637,6 +707,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // ===== Slash Command Parser =====
+    // Nhận diện và thực thi các lệnh đặc biệt như /help, /recent, /read, /fav,...
     function parseSlashCommand(term) {
         const parts = term.slice(1).trim().split(/\s+/);
         const cmd = parts[0]?.toLowerCase();
@@ -705,6 +777,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
+            showLoading();
+
             fetch(`${InitPluginSuiteLiveSearch.api.replace('/search', '/recent')}?page=1`)
                 .then(res => {
                     if (!res.ok) throw new Error('Failed to fetch');
@@ -744,6 +818,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
             }
+
+            showLoading();
 
             const endpoint = `${location.origin}/wp-json/initvico/v1/top?number=10&fields=full`;
 
@@ -806,6 +882,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
+            showLoading();
+
             const endpoint = `${InitPluginSuiteLiveSearch.api.replace('/search', '/related')}?title=${encodeURIComponent(document.title)}&exclude=${InitPluginSuiteLiveSearch.post_id || 0}`;
             fetch(endpoint)
                 .then(res => res.json())
@@ -849,9 +927,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 return true;
             }
 
-            const firstIds = allReadIds.slice(0, 10);
+            showLoading();
 
+            const firstIds = allReadIds.slice(0, 10);
             const endpoint = InitPluginSuiteLiveSearch.api.replace('/search', '/read');
+
             fetch(endpoint + '?ids=' + firstIds.join(','))
                 .then(res => res.json())
                 .then(data => {
@@ -886,6 +966,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 showMessage(InitPluginSuiteLiveSearch.i18n.no_results);
                 return true;
             }
+
+            showLoading();
 
             const firstIds = allFavIds.slice(0, 10);
             const endpoint = InitPluginSuiteLiveSearch.api.replace('/search', '/read');
@@ -922,7 +1004,87 @@ document.addEventListener('DOMContentLoaded', function () {
             return true;
         }
 
+        const baseUrl = InitPluginSuiteLiveSearch.api.replace('/search', '/product');
+
+        const buildAndFetch = ({ query = '', commandData = {}, customSetCommand = null }) => {
+            showLoading();
+            const url = `${baseUrl}?page=1${query ? '&' + query : ''}`;
+
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    if (!Array.isArray(data) || data.length === 0) {
+                        showMessage(InitPluginSuiteLiveSearch.i18n.no_results);
+                        return;
+                    }
+                    (customSetCommand || (() => setCommand('product', '', '', commandData)))();
+                    renderResults(data);
+                })
+                .catch(() => {
+                    showMessage(InitPluginSuiteLiveSearch.i18n.error);
+                });
+        };
+
+        // ----- /product -----
+        if (cmd === 'product') {
+            buildAndFetch({});
+            return true;
+        }
+
+        // ----- /on-sale -----
+        if (cmd === 'on-sale') {
+            buildAndFetch({
+                query: 'on_sale=1',
+                commandData: { on_sale: 1 },
+            });
+            return true;
+        }
+
+        // ----- /stock -----
+        if (cmd === 'stock') {
+            buildAndFetch({
+                query: 'in_stock=1',
+                commandData: { in_stock: 1 },
+            });
+            return true;
+        }
+
+        // ----- /sku -----
+        if (cmd === 'sku' && arg) {
+            buildAndFetch({
+                query: `sku=${encodeURIComponent(arg)}`,
+                commandData: { sku: arg },
+            });
+            return true;
+        }
+
+        // ----- /price -----
+        if (cmd === 'price' && arg) {
+            const nums = arg.split(/\s+/)
+                .map(v => parseFloat(v))
+                .filter(v => !isNaN(v) && v >= 0);
+
+            if (nums.length === 0) {
+                showMessage(InitPluginSuiteLiveSearch.i18n.no_results);
+                return true;
+            }
+
+            const min = nums[0] ?? '';
+            const max = nums[1] ?? '';
+
+            const queryParts = [];
+            if (min !== '') queryParts.push(`min_price=${min}`);
+            if (max !== '') queryParts.push(`max_price=${max}`);
+
+            buildAndFetch({
+                query: queryParts.join('&'),
+                commandData: { min, max },
+            });
+            return true;
+        }
+
         if (cmd === 'random') {
+            showLoading();
             const endpoint = InitPluginSuiteLiveSearch.api.replace('/search', '/random');
             fetch(endpoint)
                 .then(res => res.json())
@@ -940,7 +1102,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (cmd === 'categories' || cmd === 'tags') {
+            showLoading();
+
             const taxonomy = cmd === 'categories' ? 'category' : 'post_tag';
+            const cacheKey = `ils-cache-taxonomy-${taxonomy}`;
+
+            if (InitPluginSuiteLiveSearch.use_cache) {
+                const cached = localStorage.getItem(cacheKey);
+                if (cached) {
+                    try {
+                        renderTaxonomyList(JSON.parse(cached));
+                        return true;
+                    } catch (e) {
+                        localStorage.removeItem(cacheKey);
+                    }
+                }
+            }
+
             const endpoint = InitPluginSuiteLiveSearch.api.replace('/search', '/taxonomies?taxonomy=' + taxonomy);
 
             fetch(endpoint)
@@ -951,25 +1129,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
 
-                    const suggestionBox = document.querySelector('.ils-suggestions');
-                    if (suggestionBox) suggestionBox.innerHTML = '';
-
-                    const fragment = document.createDocumentFragment();
-                    data.forEach(item => {
-                        const pill = document.createElement('a');
-                        pill.href = item.url;
-                        pill.className = 'ils-suggest-pill';
-                        pill.textContent = item.name;
-                        pill.title = `${item.name} (${item.count})`;
-                        fragment.appendChild(pill);
-                    });
-
-                    if (suggestionBox) {
-                        suggestionBox.appendChild(fragment);
-                        resultsContainer.innerHTML = '';
-                        suggestionBox.classList.remove('ils-command-list');
-                        suggestionBox.style.display = 'flex';
+                    if (InitPluginSuiteLiveSearch.use_cache) {
+                        localStorage.setItem(cacheKey, JSON.stringify(data));
                     }
+
+                    renderTaxonomyList(data);
                 })
                 .catch(() => {
                     showMessage(InitPluginSuiteLiveSearch.i18n.error);
@@ -979,6 +1143,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (cmd === 'date' && arg) {
+            showLoading();
+
             const normalized = arg.trim().replace(/^\/+|\/+$/g, '');
             const cacheKey = `ils-cache-date-${normalized}`;
 
@@ -1026,6 +1192,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 showMessage(InitPluginSuiteLiveSearch.i18n.no_results);
                 return true;
             }
+
+            showLoading();
 
             const cacheKey = `ils-cache-tax-${cmd}-${arg}`;
             if (InitPluginSuiteLiveSearch.use_cache) {
@@ -1080,6 +1248,30 @@ document.addEventListener('DOMContentLoaded', function () {
         return false; // not a valid slash command
     }
 
+    // ===== Utility Functions =====
+    // Các hàm nhỏ hỗ trợ xử lý text, URL, debounce delay, v.v.
+    function renderTaxonomyList(data) {
+        const suggestionBox = document.querySelector('.ils-suggestions');
+        if (!suggestionBox) return;
+
+        suggestionBox.innerHTML = '';
+
+        const fragment = document.createDocumentFragment();
+        data.forEach(item => {
+            const pill = document.createElement('a');
+            pill.href = item.url;
+            pill.className = 'ils-suggest-pill';
+            pill.textContent = item.name;
+            pill.title = `${item.name} (${item.count})`;
+            fragment.appendChild(pill);
+        });
+
+        suggestionBox.appendChild(fragment);
+        resultsContainer.innerHTML = '';
+        suggestionBox.classList.remove('ils-command-list');
+        suggestionBox.style.display = 'block';
+    }
+
     function setCommand(cmd, param = '', arg = '', extra = {}) {
         currentCommand = { cmd, param, arg, ...extra };
         currentPage = 1;
@@ -1102,6 +1294,16 @@ document.addEventListener('DOMContentLoaded', function () {
         return url.includes('?') ? `${url}&${utm}` : `${url}?${utm}`;
     }
 
+    function showLoading() {
+        resultsContainer.innerHTML = `
+            <div class="ils-loading-spinner">
+                <svg width="30" height="30" viewBox="0 0 25 25" fill="none"><path d="M4.5 12.5a8 8 0 1 0 8-8" stroke="currentColor" stroke-width="1"/></svg>
+            </div>
+        `;
+    }
+
+    // ===== Render Result Items =====
+    // Duyệt từng object kết quả, vẽ HTML, gắn sự kiện fav, filter danh mục động.
     function renderResults(data, append = false) {
         if (!append) {
             resultsContainer.innerHTML = '';
@@ -1119,10 +1321,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         data.forEach(item => {
             const postId = item.id;
-            const favKey = getFavKey(postId);
-            const favActive = isFav(postId);
-            const favBtnStyle = InitPluginSuiteLiveSearch.enable_slash ? '' : ' style="display: none;"';
             const finalUrl = addUtm(item.url);
+            const isProduct = item.post_type === 'product';
+            const isFavorite = currentCommand?.cmd === 'fav' || isFav(postId);
+            const favKey = getFavKey(postId);
+            const btnStyle = InitPluginSuiteLiveSearch.enable_slash ? '' : ' style="display: none;"';
 
             const a = document.createElement('a');
             a.href = finalUrl;
@@ -1132,34 +1335,80 @@ document.addEventListener('DOMContentLoaded', function () {
             a.setAttribute('data-title', stripHtml(item.title));
             a.setAttribute('data-category', item.category || '');
 
+            // SVG icon
+            const iconSvg = isProduct
+                ? `<svg width="20" height="20" viewBox="0 0 20 20">
+                        <circle cx="7.3" cy="17.3" r="1.4" fill="currentColor"></circle>
+                        <circle cx="13.3" cy="17.3" r="1.4" fill="currentColor"></circle>
+                        <polyline fill="none" stroke="currentColor" points="0 2 3.2 4 5.3 12.5 16 12.5 18 6.5 8 6.5"></polyline>
+                   </svg>`
+                : `<svg width="20" height="20" viewBox="0 0 20 20">
+                        <polygon fill="none" stroke="currentColor" stroke-width="1.01"
+                            points="10 2 12.63 7.27 18.5 8.12 14.25 12.22 15.25 18 10 15.27 4.75 18 5.75 12.22 1.5 8.12 7.37 7.27">
+                        </polygon>
+                   </svg>`;
 
+            // Button class
+            const btnClass = isProduct ? 'ils-cart-btn' : 'ils-fav-btn';
+
+            // Info section
+            let infoHtml = '';
+            let stockBadge = '';
+            let outOfStockClass = '';
+
+            if (isProduct) {
+                const price = item.price || '';
+                const onSale = item.on_sale === true;
+                const stockStatus = item.stock_status || '';
+
+                const saleBadge = onSale
+                    ? `<span class="ils-sale-badge">${InitPluginSuiteLiveSearch.i18n?.on_sale || 'Sale'}</span>`
+                    : '';
+
+                if (stockStatus === 'outofstock') {
+                    stockBadge = `<span class="ils-stock-badge">${InitPluginSuiteLiveSearch.i18n?.out_of_stock || 'Sold out'}</span>`;
+                    outOfStockClass = ' out-of-stock';
+                }
+
+                infoHtml = [saleBadge, price, stockBadge].filter(Boolean).join(' &middot; ');
+            } else {
+                infoHtml = [item.date, item.type].filter(Boolean).join(' &middot; ');
+            }
+
+            // Inner HTML
             a.innerHTML = `
                 <div class="ils-thumb">
                     <img src="${item.thumb}" onerror="this.src='${InitPluginSuiteLiveSearch.default_thumb}'" alt="">
                 </div>
                 <div class="ils-meta">
                     <div class="ils-title">${item.title}</div>
-                    <div class="ils-info">${[item.date, item.type].filter(Boolean).join(' &middot; ')}</div>
-                    <button class="ils-fav-btn${favActive ? ' active' : ''}" title="Yêu thích" aria-label="Favorite"${favBtnStyle}>
-                        <svg width="20" height="20" viewBox="0 0 20 20">
-                            <polygon fill="none" stroke="currentColor" stroke-width="1.01"
-                                points="10 2 12.63 7.27 18.5 8.12 14.25 12.22 15.25 18 10 15.27 4.75 18 5.75 12.22 1.5 8.12 7.37 7.27">
-                            </polygon>
-                        </svg>
+                    <div class="ils-info">${infoHtml}</div>
+                    <button class="${btnClass}${isFavorite ? ' active' : ''}${outOfStockClass}"
+                            title="${isProduct ? 'Add to Cart' : 'Favorite'}"
+                            aria-label="${isProduct ? 'Add to Cart' : 'Favorite'}"
+                            ${btnStyle}>
+                        ${iconSvg}
                     </button>
                 </div>
             `;
 
-            const btn = a.querySelector('.ils-fav-btn');
+            // Behavior
+            const btn = a.querySelector(`.${btnClass}`);
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (localStorage.getItem(favKey)) {
-                    localStorage.removeItem(favKey);
-                    btn.classList.remove('active');
+
+                if (isProduct) {
+                    const addToCart = item.add_to_cart_url || finalUrl;
+                    window.location.href = addToCart;
                 } else {
-                    localStorage.setItem(favKey, Date.now());
-                    btn.classList.add('active');
+                    if (localStorage.getItem(favKey)) {
+                        localStorage.removeItem(favKey);
+                        btn.classList.remove('active');
+                    } else {
+                        localStorage.setItem(favKey, Date.now());
+                        btn.classList.add('active');
+                    }
                 }
             });
 
@@ -1175,7 +1424,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 ${categories.map(cat => `<span class="ils-suggest-pill" data-filter="${cat}">${cat}</span>`).join('')}
             `;
             suggestionBox.classList.remove('ils-command-list');
-            suggestionBox.style.display = 'flex';
+            suggestionBox.style.display = 'block';
 
             suggestionBox.querySelectorAll('.ils-suggest-pill').forEach(pill => {
                 pill.addEventListener('click', () => {
@@ -1205,7 +1454,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }));
     }
 
+    // ===== Main Search Logic =====
+    // Gọi API tìm kiếm hoặc slash command, render kết quả, điều hướng theo điều kiện nhập.
     function handleSearch() {
+        selectedIndex = -1;
+        commandIndex = -1;
+        suggestionIndex = -1;
+
         window.dispatchEvent(new CustomEvent('ils:search-started'));
 
         currentCommand = null;
@@ -1221,28 +1476,28 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Slash command prediction
-        if (InitPluginSuiteLiveSearch.enable_slash && term.startsWith('/') && !term.includes(' ')) {
-            const keyword = term.slice(1).toLowerCase();
+        // ===== Handle Slash Command Logic =====
+        if (InitPluginSuiteLiveSearch.enable_slash && term.startsWith('/')) {
+            const parts = term.slice(1).trim().split(/\s+/);
+            const cmdOnly = parts[0]?.toLowerCase();
             const allCommands = InitPluginSuiteLiveSearch.commands || {};
-            const matched = Object.keys(allCommands).filter(k => k.startsWith(keyword));
 
-            if (matched.length >= 1 && matched.includes(keyword)) {
-                parseSlashCommand(term);
-                return;
+            if (cmdOnly && allCommands[cmdOnly]) {
+                suggestionBox.innerHTML = '';
+                suggestionBox.classList.remove('ils-command-list');
+                suggestionBox.style.display = 'none';
+                if (parseSlashCommand(term)) return;
             }
 
+            const matched = Object.keys(allCommands).filter(k => k.startsWith(cmdOnly));
             if (matched.length) {
                 renderSlashCommandList(matched);
                 return;
             }
-        }
 
-        if (InitPluginSuiteLiveSearch.enable_slash && term.startsWith('/') && parseSlashCommand(term)) {
             suggestionBox.innerHTML = '';
             suggestionBox.classList.remove('ils-command-list');
             suggestionBox.style.display = 'none';
-            return;
         }
 
         if (term.length < 2) {
@@ -1252,7 +1507,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         suggestionBox.style.display = 'none';
-        resultsContainer.innerHTML = `<p class="ils-loading">${InitPluginSuiteLiveSearch.i18n.loading}</p>`;
+        showLoading();
 
         const cacheKey = `ils-cache-${term}`;
         if (InitPluginSuiteLiveSearch.use_cache) {
@@ -1287,10 +1542,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function debounce(fn, delay) {
-        let timer;
+        let timerMap = new WeakMap();
         return function (...args) {
+            let target = args[0]?.target || this;
+            let timer = timerMap.get(target);
             clearTimeout(timer);
             timer = setTimeout(() => fn.apply(this, args), delay);
+            timerMap.set(target, timer);
         };
     }
 
@@ -1301,6 +1559,8 @@ document.addEventListener('DOMContentLoaded', function () {
             : '<svg width="20" height="20" viewBox="0 0 20 20"><circle fill="none" stroke="currentColor" stroke-width="1.1" cx="9" cy="9" r="7"></circle><path fill="none" stroke="currentColor" stroke-width="1.1" d="M14,14 L18,18 L14,14 Z"></path></svg>'; // icon search
     }
 
+    // ===== Trigger Handlers =====
+    // Các cách mở modal từ UI: input focus, triple click, ctrl+/, link #init-live-search, v.v.
     document.addEventListener('click', function (e) {
         const target = e.target.closest('a[href*="modal=search"]');
         if (target) {
@@ -1412,53 +1672,32 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    document.addEventListener('mouseup', () => {
-        const config = window.InitPluginSuiteLiveSearch || {};
-        const maxWords = config.max_select_word ?? 8;
-        if (maxWords < 2) return;
+    const maxWords = InitPluginSuiteLiveSearch.max_select_word ?? 8;
+    if (maxWords < 2) return;
 
-        const selection = window.getSelection();
-        if (!selection || selection.isCollapsed) return;
-
-        const text = selection.toString().replace(/[“”‘’'"`~!@#$%^&*()\-+={}[\]|\\:;"<>,.?/_]/g, '').trim();
-        const words = text.split(/\s+/).filter(Boolean);
-        if (words.length < 2 || words.length > maxWords) return;
-
-        if (document.querySelector('.ils-selection-tooltip')) return;
-
-        const rect = selection.getRangeAt(0).getBoundingClientRect();
-        const scrollY = window.scrollY || document.documentElement.scrollTop;
-        const scrollX = window.scrollX || document.documentElement.scrollLeft;
-
+    // ===== Quick Search via Text Selection =====
+    // Hiện tooltip hoặc button 'Quick search' khi người dùng bôi đen đoạn văn bản.
+    function createSelectionTooltip(text, className, isMobile, rect = null) {
         const link = document.createElement('a');
         link.href = '#';
-        link.className = 'ils-selection-tooltip';
+        link.className = className;
         link.setAttribute('data-ils', text);
-        link.textContent = config.i18n?.quick_search || 'Quick search';
+        link.textContent = InitPluginSuiteLiveSearch.i18n?.quick_search || 'Quick search';
         document.body.appendChild(link);
 
-        link.style.position = 'absolute';
-        link.style.top = `${rect.top + scrollY - 52}px`;
-        link.style.left = `${rect.left + scrollX + rect.width / 2}px`;
-        link.style.transform = 'translateX(-50%)';
-        link.style.zIndex = '9999';
+        if (!isMobile && rect) {
+            const scrollY = window.scrollY || document.documentElement.scrollTop;
+            const scrollX = window.scrollX || document.documentElement.scrollLeft;
+            link.style.position = 'absolute';
+            link.style.top = `${rect.top + scrollY - 52}px`;
+            link.style.left = `${rect.left + scrollX + rect.width / 2}px`;
+            link.style.transform = 'translateX(-50%)';
+            link.style.zIndex = '9999';
+        }
 
-        link.addEventListener('click', function (e) {
+        link.addEventListener('click', (e) => {
             e.preventDefault();
-            if (window.InitLiveSearchAPI?.openModal) {
-                window.InitLiveSearchAPI.openModal();
-                setTimeout(() => {
-                    const input = document.querySelector('#init-live-search-input');
-                    if (input) {
-                        input.value = text;
-                        input.dispatchEvent(new Event('input'));
-                        input.focus();
-                    }
-                    link.remove();
-                }, 300);
-            } else {
-                link.remove();
-            }
+            link.remove();
         });
 
         setTimeout(() => {
@@ -1467,8 +1706,28 @@ document.addEventListener('DOMContentLoaded', function () {
                     link.remove();
                 }
             };
-            document.addEventListener('mousedown', removeIfUnclicked, { once: true });
+            document.addEventListener(isMobile ? 'touchstart' : 'mousedown', removeIfUnclicked, { once: true });
             document.addEventListener('scroll', () => link.remove(), { once: true });
         }, 50);
-    });
+    }
+
+    function handleSelectionEvent(isMobile) {
+        document.addEventListener(isMobile ? 'selectionchange' : 'mouseup', () => {
+            const selection = window.getSelection();
+            if (!selection || selection.isCollapsed) return;
+
+            const text = selection.toString().replace(/[“”‘’'"`~!@#$%^&*()\-=+{}\[\]|\\:;"<>,.?/_]/g, '').trim();
+            const words = text.split(/\s+/).filter(Boolean);
+            if (words.length < (isMobile ? 1 : 2) || words.length > maxWords) return;
+
+            if (!isMobile && document.querySelector('.ils-selection-tooltip')) return;
+
+            const className = isMobile ? 'ils-selection-tooltip-mobile' : 'ils-selection-tooltip';
+            const rect = !isMobile ? selection.getRangeAt(0).getBoundingClientRect() : null;
+
+            createSelectionTooltip(text, className, isMobile, rect);
+        });
+    }
+
+    handleSelectionEvent(isMobile);
 });

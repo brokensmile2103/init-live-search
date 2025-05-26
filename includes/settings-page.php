@@ -79,15 +79,15 @@ function init_plugin_suite_live_search_render_settings_page() {
                     <th scope="row"><?php esc_html_e('Search Mode', 'init-live-search'); ?></th>
                     <td>
                         <label>
-                            <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title" <?php checked(($options['search_mode'] ?? 'title_content') === 'title'); ?>>
+                            <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title" <?php checked(($options['search_mode'] ?? 'title') === 'title'); ?>>
                             <?php esc_html_e('Title Only', 'init-live-search'); ?>
                         </label><br>
                         <label>
-                            <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title_excerpt" <?php checked(($options['search_mode'] ?? 'title_content') === 'title_excerpt'); ?>>
+                            <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title_excerpt" <?php checked(($options['search_mode'] ?? 'title') === 'title_excerpt'); ?>>
                             <?php esc_html_e('Title and Excerpt', 'init-live-search'); ?>
                         </label><br>
                         <label>
-                            <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title_content" <?php checked(($options['search_mode'] ?? 'title_content') === 'title_content'); ?>>
+                            <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title_content" <?php checked(($options['search_mode'] ?? 'title') === 'title_content'); ?>>
                             <?php esc_html_e('Title, Excerpt and Content', 'init-live-search'); ?>
                         </label>
                     </td>
