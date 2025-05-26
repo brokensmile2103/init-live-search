@@ -17,7 +17,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - **Init Smart Tag-Aware Search** (v1.5.2):  
   Introduced a new intelligent search mode combining post title and tag relevance, with smart fallback to keyword and bi-gram matching.  
 - **Quick Search tooltip now works on single-word selections**  
-  e.g. selecting just “JavaScript” or “AMD” now triggers the tooltip as expected.
+  e.g. selecting just “JavaScript” or “PHP” now triggers the tooltip as expected.
 - **WooCommerce support:**  
   Display product prices, sale badges, and “Add to Cart” buttons directly in search results.
 - New slash commands for WooCommerce:
