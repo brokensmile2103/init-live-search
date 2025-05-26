@@ -36,7 +36,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 
 ## Features
 
-- Modal search interface (Ctrl + /, triple-click, or `data-ils`)
+- Modal search interface (`Ctrl + /`, triple-click, or `data-ils`)
 - REST API-powered — no admin-ajax
 - Slash commands: `/recent`, `/fav`, `/id`, `/tag`, `/product`, `/on-sale`, ...
 - Tooltip-based Quick Search (select text → click)
