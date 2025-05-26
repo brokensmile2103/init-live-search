@@ -1,5 +1,7 @@
 # Init Live Search
 
+> REST-API-powered live search for WordPress — with slash commands, WooCommerce product filters, ACF field queries, voice input, and local cache. Built with pure JavaScript.
+
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
 [![Version](https://img.shields.io/badge/stable-v1.5.3-blue.svg)](https://wordpress.org/plugins/init-live-search/)
@@ -26,11 +28,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
   e.g. selecting just “JavaScript” or “PHP” now triggers the tooltip as expected.
 - **WooCommerce support:**  
   Display product prices, sale badges, and “Add to Cart” buttons directly in search results.
-- New slash commands for WooCommerce:
-  - `/product` – show all products
-  - `/on-sale` – products with sale price
-  - `/stock` – in-stock products
-  - `/sku ABC123` – find product by SKU
+- Smart slash commands: `/product`, `/on-sale`, `/stock`, `/sku`, `/price`
 - Smarter caching and pagination for product queries
 - Fixed: `fav` buttons incorrectly marked active on `/recent`, `/tag`, `/category`
 - Standardized infinite scroll behavior across all slash commands
@@ -48,6 +46,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - Deep linking: open modal with `?modal=search&term=/recent`
 - Adaptive dark mode (`auto`, `dark`, `light`)
 - WooCommerce-ready: prices, badges, and "Add to Cart"
+- ACF support: search in specific custom fields via settings
 - Developer-friendly: filters, events, modular JS, REST-first design
 
 ## Slash Command Examples
