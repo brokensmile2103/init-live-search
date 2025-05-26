@@ -98,6 +98,13 @@ function init_plugin_suite_live_search_render_settings_page() {
                     </td>
                 </tr>
                 <tr>
+                    <th scope="row"><?php esc_html_e('Search in ACF Fields (Advanced)', 'init-live-search'); ?></th>
+                    <td>
+                        <input type="text" name="init_plugin_suite_live_search_settings[acf_search_fields]" value="<?php echo esc_attr($options['acf_search_fields'] ?? ''); ?>" class="regular-text">
+                        <p class="description"><?php esc_html_e('Optional. Enter comma-separated ACF field keys to include in search (e.g. company_name, project_code). If left blank, ACF fields will not be searched.', 'init-live-search'); ?></p>
+                    </td>
+                </tr>
+                <tr>
                     <th scope="row"><?php esc_html_e('Enable fallback matching?', 'init-live-search'); ?></th>
                     <td>
                         <label>
@@ -216,6 +223,7 @@ function init_plugin_suite_live_search_sanitize_settings($input) {
     $allowed_modes = ['title', 'title_excerpt', 'title_content', 'title_tag'];
     $output['search_mode'] = in_array($input['search_mode'], $allowed_modes, true) ? $input['search_mode'] : 'title';
     
+    $output['acf_search_fields'] = sanitize_text_field($input['acf_search_fields'] ?? '');
     $output['enable_fallback'] = !empty($input['enable_fallback']) ? '1' : '0';
     $output['enqueue_css'] = !empty($input['enqueue_css']) ? '1' : '0';
     $output['use_cache'] = !empty($input['use_cache']) ? '1' : '0';

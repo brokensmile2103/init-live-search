@@ -260,3 +260,9 @@ msgstr ""
 
 msgid "This mode matches against post title and tag names. Ideal for content with rich tagging."
 msgstr ""
+
+msgid "Search in ACF Fields (Advanced)"
+msgstr ""
+
+msgid "Optional. Enter comma-separated ACF field keys to include in search (e.g. company_name, project_code). If left blank, ACF fields will not be searched."
+msgstr ""

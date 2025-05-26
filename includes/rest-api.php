@@ -75,6 +75,17 @@ function init_plugin_suite_live_search_search($request) {
 function init_plugin_suite_live_search_get_results($term, $args = []) {
     global $wpdb;
 
+    // Tự động phát hiện ngôn ngữ hiện tại nếu dùng WPML hoặc Polylang
+    if (empty($args['lang'])) {
+        if (function_exists('pll_current_language')) {
+            $args['lang'] = pll_current_language();
+        } elseif (function_exists('apply_filters')) {
+            $args['lang'] = apply_filters('wpml_current_language', null);
+        } else {
+            $args['lang'] = get_locale();
+        }
+    }
+
     $term = sanitize_text_field($term);
     $options = get_option('init_plugin_suite_live_search_settings', []);
 
@@ -151,7 +162,36 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
                 }
             }
 
+            // Hỗ trợ tìm trong ACF nếu có thiết lập
+            if (function_exists('get_field') && !empty($options['acf_search_fields'])) {
+                $acf_fields = array_map('trim', explode(',', $options['acf_search_fields']));
+                $acf_fields = array_filter($acf_fields, function($f) { return $f !== ''; });
+
+                if (!empty($acf_fields)) {
+                    $acf_like = '%' . $wpdb->esc_like($term) . '%';
+
+                    $placeholders = implode(', ', array_fill(0, count($acf_fields), '%s'));
+
+                    $acf_ids = $wpdb->get_col($wpdb->prepare(
+                        "
+                        SELECT pm.post_id
+                        FROM {$wpdb->postmeta} pm
+                        INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+                        WHERE pm.meta_key IN ($placeholders)
+                        AND pm.meta_value LIKE %s
+                        AND p.post_status = 'publish'
+                        LIMIT 200
+                        ",
+                        ...array_merge($acf_fields, [$acf_like])
+                    ));
+
+                    $post_ids = array_unique(array_merge($post_ids, array_map('intval', $acf_ids)));
+                }
+            }
+
             $post_ids = apply_filters('init_plugin_suite_live_search_post_ids', $post_ids, $term, null);
+            // Lọc post_ids theo ngôn ngữ (WPML/Polylang) nếu có
+            $post_ids = apply_filters('init_plugin_suite_live_search_filter_lang', $post_ids, $term, $args);
             if ($paged === 1) {
                 wp_cache_set($cache_key, $post_ids, 'init_plugin_suite_live_search', 300);
             }
@@ -613,6 +653,7 @@ function init_plugin_suite_live_search_related($request) {
     $results = init_plugin_suite_live_search_get_results($clean, [
         'exclude'    => $exclude_id,
         'paged'      => $paged,
+        'lang'       => init_plugin_suite_live_search_detect_lang(),
     ]);
 
     if ($can_cache) {
@@ -633,6 +674,7 @@ function init_plugin_suite_live_search_get_reading_posts($request) {
         'force_ids'  => $ids,
         'post_types' => ['any'],
         'limit'      => 10,
+        'lang'       => init_plugin_suite_live_search_detect_lang(),
     ]));
 }
 
@@ -651,6 +693,8 @@ function init_plugin_suite_live_search_random($request) {
         'ignore_sticky_posts' => true,
         'no_found_rows'       => true,
     ];
+
+    $args = apply_filters('init_plugin_suite_live_search_query_args', $args, 'random', $request);
 
     $query = new WP_Query($args);
     if (empty($query->posts)) return rest_ensure_response([]);
@@ -911,4 +955,13 @@ function init_plugin_suite_live_search_build_result_list($post_ids, $args = [], 
     }
 
     return $results;
+}
+
+function init_plugin_suite_live_search_detect_lang() {
+    if (function_exists('pll_current_language')) {
+        return pll_current_language();
+    } elseif (function_exists('apply_filters')) {
+        return apply_filters('wpml_current_language', null);
+    }
+    return get_locale();
 }

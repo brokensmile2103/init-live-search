@@ -263,3 +263,9 @@ msgstr "Init Smart Tag-Aware Search"
 
 msgid "This mode matches against post title and tag names. Ideal for content with rich tagging."
 msgstr "Chế độ này sẽ dò theo tiêu đề và tên tag. Thích hợp cho nội dung có gắn tag kỹ lưỡng."
+
+msgid "Search in ACF Fields (Advanced)"
+msgstr "Tìm trong trường ACF (Nâng cao)"
+
+msgid "Optional. Enter comma-separated ACF field keys to include in search (e.g. company_name, project_code). If left blank, ACF fields will not be searched."
+msgstr "Không bắt buộc. Nhập các khóa trường ACF, cách nhau bằng dấu phẩy, để đưa vào tìm kiếm (ví dụ: company_name, project_code). Nếu để trống, plugin sẽ không tìm trong các trường ACF."

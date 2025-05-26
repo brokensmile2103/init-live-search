@@ -300,7 +300,7 @@
     flex-direction: column;
     justify-content: center;
     position: relative;
-    padding-right: 20px;
+    padding-right: 30px;
 }
 .ils-title {
     font-weight: 600;
@@ -426,6 +426,7 @@
 }
 .ils-selection-tooltip:hover {
     color: #ddd;
+    text-decoration: none;
 }
 .ils-selection-tooltip::after {
     content: "";

@@ -4,7 +4,7 @@ Tags: live search, ajax search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.5.2  
+Stable tag: 1.5.3  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -32,7 +32,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 == What's New in Version 1.5.x ==
 
 - New Search Mode: **Init Smart Tag-Aware Search** — combine title and post_tag matching with intelligent fallback using keywords and bi-grams
-- Quick Search tooltip: select 2–8 words on any page to trigger instant search
+- Quick Search tooltip: select 1–8 words on any page to trigger instant search
 - `data-ils` attribute: open modal and prefill slash commands from any HTML element
 - New slash commands: `/fav` and `/fav_clear` to manage favorite posts via `localStorage`
 - Favorite system: add or remove posts directly from result list using a star icon
@@ -47,6 +47,8 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 - Added infinite scroll support for WooCommerce-based slash commands
 - Unified command architecture with pagination support across all slash commands
 - Enhanced keyboard navigation and auto-scrolling for commands and suggestions
+- **ACF field search**: search specific ACF fields via settings (`field_a, field_b`), with filter hook for full control
+- **Multilingual support**: built-in language detection + filters for WPML and Polylang compatibility
 
 == Features ==
 
@@ -172,6 +174,18 @@ Customize the cache duration (in seconds) for the `/taxonomies` endpoint. Return
 **Applies to:** `/taxonomies`  
 **Params:** `int $ttl`, `string $taxonomy`, `int $limit`
 
+**`init_plugin_suite_live_search_filter_lang`**
+
+Filter the list of post IDs by the current language. Supports Polylang and WPML.  
+**Applies to:** `/search`, `/related`, `/read`, and other multilingual-aware endpoints  
+**Params:** `array $post_ids`, `string $term`, `array $args`
+
+**`init_plugin_suite_live_search_category_taxonomy`**
+
+Override the taxonomy used to fetch and display category labels in results.  
+**Applies to:** all endpoints  
+**Params:** `string $taxonomy`, `int $post_id`
+
 == REST API Endpoints ==
 
 Fully documented, lightweight, and API-first endpoints. Ideal for headless or decoupled builds.
@@ -267,7 +281,7 @@ Yes. There’s a toggle in the admin settings to turn off all slash command func
 No need — this plugin uses a modal and doesn’t require template overrides. All results are rendered via JavaScript.
 
 = What is Quick Search tooltip? =  
-When you select 2–8 words on any page, a small tooltip appears allowing you to search instantly — no typing required.
+When you select 1–8 words on any page, a small tooltip appears allowing you to search instantly — no typing required.
 
 = Does it support WooCommerce products? =  
 Yes. It can search and display WooCommerce products including price, stock status, sale badges, and “Add to Cart” buttons — with support for slash commands like `/product`, `/on-sale`, `/stock`, `/sku`, and `/price`.
@@ -287,11 +301,25 @@ It’s an advanced search mode that matches keywords not only in post titles but
 
 == Changelog ==
 
+= 1.5.3 – May 27, 2025 =
+- Added support for searching specific ACF fields (Advanced Custom Fields)
+  → Optional admin setting to define comma-separated field keys (e.g. `company_name, project_code`)
+  → Only searches published posts and supports intelligent fallback logic
+  → Built-in filter for full control: `init_plugin_suite_live_search_post_ids`
+- Multilingual compatibility enhancements
+  → Automatic language detection with Polylang and WPML
+  → Added `init_plugin_suite_live_search_filter_lang` filter to restrict results by current language
+  → Filterable language-aware REST queries for slash commands like `/recent`, `/tax`, etc.
+- New developer filter: `init_plugin_suite_live_search_category_taxonomy`
+  → Allows customizing the taxonomy used for displaying categories (e.g. use `product_cat` for WooCommerce)
+- Improved ACF query performance and status filtering (joins `postmeta` with published posts only)
+- Internal consistency tweaks and filter documentation improvements
+
 = 1.5.2 – May 26, 2025 =
 - Introduced new search mode: **Init Smart Tag-Aware Search**
   → Combines post title and post tag matching with intelligent fallback using keywords and bi-grams
   → Automatically splits terms into single words to match short tags like “php”, “css”, or “seo”
-- Improved Quick Search tooltip behavior: now triggers on single-word selections (e.g. “JavaScript”, “AMD”)
+- Improved Quick Search tooltip behavior: now triggers on single-word selections (e.g. “JavaScript”, “PHP”)
 - Minor UI polish and internal consistency improvements
 
 = 1.5.1 – May 26, 2025 =
