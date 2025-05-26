@@ -210,8 +210,8 @@ msgstr "Cho phép sử dụng các lệnh tìm kiếm bắt đầu bằng dấu 
 msgid "Max Words to Trigger Highlight Search"
 msgstr "Số từ tối đa để bật tìm kiếm khi bôi đen"
 
-msgid "Set maximum word count allowed to trigger tooltip search on text selection. Set 0 or 1 to disable."
-msgstr "Thiết lập số từ tối đa được phép để hiển thị nút tìm kiếm khi người dùng bôi đen văn bản. Nhập 0 hoặc 1 để tắt chức năng này."
+msgid "Set maximum word count allowed to trigger tooltip search on text selection. Set 0 to disable."
+msgstr "Thiết lập số từ tối đa được phép để hiển thị nút tìm kiếm khi người dùng bôi đen văn bản. Nhập 0 để tắt chức năng này."
 
 msgid "Quick search"
 msgstr "Tìm kiếm nhanh"
@@ -257,3 +257,9 @@ msgstr "Tìm sản phẩm theo mã SKU"
 
 msgid "Filter products by price range"
 msgstr "Lọc sản phẩm theo phạm vi giá"
+
+msgid "Init Smart Tag-Aware Search"
+msgstr "Init Smart Tag-Aware Search"
+
+msgid "This mode matches against post title and tag names. Ideal for content with rich tagging."
+msgstr "Chế độ này sẽ dò theo tiêu đề và tên tag. Thích hợp cho nội dung có gắn tag kỹ lưỡng."

@@ -4,7 +4,7 @@ Tags: live search, ajax search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.5.1  
+Stable tag: 1.5.2  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -12,7 +12,7 @@ Blazing-fast live search modal for WordPress. Powered by REST API and Vanilla JS
 
 == Description ==
 
-Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. **Init Live Search** is a lightweight, modern, and fully accessible live search solution for WordPress.
+Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. **Init Live Search** is a lightweight, modern, and fully accessible live search solution for WordPress. Now with semantic keyword matching and smart tag awareness.
 
 It replaces the default `<input name="s">` with a clean, intuitive modal that retrieves results instantly via the WordPress REST API. Everything happens in real-time — without disrupting the browsing flow.
 
@@ -31,6 +31,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 
 == What's New in Version 1.5.x ==
 
+- New Search Mode: **Init Smart Tag-Aware Search** — combine title and post_tag matching with intelligent fallback using keywords and bi-grams
 - Quick Search tooltip: select 2–8 words on any page to trigger instant search
 - `data-ils` attribute: open modal and prefill slash commands from any HTML element
 - New slash commands: `/fav` and `/fav_clear` to manage favorite posts via `localStorage`
@@ -52,6 +53,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 Everything you expect from a modern live search — and more:
 
 - Live search powered by WordPress REST API (no admin-ajax)
+- Smart tag-aware search mode: match keywords in both titles and post tags
 - Clean modal interface that works with any theme
 - Fully keyboard accessible (Arrow keys, Enter, Escape)
 - Slash command system (`/recent`, `/popular`, `/tag`, `/id`, `/fav`, etc.)
@@ -111,54 +113,60 @@ Options: `dark`, `light`, `auto`
 
 This plugin includes multiple filters to help developers customize behavior and output at various stages of the search flow.
 
-### `init_plugin_suite_live_search_enable_fallback`
+**`init_plugin_suite_live_search_enable_fallback`**
 
 Enable or disable fallback logic (trimming or bigrams) when few results are found.  
 **Applies to:** `/search`  
 **Params:** `bool $enabled`, `string $term`, `WP_REST_Request $request`
 
-### `init_plugin_suite_live_search_post_ids`
+**`init_plugin_suite_live_search_post_ids`**
 
 Customize the array of post IDs returned from the search query.  
 **Applies to:** `/search`  
 **Params:** `array $post_ids`, `string $term`, `WP_REST_Request $request`
 
-### `init_plugin_suite_live_search_result_item`
+**`init_plugin_suite_live_search_result_item`**
 
 Modify each result item before it's sent in the response.  
 **Applies to:** `/search`  
 **Params:** `array $item`, `int $post_id`, `string $term`, `WP_REST_Request $request`
 
-### `init_plugin_suite_live_search_results`
+**`init_plugin_suite_live_search_results`**
 
 Filter the final array of results before being returned.  
 **Applies to:** `/search`  
 **Params:** `array $results`, `array $post_ids`, `string $term`, `WP_REST_Request $request`
 
-### `init_plugin_suite_live_search_category`
+**`init_plugin_suite_live_search_category`**
 
 Customize the category label shown in search results.  
 **Applies to:** all endpoints  
 **Params:** `string $category_name`, `int $post_id`
 
-### `init_plugin_suite_live_search_default_thumb`
+**`init_plugin_suite_live_search_default_thumb`**
 
 Override the default thumbnail if the post lacks a featured image.  
 **Applies to:** all endpoints  
 **Params:** `string $thumb_url`
 
-### `init_plugin_suite_live_search_query_args`
+**`init_plugin_suite_live_search_query_args`**
 
 Modify WP_Query arguments for recent, date, or taxonomy-based commands.  
 **Applies to:** `/recent`, `/date`, `/tax`  
 **Params:** `array $args`, `string $type ('recent' | 'date' | 'tax')`, `WP_REST_Request $request`
 
-### `init_plugin_suite_live_search_stop_words`
+**`init_plugin_suite_live_search_stop_single_words`**
+
+Customize the list of single-word stopwords removed before generating bigrams.  
+**Applies to:** keyword suggestion  
+**Params:** `array $stop_words`, `string $locale`
+
+**`init_plugin_suite_live_search_stop_words`**
 
 Customize the stop-word list used when auto-generating suggested keywords.  
 **Params:** `array $stop_words`, `string $locale`
 
-### `init_plugin_suite_live_search_taxonomy_cache_ttl`
+**`init_plugin_suite_live_search_taxonomy_cache_ttl`**
 
 Customize the cache duration (in seconds) for the `/taxonomies` endpoint. Return `0` to disable caching.
 **Applies to:** `/taxonomies`  
@@ -215,6 +223,7 @@ All endpoints are under namespace: `initlise/v1`
 3. Search results with filter pills and post types
 4. Fully supports dark mode (auto or manual)
 5. Slash command dropdown helper with real-time suggestions
+6. WooCommerce product search via `/product` slash command with price, sale, and out-of-stock indicators
 
 == FAQ ==
 
@@ -266,6 +275,9 @@ Yes. It can search and display WooCommerce products including price, stock statu
 = Can I filter products by price or stock? =  
 Yes. Use the slash command `/price 100 500` to filter by price range, or `/stock` to show in-stock products only.
 
+= What is “Init Smart Tag-Aware Search”? =  
+It’s an advanced search mode that matches keywords not only in post titles but also in post tags — with automatic fallback using word splitting and bi-grams. This helps catch results like “JavaScript” or “SEO” even if they’re only used as tags.
+
 == Installation ==
 
 1. Upload the plugin folder to /wp-content/plugins/ or install via the admin panel.
@@ -274,6 +286,13 @@ Yes. Use the slash command `/price 100 500` to filter by price range, or `/stock
 4. (Optional) Configure advanced settings in Settings → Init Live Search.
 
 == Changelog ==
+
+= 1.5.2 – May 26, 2025 =
+- Introduced new search mode: **Init Smart Tag-Aware Search**
+  → Combines post title and post tag matching with intelligent fallback using keywords and bi-grams
+  → Automatically splits terms into single words to match short tags like “php”, “css”, or “seo”
+- Improved Quick Search tooltip behavior: now triggers on single-word selections (e.g. “JavaScript”, “AMD”)
+- Minor UI polish and internal consistency improvements
 
 = 1.5.1 – May 26, 2025 =
 - Added WooCommerce product search with slash commands: `/product`, `/on-sale`, `/stock`, `/sku {code}`, `/price {min} {max}`

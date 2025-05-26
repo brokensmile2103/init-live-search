@@ -83,6 +83,11 @@ function init_plugin_suite_live_search_render_settings_page() {
                             <?php esc_html_e('Title Only', 'init-live-search'); ?>
                         </label><br>
                         <label>
+                            <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title_tag" <?php checked(($options['search_mode'] ?? 'title') === 'title_tag'); ?>>
+                            <?php esc_html_e('Init Smart Tag-Aware Search', 'init-live-search'); ?>
+                        </label>
+                        <small><span class="dashicons dashicons-editor-help" title="<?php esc_attr_e('This mode matches against post title and tag names. Ideal for content with rich tagging.', 'init-live-search'); ?>"></span></small><br>
+                        <label>
                             <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title_excerpt" <?php checked(($options['search_mode'] ?? 'title') === 'title_excerpt'); ?>>
                             <?php esc_html_e('Title and Excerpt', 'init-live-search'); ?>
                         </label><br>
@@ -121,7 +126,7 @@ function init_plugin_suite_live_search_render_settings_page() {
                     <th scope="row"><?php esc_html_e('Max Words to Trigger Highlight Search', 'init-live-search'); ?></th>
                     <td>
                         <input type="number" name="init_plugin_suite_live_search_settings[max_select_word]" min="0" max="20" value="<?php echo esc_attr($options['max_select_word'] ?? 8); ?>">
-                        <p class="description"><?php esc_html_e('Set maximum word count allowed to trigger tooltip search on text selection. Set 0 or 1 to disable.', 'init-live-search'); ?></p>
+                        <p class="description"><?php esc_html_e('Set maximum word count allowed to trigger tooltip search on text selection. Set 0 to disable.', 'init-live-search'); ?></p>
                     </td>
                 </tr>
                 <tr>
@@ -207,7 +212,10 @@ function init_plugin_suite_live_search_sanitize_settings($input) {
     $output['trigger_input_focus'] = !empty($input['trigger_input_focus']) ? '1' : '0';
     $output['enable_slash'] = !empty($input['enable_slash']) ? '1' : '0';
     $output['max_results'] = min(100, max(1, absint($input['max_results'] ?? 10)));
-    $output['search_mode'] = in_array($input['search_mode'], ['title', 'title_excerpt', 'title_content']) ? $input['search_mode'] : 'title';
+    
+    $allowed_modes = ['title', 'title_excerpt', 'title_content', 'title_tag'];
+    $output['search_mode'] = in_array($input['search_mode'], $allowed_modes, true) ? $input['search_mode'] : 'title';
+    
     $output['enable_fallback'] = !empty($input['enable_fallback']) ? '1' : '0';
     $output['enqueue_css'] = !empty($input['enqueue_css']) ? '1' : '0';
     $output['use_cache'] = !empty($input['use_cache']) ? '1' : '0';

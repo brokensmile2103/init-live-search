@@ -1673,7 +1673,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     const maxWords = InitPluginSuiteLiveSearch.max_select_word ?? 8;
-    if (maxWords < 2) return;
+    if (maxWords < 1) return;
 
     // ===== Quick Search via Text Selection =====
     // Hiện tooltip hoặc button 'Quick search' khi người dùng bôi đen đoạn văn bản.
@@ -1718,7 +1718,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const text = selection.toString().replace(/[“”‘’'"`~!@#$%^&*()\-=+{}\[\]|\\:;"<>,.?/_]/g, '').trim();
             const words = text.split(/\s+/).filter(Boolean);
-            if (words.length < (isMobile ? 1 : 2) || words.length > maxWords) return;
+            if (words.length < 1 || words.length > maxWords) return;
 
             if (!isMobile && document.querySelector('.ils-selection-tooltip')) return;
 

@@ -200,6 +200,67 @@ function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like,
                 ...array_merge($post_types, [$like, $term, $limit])
             ));
 
+        case 'title_tag':
+            // Từ khóa chính
+            $ids_title = $wpdb->get_col($wpdb->prepare(
+                "
+                SELECT ID FROM {$wpdb->posts}
+                WHERE post_status = 'publish'
+                AND post_type IN ($placeholders)
+                AND post_title LIKE %s
+                ORDER BY LOCATE(%s, post_title), post_date DESC
+                LIMIT %d
+                ",
+                ...array_merge($post_types, [$like, $term, $limit])
+            ));
+
+            // Quét tag theo full term
+            $ids_tag = $wpdb->get_col($wpdb->prepare(
+                "
+                SELECT DISTINCT p.ID
+                FROM {$wpdb->posts} p
+                INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+                INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+                INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+                WHERE p.post_status = 'publish'
+                AND p.post_type IN ($placeholders)
+                AND tt.taxonomy = 'post_tag'
+                AND t.name LIKE %s
+                ORDER BY p.post_date DESC
+                LIMIT %d
+                ",
+                ...array_merge($post_types, [$like, $limit])
+            ));
+
+            // Nếu từ khóa chỉ có đúng 2 từ → fallback thêm từng từ đơn
+            $ids_tag_extra = [];
+            $words = preg_split('/\s+/', $term);
+            if (count($words) === 2) {
+                foreach ($words as $word) {
+                    $like_word = '%' . $wpdb->esc_like($word) . '%';
+                    $result = $wpdb->get_col($wpdb->prepare(
+                        "
+                        SELECT DISTINCT p.ID
+                        FROM {$wpdb->posts} p
+                        INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+                        INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+                        INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+                        WHERE p.post_status = 'publish'
+                        AND p.post_type IN ($placeholders)
+                        AND tt.taxonomy = 'post_tag'
+                        AND t.name LIKE %s
+                        ORDER BY p.post_date DESC
+                        LIMIT %d
+                        ",
+                        ...array_merge($post_types, [$like_word, $limit])
+                    ));
+                    $ids_tag_extra = array_merge($ids_tag_extra, $result);
+                }
+            }
+
+            // Gộp hết lại
+            return array_unique(array_merge($ids_title, $ids_tag, $ids_tag_extra));
+
         case 'title_excerpt':
             return $wpdb->get_col($wpdb->prepare(
                 "

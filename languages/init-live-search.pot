@@ -207,7 +207,7 @@ msgstr ""
 msgid "Max Words to Trigger Highlight Search"
 msgstr ""
 
-msgid "Set maximum word count allowed to trigger tooltip search on text selection. Set 0 or 1 to disable."
+msgid "Set maximum word count allowed to trigger tooltip search on text selection. Set 0 to disable."
 msgstr ""
 
 msgid "Quick search"
@@ -253,4 +253,10 @@ msgid "Search product by SKU"
 msgstr ""
 
 msgid "Filter products by price range"
+msgstr ""
+
+msgid "Init Smart Tag-Aware Search"
+msgstr ""
+
+msgid "This mode matches against post title and tag names. Ideal for content with rich tagging."
 msgstr ""
