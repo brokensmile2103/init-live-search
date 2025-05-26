@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://inithtml.com/wp-content/uploads/2025/05/Init-Live-Search-Github.webp" alt="Init Live Search" width="100%">
+</p>
+
 # Init Live Search
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
