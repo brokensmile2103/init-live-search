@@ -57,7 +57,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 | `/product`        | Show all products                            |
 | `/on-sale`        | Products currently on sale                   |
 | `/stock`          | In-stock products only                       |
-| `/sku abc123`     | Lookup product by SKU                        |
+| `/sku ABC123`     | Lookup product by SKU                        |
 | `/fav`            | Show favorite posts                          |
 | `/fav_clear`      | Clear all favorites                          |
 | `/random`         | Open a random published post instantly       |
