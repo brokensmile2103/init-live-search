@@ -2,7 +2,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.5.1-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.5.2-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -12,10 +12,15 @@ Init Live Search replaces your default WordPress search with a sleek, fast, comm
 
 Whether you're building a blog, an eCommerce site, a headless frontend, or a high-performance content portal, this plugin adapts to your workflow.
 
-## What's New in v1.5.1
+## What's New in v1.5.x
 
-- **WooCommerce support:** Display price, sale badges, and "Add to Cart" buttons in search results
-- New slash commands:
+- **Init Smart Tag-Aware Search** (v1.5.2):  
+  Introduced a new intelligent search mode combining post title and tag relevance, with smart fallback to keyword and bi-gram matching.  
+- **Quick Search tooltip now works on single-word selections**  
+  e.g. selecting just “JavaScript” or “AMD” now triggers the tooltip as expected.
+- **WooCommerce support:**  
+  Display product prices, sale badges, and “Add to Cart” buttons directly in search results.
+- New slash commands for WooCommerce:
   - `/product` – show all products
   - `/on-sale` – products with sale price
   - `/stock` – in-stock products
@@ -23,6 +28,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - Smarter caching and pagination for product queries
 - Fixed: `fav` buttons incorrectly marked active on `/recent`, `/tag`, `/category`
 - Standardized infinite scroll behavior across all slash commands
+- Minor UI polish and internal consistency improvements
 
 ## Features
 
@@ -51,7 +57,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 | `/product`        | Show all products                            |
 | `/on-sale`        | Products currently on sale                   |
 | `/stock`          | In-stock products only                       |
-| `/sku ABC123`     | Lookup product by SKU                        |
+| `/sku abc123`     | Lookup product by SKU                        |
 | `/fav`            | Show favorite posts                          |
 | `/fav_clear`      | Clear all favorites                          |
 | `/random`         | Open a random published post instantly       |
