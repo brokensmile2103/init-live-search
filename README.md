@@ -2,7 +2,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.5.0-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.5.1-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -10,34 +10,51 @@
 
 Init Live Search replaces your default WordPress search with a sleek, fast, command-style modal powered by REST API and modern JavaScript. Navigate your content like a pro — with slash commands, instant results, keyboard shortcuts, tooltip search, and even voice input.
 
-Whether you're building a blog, a headless frontend, or a high-performance content site, this plugin adapts to your workflow.
+Whether you're building a blog, an eCommerce site, a headless frontend, or a high-performance content portal, this plugin adapts to your workflow.
+
+## What's New in v1.5.1
+
+- **WooCommerce support:** Display price, sale badges, and "Add to Cart" buttons in search results
+- New slash commands:
+  - `/product` – show all products
+  - `/on-sale` – products with sale price
+  - `/stock` – in-stock products
+  - `/sku ABC123` – find product by SKU
+- Smarter caching and pagination for product queries
+- Fixed: `fav` buttons incorrectly marked active on `/recent`, `/tag`, `/category`
+- Standardized infinite scroll behavior across all slash commands
 
 ## Features
 
 - Modal search interface (Ctrl + /, triple-click, or `data-ils`)
 - REST API-powered — no admin-ajax
-- Slash commands: `/recent`, `/fav`, `/id`, `/tag`, ...
+- Slash commands: `/recent`, `/fav`, `/id`, `/tag`, `/product`, `/on-sale`, ...
 - Tooltip-based Quick Search (select text → click)
 - LocalStorage-powered favorites and caching
 - Voice input via `SpeechRecognition` API
 - Keyboard navigation: ↑ ↓ → ← Enter Esc
 - Deep linking: open modal with `?modal=search&term=/recent`
 - Adaptive dark mode (`auto`, `dark`, `light`)
+- WooCommerce-ready: prices, badges, and "Add to Cart"
 - Developer-friendly: filters, events, modular JS, REST-first design
 
 ## Slash Command Examples
 
-| Command         | Description                                  |
-|-----------------|----------------------------------------------|
-| `/recent`       | Show latest posts                            |
-| `/popular`      | Show most viewed posts (with Init View Count)|
-| `/id 123`       | Jump to post with ID                         |
-| `/date 2025/05` | Posts by month                               |
-| `/category wp`  | Filter by category slug                      |
-| `/tag seo`      | Filter by tag                                |
-| `/fav`          | Show favorite posts                          |
-| `/fav_clear`    | Clear all favorites                          |
-| `/random`       | Open a random published post instantly       |
+| Command           | Description                                  |
+|-------------------|----------------------------------------------|
+| `/recent`         | Show latest posts                            |
+| `/popular`        | Show most viewed posts (with Init View Count)|
+| `/id 123`         | Jump to post with ID                         |
+| `/date 2025/05`   | Posts by month                               |
+| `/category wp`    | Filter by category slug                      |
+| `/tag seo`        | Filter by tag                                |
+| `/product`        | Show all products                            |
+| `/on-sale`        | Products currently on sale                   |
+| `/stock`          | In-stock products only                       |
+| `/sku ABC123`     | Lookup product by SKU                        |
+| `/fav`            | Show favorite posts                          |
+| `/fav_clear`      | Clear all favorites                          |
+| `/random`         | Open a random published post instantly       |
 
 ## Developer Docs
 
