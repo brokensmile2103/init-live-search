@@ -1,10 +1,10 @@
 # Init Live Search
 
-> REST-API-powered live search for WordPress — with slash commands, WooCommerce product filters, ACF field queries, voice input, and local cache. Built with pure JavaScript.
+> REST-API-powered live search for WordPress — with slash commands, WooCommerce filters, ACF + SEO metadata support, voice input, and local cache. Built with pure JavaScript.
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.5.3-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.5.4-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -16,38 +16,37 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 
 ## What's New in v1.5.x
 
+- **Search in SEO Metadata** (v1.5.4):  
+  Match search terms against SEO Titles and Meta Descriptions (Yoast, Rank Math, AIOSEO, TSF, SEOPress).  
+  Lightweight, filterable, and optionally toggleable via settings.
 - **ACF field search** (v1.5.3):  
-  Search within specific ACF fields using a comma-separated list in settings (e.g. `company_name, project_code`)  
-  Supports published posts only, fallback logic, and custom filters.
-- **Multilingual support for WPML and Polylang** (v1.5.3):  
-  Auto-detect current language and filter results accordingly.  
-  Includes `init_plugin_suite_live_search_filter_lang` and other dev hooks.
-- **Init Smart Tag-Aware Search** (v1.5.2):  
-  Introduced a new intelligent search mode combining post title and tag relevance, with smart fallback to keyword and bi-gram matching.  
-- **Quick Search tooltip now works on single-word selections**  
-  e.g. selecting just “JavaScript” or “PHP” now triggers the tooltip as expected.
-- **WooCommerce support:**  
-  Display product prices, sale badges, and “Add to Cart” buttons directly in search results.
-- Smart slash commands: `/product`, `/on-sale`, `/stock`, `/sku`, `/price`
-- Smarter caching and pagination for product queries
-- Fixed: `fav` buttons incorrectly marked active on `/recent`, `/tag`, `/category`
-- Standardized infinite scroll behavior across all slash commands
-- Minor UI polish and internal consistency improvements
+  Search within specific ACF fields using a comma-separated list (e.g. `company_name, project_code`)
+- **Multilingual support** (v1.5.3):  
+  Auto-detect WPML/Polylang language and filter results by locale.
+- **Smart Tag-Aware Search** (v1.5.2):  
+  Combines title + tag matching with keyword and bigram fallback.
+- **Quick Search tooltip**:  
+  Now works on single-word selections. Configurable limit (1–20 words).
+- **WooCommerce integration**:  
+  Show prices, badges, stock, and "Add to Cart" buttons via slash commands like `/product`, `/price`, etc.
+- **Unified slash command engine** with pagination, infinite scroll, and better keyboard nav
+- Smarter caching, reset logic, and consistent modal triggers across devices
 
 ## Features
 
-- Modal search interface (`Ctrl + /`, triple-click, or `data-ils`)
-- REST API-powered — no admin-ajax
-- Slash commands: `/recent`, `/fav`, `/id`, `/tag`, `/product`, `/on-sale`, ...
-- Tooltip-based Quick Search (select text → click)
-- LocalStorage-powered favorites and caching
-- Voice input via `SpeechRecognition` API
-- Keyboard navigation: `↑` `↓` `→` `←` `Enter` `Esc`
-- Deep linking: open modal with `?modal=search&term=/recent`
-- Adaptive dark mode (`auto`, `dark`, `light`)
-- WooCommerce-ready: prices, badges, and "Add to Cart"
-- ACF support: search in specific custom fields via settings
-- Developer-friendly: filters, events, modular JS, REST-first design
+- Clean modal search interface (`Ctrl + /`, triple-click, or `data-ils`)
+- Powered by WordPress REST API — no `admin-ajax`, no jQuery
+- **Search in SEO Metadata** — match keywords in SEO Titles and Meta Descriptions (Yoast, Rank Math, AIOSEO, TSF, SEOPress)
+- Smart **Slash Commands**: `/recent`, `/fav`, `/id`, `/tag`, `/product`, `/on-sale`, `/sku`, `/price`, etc.
+- **Quick Search Tooltip**: select up to 20 words to trigger instant search (configurable)
+- LocalStorage-based **favorites** and **caching**
+- Voice input via native `SpeechRecognition` API
+- Full **keyboard navigation**: `↑ ↓ ← → Enter Esc`
+- Deep linking: prefill search via `?modal=search&term=...`
+- Dark mode support: `auto`, `dark`, or `light`
+- **WooCommerce integration**: show price, stock, sale badges, "Add to Cart"
+- **ACF support**: search custom fields with comma-separated keys
+- Developer-friendly: hooks, filters, events, modular JS, REST-first architecture
 
 ## Slash Command Examples
 
