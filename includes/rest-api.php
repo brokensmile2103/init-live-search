@@ -136,6 +136,13 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
                 ? (bool)$args['enable_fallback']
                 : (!isset($options['enable_fallback']) || $options['enable_fallback']);
 
+            $enable_fallback = apply_filters(
+                'init_plugin_suite_live_search_enable_fallback',
+                $enable_fallback,
+                $term,
+                $args
+            );
+
             if ($enable_fallback) {
                 $words = preg_split('/\s+/', trim($term));
                 $cut_attempts = 0;
@@ -150,7 +157,7 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
                 }
 
                 if (count($post_ids) < floor($limit / 2) && str_word_count($term) >= 3) {
-                    $bi_terms = init_plugin_suite_live_search_generate_bigrams($term);
+                    $bi_terms = array_unique(init_plugin_suite_live_search_generate_bigrams($term));
                     foreach (array_slice($bi_terms, 0, 10) as $bi_term) {
                         $like_bi = '%' . $wpdb->esc_like($bi_term) . '%';
                         $more_ids = init_plugin_suite_live_search_get_post_ids_by_mode(
@@ -189,7 +196,7 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
                 }
             }
 
-            $post_ids = apply_filters('init_plugin_suite_live_search_post_ids', $post_ids, $term, null);
+            $post_ids = apply_filters('init_plugin_suite_live_search_post_ids', $post_ids, $term, $args);
             // Lọc post_ids theo ngôn ngữ (WPML/Polylang) nếu có
             $post_ids = apply_filters('init_plugin_suite_live_search_filter_lang', $post_ids, $term, $args);
             if ($paged === 1) {
@@ -222,7 +229,7 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
         $default_thumb
     );
 
-    return apply_filters('init_plugin_suite_live_search_results', $results, $post_ids, $term, null);
+    return apply_filters('init_plugin_suite_live_search_results', $results, $post_ids, $term, $args);
 }
 
 function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like, $post_types, $placeholders, $search_mode, $limit) {
@@ -284,7 +291,12 @@ function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like,
                 ",
                 ...array_merge($post_types, [$like, $term, $limit])
             ));
-            return array_unique(array_merge($ids_title, $seo_ids));
+
+            $weights = apply_filters('init_plugin_suite_live_search_weights', [3, 2], 'title');
+            return init_plugin_suite_live_search_ranked_merge_weighted(
+                [$ids_title, $seo_ids],
+                $weights
+            );
 
         case 'title_tag':
             $ids_title = $wpdb->get_col($wpdb->prepare(
@@ -341,7 +353,11 @@ function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like,
                 }
             }
 
-            return array_unique(array_merge($ids_title, $ids_tag, $ids_tag_extra, $seo_ids));
+            $weights = apply_filters('init_plugin_suite_live_search_weights', [3, 2, 1, 1], 'title_tag');
+            return init_plugin_suite_live_search_ranked_merge_weighted(
+                [$ids_title, $seo_ids, $ids_tag, $ids_tag_extra],
+                $weights
+            );
 
         case 'title_excerpt':
             $ids = $wpdb->get_col($wpdb->prepare(
@@ -355,7 +371,12 @@ function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like,
                 ",
                 ...array_merge($post_types, [$like, $like, $term, $limit])
             ));
-            return array_unique(array_merge($ids, $seo_ids));
+            
+            $weights = apply_filters('init_plugin_suite_live_search_weights', [3, 2], 'title_excerpt');
+            return init_plugin_suite_live_search_ranked_merge_weighted(
+                [$ids, $seo_ids],
+                $weights
+            );
 
         case 'title_content':
         default:
@@ -380,6 +401,28 @@ function init_plugin_suite_live_search_generate_bigrams($term) {
         $bigrams[] = $words[$i] . ' ' . $words[$i + 1];
     }
     return $bigrams;
+}
+
+function init_plugin_suite_live_search_ranked_merge_weighted(array $arrays, array $weights = []) {
+    $non_empty = array_filter($arrays, function($arr) {
+        return is_array($arr) && !empty($arr);
+    });
+
+    if (count($non_empty) <= 1) {
+        return array_unique(array_merge(...$non_empty));
+    }
+
+    $score_map = [];
+
+    foreach ($arrays as $i => $arr) {
+        $weight = $weights[$i] ?? 1; // default weight = 1
+        foreach ((array)$arr as $id) {
+            $score_map[$id] = ($score_map[$id] ?? 0) + $weight;
+        }
+    }
+
+    arsort($score_map);
+    return array_keys($score_map);
 }
 
 function init_plugin_suite_live_search_highlight_keyword($text, $keywords) {
@@ -983,7 +1026,7 @@ function init_plugin_suite_live_search_build_result_item($post_id, $term = '', $
         $item = array_merge($item, init_plugin_suite_live_search_get_product_data($post_id));
     }
 
-    return apply_filters('init_plugin_suite_live_search_result_item', $item, $post_id, $term, null);
+    return apply_filters('init_plugin_suite_live_search_result_item', $item, $post_id, $term, $args);
 }
 
 function init_plugin_suite_live_search_build_result_list($post_ids, $args = [], $term = '', $keywords = [], $default_thumb = '') {

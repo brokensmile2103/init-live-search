@@ -40,6 +40,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 - **ACF field search**: search custom ACF fields (configurable via settings)
 - **Multilingual support**: automatic language detection + WPML/Polylang compatibility
 - **Search in SEO Metadata**: match against SEO Titles and Meta Descriptions from major SEO plugins (Yoast, Rank Math, AIOSEO, TSF, SEOPress). Fully extensible via filter.
+- **Weighted Result Ranking**: control result priority across multiple sources (title, SEO, tags, etc.) using custom weights via filter
 
 == Features ==
 
@@ -112,25 +113,25 @@ This plugin includes multiple filters to help developers customize behavior and 
 
 Enable or disable fallback logic (trimming or bigrams) when few results are found.  
 **Applies to:** `/search`  
-**Params:** `bool $enabled`, `string $term`, `WP_REST_Request $request`
+**Params:** `bool $enabled`, `string $term`, `array $args`
 
 **`init_plugin_suite_live_search_post_ids`**
 
 Customize the array of post IDs returned from the search query.  
 **Applies to:** `/search`  
-**Params:** `array $post_ids`, `string $term`, `WP_REST_Request $request`
+**Params:** `array $post_ids`, `string $term`, `array $args`
 
 **`init_plugin_suite_live_search_result_item`**
 
 Modify each result item before it's sent in the response.  
 **Applies to:** `/search`  
-**Params:** `array $item`, `int $post_id`, `string $term`, `WP_REST_Request $request`
+**Params:** `array $item`, `int $post_id`, `string $term`, `array $args`
 
 **`init_plugin_suite_live_search_results`**
 
 Filter the final array of results before being returned.  
 **Applies to:** `/search`  
-**Params:** `array $results`, `array $post_ids`, `string $term`, `WP_REST_Request $request`
+**Params:** `array $results`, `array $post_ids`, `string $term`, `array $args`  
 
 **`init_plugin_suite_live_search_category`**
 
@@ -146,9 +147,9 @@ Override the default thumbnail if the post lacks a featured image.
 
 **`init_plugin_suite_live_search_query_args`**
 
-Modify WP_Query arguments for recent, date, or taxonomy-based commands.  
-**Applies to:** `/recent`, `/date`, `/tax`  
-**Params:** `array $args`, `string $type ('recent' | 'date' | 'tax')`, `WP_REST_Request $request`
+Modify WP_Query arguments for recent, date, taxonomy-based, or product-based commands.  
+**Applies to:** `/recent`, `/date`, `/tax`, `/product`, `/random`  
+**Params:** `array $args`, `string $type`, `WP_REST_Request $request`
 
 **`init_plugin_suite_live_search_stop_single_words`**
 
@@ -163,7 +164,7 @@ Customize the stop-word list used when auto-generating suggested keywords.
 
 **`init_plugin_suite_live_search_taxonomy_cache_ttl`**
 
-Customize the cache duration (in seconds) for the `/taxonomies` endpoint. Return `0` to disable caching.
+Customize the cache duration (in seconds) for the `/taxonomies` endpoint. Return `0` to disable caching.  
 **Applies to:** `/taxonomies`  
 **Params:** `int $ttl`, `string $taxonomy`, `int $limit`
 
@@ -184,6 +185,12 @@ Override the taxonomy used to fetch and display category labels in results.
 Customize the list of meta keys used for matching SEO Titles and Meta Descriptions.  
 **Applies to:** `/search` (when Search in SEO Metadata is enabled)  
 **Params:** `array $meta_keys`
+
+**`init_plugin_suite_live_search_weights`**
+
+Customize the weighting array used to merge and sort post IDs from multiple sources (title, SEO, tag, etc.).  
+**Applies to:** `/search` (search modes: `title`, `title_tag`, `title_excerpt`)  
+**Params:** `array $weights`, `string $search_mode`
 
 == REST API Endpoints ==
 
@@ -307,12 +314,14 @@ A feature that matches keywords in SEO Titles and Meta Descriptions set by popul
 == Changelog ==
 
 = 1.5.4 – May 27, 2025 =
-- Introduced semantic SEO-aware search layer with lightweight logic and zero AI dependencies
-  → Enable searching within SEO Titles and Meta Descriptions
-  → Supports Yoast SEO, Rank Math, AIOSEO, The SEO Framework, and SEOPress
+- Introduced semantic SEO-aware search layer with lightweight logic and zero AI dependencies  
+  → Enable searching within SEO Titles and Meta Descriptions  
+  → Supports Yoast SEO, Rank Math, AIOSEO, The SEO Framework, and SEOPress  
   → Optional setting in admin panel, with filter hook to customize meta keys
-- New developer filter: `init_plugin_suite_live_search_seo_meta_keys`
+- New developer filter: `init_plugin_suite_live_search_seo_meta_keys`  
   → Customize which SEO meta fields are searched (e.g. `_yoast_wpseo_title`, `rank_math_description`, etc.)
+- New developer filter: `init_plugin_suite_live_search_weights`  
+  → Customize weighting when merging post IDs from multiple sources (title, SEO, tags) to control result order
 
 = 1.5.3 – May 27, 2025 =
 - Added support for searching specific ACF fields (Advanced Custom Fields)
