@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Init Live Search
+ * Plugin Name: Init Live Search – Smart, Slash Commands, REST API
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
  * Description: A fast, lightweight, and smart live search modal built with Vanilla JS and powered by the WordPress REST API.
- * Version: 1.5.4
+ * Version: 1.6
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-live-search
@@ -18,7 +18,7 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.5.4');
+define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.6');
 define('INIT_PLUGIN_SUITE_LS_SLUG',           'init-live-search');
 define('INIT_PLUGIN_SUITE_LS_OPTION',         'init_plugin_suite_live_search_settings');
 define('INIT_PLUGIN_SUITE_LS_NAMESPACE',      'initlise/v1');
@@ -45,14 +45,51 @@ add_action('wp_enqueue_scripts', function () {
         return;
     }
 
-    // Enqueue CSS
-    if (!isset($options['enqueue_css']) || $options['enqueue_css']) {
-        wp_enqueue_style(
-            'init-plugin-suite-live-search-style',
-            INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'css/style.css',
-            [],
-            INIT_PLUGIN_SUITE_LS_VERSION
-        );
+    $css_style = $options['css_style'] ?? 'default';
+
+    // Check for theme override file
+    $theme_custom_css = get_stylesheet_directory() . '/init-live-search/style.css';
+    $theme_custom_url = get_stylesheet_directory_uri() . '/init-live-search/style.css';
+
+    switch ($css_style) {
+        case 'default':
+            wp_enqueue_style(
+                'init-plugin-suite-live-search-style',
+                INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'css/style.css',
+                [],
+                INIT_PLUGIN_SUITE_LS_VERSION
+            );
+            break;
+
+        case 'full':
+            wp_enqueue_style(
+                'init-plugin-suite-live-search-style-full',
+                INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'css/style-full.css',
+                [],
+                INIT_PLUGIN_SUITE_LS_VERSION
+            );
+            break;
+
+        case 'topbar':
+            wp_enqueue_style(
+                'init-plugin-suite-live-search-style-topbar',
+                INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'css/style-topbar.css',
+                [],
+                INIT_PLUGIN_SUITE_LS_VERSION
+            );
+            break;
+
+        case 'none':
+        default:
+            if (file_exists($theme_custom_css)) {
+                wp_enqueue_style(
+                    'init-plugin-suite-live-search-style-custom',
+                    $theme_custom_url,
+                    [],
+                    filemtime($theme_custom_css)
+                );
+            }
+            break;
     }
 
     // Enqueue JS

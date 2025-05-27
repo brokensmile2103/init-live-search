@@ -1,46 +1,46 @@
-=== Init Live Search ===
+=== Init Live Search – Smart, Slash Commands, REST API ===
 Contributors: brokensmile.2103  
 Tags: live search, ajax search, woocommerce, rest api, slash command  
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.5.4  
+Stable tag: 1.6  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
-Blazing-fast live search modal for WordPress. Powered by REST API and Vanilla JS. Supports voice, keyboard, slash commands, and caching.
+Fast, modern live search for WordPress. REST API-powered with slash commands, SEO-aware, ACF, WooCommerce, and custom UI styles.
 
 == Description ==
 
-Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. **Init Live Search** is a lightweight, modern, and fully accessible live search solution for WordPress. Now with tag-aware matching, ACF support, and SEO metadata awareness.
+Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. **Init Live Search** is a modern, lightweight, and fully accessible live search solution for WordPress — now with tag-aware matching, SEO metadata support, ACF integration, and customizable UI presets.
 
-It replaces the default `<input name="s">` with a clean, intuitive modal that retrieves results instantly via the WordPress REST API. Everything happens in real-time — without disrupting the browsing flow.
+It replaces the default `<input name="s">` with a clean, intuitive search modal powered entirely by the WordPress REST API. Everything loads in real-time — with zero disruption to browsing flow.
 
-Designed for both blogs and headless sites, it includes optional features like voice input, dark mode, keyword suggestions, and advanced developer hooks for total flexibility.
+You get:
+- Beautiful preset styles (fullscreen, topbar, or default)  
+- Fully keyboard accessible (`↑ ↓ ← → Enter Esc`)  
+- Slash commands (`/recent`, `/tag`, `/id`, etc.) for power users  
+- Quick Search tooltip triggered by selecting text  
+- Voice input via browser SpeechRecognition  
+- SEO-aware matching from popular plugins (Yoast, Rank Math, AIOSEO, etc.)  
+- ACF field support for advanced content types  
+- Local result caching and fallback logic  
+- Theme override support or option to disable all plugin CSS
 
-The plugin supports:
-- Keyboard navigation (`↑` `↓` `←` `→` `Enter` `Esc`)
-- Slash commands (e.g. `/recent`, `/id`, `/tag`)
-- Voice input (if supported)
-- Dark mode (`.dark` class or global config)
-- Smart fallback and result caching
+Perfect for content-heavy blogs, WooCommerce stores, or even headless sites. Every interaction is fast, fluid, and designed to work across devices.
 
 This plugin is part of the [Init Plugin Suite](https://inithtml.com/init-plugin-suite-bo-plugin-wordpress-toi-gian-manh-me-mien-phi/) — a collection of minimalist, fast, and developer-focused tools for WordPress.
 
 GitHub repository: [https://github.com/brokensmile2103/init-live-search](https://github.com/brokensmile2103/init-live-search)
 
-== What's New in Version 1.5.x ==
+== What's New in Version 1.6 ==
 
-- **Init Smart Tag-Aware Search**: match post titles and tags with intelligent fallback using bi-grams
-- **Quick Search** tooltip: select up to 8 words (configurable up to 20) to trigger instant search on text selection; set to 0 to disable
-- `data-ils` attribute: open modal + prefill slash command from any HTML element
-- **Favorites**: manage via `/fav`, `/fav_clear`, and star icon in result list
-- **WooCommerce integration**: new commands `/product`, `/on-sale`, `/stock`, `/sku`, `/price {min} {max}` with price, stock, and "Add to Cart" UI
-- Unified slash command system: consistent pagination, infinite scroll, and keyboard navigation
-- **ACF field search**: search custom ACF fields (configurable via settings)
-- **Multilingual support**: automatic language detection + WPML/Polylang compatibility
-- **Search in SEO Metadata**: match against SEO Titles and Meta Descriptions from major SEO plugins (Yoast, Rank Math, AIOSEO, TSF, SEOPress). Fully extensible via filter.
-- **Weighted Result Ranking**: control result priority across multiple sources (title, SEO, tags, etc.) using custom weights via filter
+- **UI Style Presets**: choose from built-in layouts like fullscreen overlay (`style-full.css`) or top bar search (`style-topbar.css`) for a tailored frontend experience
+- **Theme CSS Override**: drop a `style.css` file into your theme's `init-live-search/` folder to fully control styling
+- **Disable All Plugin CSS**: advanced option to turn off built-in styles and start from scratch
+- **New UI Style Picker**: select your preferred style directly in the admin settings
+- **Improved CSS Loader**: cleaner separation of default styles, theme overrides, and preset layouts
+- **Better Developer Control**: presets are scoped and non-invasive, ensuring minimal conflict with themes or page builders
 
 == Features ==
 
@@ -49,7 +49,7 @@ Everything you expect from a modern live search — and more:
 - Live search powered by WordPress REST API (no admin-ajax)
 - Smart tag-aware search mode: match keywords in both titles and post tags
 - Search in SEO Metadata: match keywords in SEO Titles and Meta Descriptions from popular SEO plugins (Yoast, Rank Math, AIOSEO, TSF, SEOPress)
-- Clean modal interface that works with any theme — no template override required.
+- Clean modal interface that works with any theme — no template override required
 - Fully keyboard accessible (Arrow keys, Enter, Escape)
 - Slash command system (`/recent`, `/popular`, `/tag`, `/id`, `/fav`, etc.)
 - WooCommerce support: search by product, sale status, stock, SKU, or price range
@@ -62,7 +62,10 @@ Everything you expect from a modern live search — and more:
 - Custom triggers: Ctrl + /, triple-click, or `data-ils` attribute
 - Local caching with `localStorage` to improve performance
 - Optional keyword suggestions (manual or auto-generated)
-- Developer-friendly with filters and REST API endpoints
+- UI style presets: choose between default, fullscreen (`style-full.css`), or topbar (`style-topbar.css`) layouts
+- Theme override support: add `init-live-search/style.css` to fully customize design
+- Option to disable all built-in CSS and style from scratch
+- Developer-friendly with filters and custom REST API endpoints
 - Built with pure JavaScript — no jQuery required
 
 == Dark Mode Support ==
@@ -90,9 +93,11 @@ Options: `dark`, `light`, `auto`
 - Set max words for tooltip search  
 - Enable voice input (SpeechRecognition API)  
 - Enable result caching (localStorage)  
-- Enable/disable default CSS  
-- Define or auto-generate keyword suggestions  
+- Choose frontend UI style (default, fullscreen, or topbar)  
+- Allow theme override via `init-live-search/style.css`  
+- Option to disable all built-in CSS completely  
 - Add default UTM parameter to result links  
+- Define or auto-generate keyword suggestions  
 
 == Keyboard Shortcuts ==
 
@@ -238,66 +243,59 @@ All endpoints are under namespace: `initlise/v1`
 
 == Screenshots ==
 
-1. Admin settings with search behavior options
-2. Clean modal interface with keyword suggestions
-3. Search results with filter pills and post types
-4. Fully supports dark mode (auto or manual)
-5. Slash command dropdown helper with real-time suggestions
-6. WooCommerce product search via `/product` slash command with price, sale, and out-of-stock indicators
+1. Admin settings with search behavior options  
+2. Clean modal interface with keyword suggestions  
+3. Search results with filter pills and post types  
+4. Fully supports dark mode (auto or manual)  
+5. Slash command dropdown helper with real-time suggestions  
+6. WooCommerce product search via `/product` slash command with price, sale, and out-of-stock indicators  
+7. Fullscreen search interface using the `style-full.css` preset  
+8. Top bar search layout using the `style-topbar.css` preset
 
-== FAQ ==
+== Frequently Asked Questions ==
 
 = Does this plugin use jQuery? =  
 No. It’s built entirely with modern Vanilla JavaScript.
 
 = How is search triggered? =  
-It auto-detects `<input name="s">` fields, and can also be triggered by triple-click, Ctrl + / (or Cmd + /), or via URL (`?modal=search`).
+It auto-detects `<input name="s">` fields. You can also trigger it via triple-click, keyboard shortcut (Ctrl + /), selection tooltip, or `?modal=search` URL.
 
 = Can I prefill the modal from a URL? =  
-Yes. Use `?modal=search&term=your+keyword` to open the modal with a prefilled search term.
+Yes. Use `?modal=search&term=your+keyword` to open the modal with a prefilled term.
 
 = Is voice input supported? =  
 Yes, via the browser’s built-in SpeechRecognition API (if available).
 
-= Can I generate keyword suggestions automatically? =  
-Yes. You can enter them manually or auto-generate from your content.
-
-= Is caching enabled? =  
-Yes. Results are cached in `localStorage` to improve performance.
-
-= What happens when no result is selected? =  
-The plugin falls back to the default WordPress search when you press Enter.
-
-= Is it mobile-friendly? =  
-Yes. Fully responsive and works across devices.
-
-= What’s the triple-click trigger? =  
-Triple-click anywhere (within 0.5s) to open the search modal.
-
-= Can I disable all triggers and use only the REST API? =  
-Yes. Disable all triggers to prevent any frontend assets from loading.
-
 = What are slash commands? =  
-Quick commands like `/recent`, `/id 123`, or `/tag wordpress` to jump or filter instantly.
+Slash commands let you filter instantly with `/recent`, `/tag {slug}`, `/id {post_id}`, `/product`, `/price 100 500`, etc.
 
 = Can I disable slash commands? =  
-Yes. There’s a setting to turn them off entirely.
-
-= Does it support WooCommerce? =  
-Yes. Supports product search, pricing, stock status, sale badges, and "Add to Cart" — including commands like `/product`, `/on-sale`, `/stock`, `/sku`, `/price`.
-
-= Can I filter products by price or stock? =  
-Yes. Use `/price 100 500` or `/stock` for quick filtering.
+Yes. There’s an option in settings to disable them completely.
 
 = What is Quick Search tooltip? =  
-When you select 1 to 8 words on any page, a tooltip appears to trigger instant search.  
-This limit is configurable in settings (max 20; set 0 to disable).
+When you highlight 1–8 words, a tooltip appears to trigger instant search.  
+This is configurable in settings (max 20; set 0 to disable).
 
 = What is Smart Tag-Aware Search? =  
-An advanced mode that matches keywords in post titles and tags, with fallback using word splitting and bi-grams.
+An advanced mode that matches keywords in titles and tags with fallback using split terms and bi-gram logic.
 
 = What is Search in SEO Metadata? =  
-A feature that matches keywords in SEO Titles and Meta Descriptions set by popular SEO plugins (Yoast, Rank Math, AIOSEO, TSF, SEOPress).
+Allows searching within SEO Titles and Meta Descriptions from plugins like Yoast SEO, Rank Math, AIOSEO, The SEO Framework, and SEOPress.
+
+= Does it support WooCommerce? =  
+Yes. Product commands like `/product`, `/on-sale`, `/stock`, and `/sku` show prices, badges, and “Add to Cart” links.
+
+= Can I override the plugin’s CSS? =  
+Yes. Add `init-live-search/style.css` to your theme, or choose from built-in UI styles like `style-full.css` or `style-topbar.css`.
+
+= Is it mobile-friendly? =  
+Yes. The UI is fully responsive and optimized for all devices.
+
+= Is search result caching enabled? =  
+Yes. Results are cached in `localStorage` for faster repeat access.
+
+= What happens when no result is selected? =  
+Pressing Enter will redirect to the default WordPress search page.
 
 == Installation ==
 
@@ -313,34 +311,48 @@ A feature that matches keywords in SEO Titles and Meta Descriptions set by popul
 
 == Changelog ==
 
+= 1.6 – May 27, 2025 =
+- Introduced optional frontend UI presets for enhanced search experience  
+  - `style-full.css`: fullscreen modal overlay with centered input, ideal for immersive search UX  
+  - `style-topbar.css`: fixed top bar search layout, similar to Spotlight or admin bar  
+  - Choose preset style from the new “UI Style” setting in plugin options
+- Theme override support  
+  - Place `init-live-search/style.css` in your theme to override plugin styles completely  
+  - Option to disable all default CSS and style from scratch
+- Improved developer experience  
+  - Automatically detects and loads custom `style.css` if placed in theme folder  
+  - Preset styles are scoped and minimal to reduce conflicts
+- Internal CSS loader and selector refactor to support future style expansions
+- Updated plugin assets and settings screen to reflect new style options
+
 = 1.5.4 – May 27, 2025 =
 - Introduced semantic SEO-aware search layer with lightweight logic and zero AI dependencies  
-  → Enable searching within SEO Titles and Meta Descriptions  
-  → Supports Yoast SEO, Rank Math, AIOSEO, The SEO Framework, and SEOPress  
-  → Optional setting in admin panel, with filter hook to customize meta keys
+  - Enable searching within SEO Titles and Meta Descriptions  
+  - Supports Yoast SEO, Rank Math, AIOSEO, The SEO Framework, and SEOPress  
+  - Optional setting in admin panel, with filter hook to customize meta keys
 - New developer filter: `init_plugin_suite_live_search_seo_meta_keys`  
-  → Customize which SEO meta fields are searched (e.g. `_yoast_wpseo_title`, `rank_math_description`, etc.)
+  - Customize which SEO meta fields are searched (e.g. `_yoast_wpseo_title`, `rank_math_description`, etc.)
 - New developer filter: `init_plugin_suite_live_search_weights`  
-  → Customize weighting when merging post IDs from multiple sources (title, SEO, tags) to control result order
+  - Customize weighting when merging post IDs from multiple sources (title, SEO, tags) to control result order
 
 = 1.5.3 – May 27, 2025 =
 - Added support for searching specific ACF fields (Advanced Custom Fields)
-  → Optional admin setting to define comma-separated field keys (e.g. `company_name, project_code`)
-  → Only searches published posts and supports intelligent fallback logic
-  → Built-in filter for full control: `init_plugin_suite_live_search_post_ids`
+  - Optional admin setting to define comma-separated field keys (e.g. `company_name, project_code`)
+  - Only searches published posts and supports intelligent fallback logic
+  - Built-in filter for full control: `init_plugin_suite_live_search_post_ids`
 - Multilingual compatibility enhancements
-  → Automatic language detection with Polylang and WPML
-  → Added `init_plugin_suite_live_search_filter_lang` filter to restrict results by current language
-  → Filterable language-aware REST queries for slash commands like `/recent`, `/tax`, etc.
+  - Automatic language detection with Polylang and WPML
+  - Added `init_plugin_suite_live_search_filter_lang` filter to restrict results by current language
+  - Filterable language-aware REST queries for slash commands like `/recent`, `/tax`, etc.
 - New developer filter: `init_plugin_suite_live_search_category_taxonomy`
-  → Allows customizing the taxonomy used for displaying categories (e.g. use `product_cat` for WooCommerce)
+  - Allows customizing the taxonomy used for displaying categories (e.g. use `product_cat` for WooCommerce)
 - Improved ACF query performance and status filtering (joins `postmeta` with published posts only)
 - Internal consistency tweaks and filter documentation improvements
 
 = 1.5.2 – May 26, 2025 =
 - Introduced new search mode: **Init Smart Tag-Aware Search**
-  → Combines post title and post tag matching with intelligent fallback using keywords and bi-grams
-  → Automatically splits terms into single words to match short tags like “php”, “css”, or “seo”
+  - Combines post title and post tag matching with intelligent fallback using keywords and bi-grams
+  - Automatically splits terms into single words to match short tags like “php”, “css”, or “seo”
 - Improved Quick Search tooltip behavior: now triggers on single-word selections (e.g. “JavaScript”, “PHP”)
 - Minor UI polish and internal consistency improvements
 

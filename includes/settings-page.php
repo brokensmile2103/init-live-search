@@ -168,12 +168,29 @@ function init_plugin_suite_live_search_render_settings_page() {
                     <th colspan="2"><h2 id="styling-suggestions"><?php esc_html_e('Styling & Suggestions', 'init-live-search'); ?></h2></th>
                 </tr>
                 <tr>
-                    <th scope="row"><?php esc_html_e('Enqueue default CSS?', 'init-live-search'); ?></th>
+                    <th scope="row"><?php esc_html_e('Frontend CSS Style', 'init-live-search'); ?></th>
                     <td>
-                        <label>
-                            <input type="checkbox" name="init_plugin_suite_live_search_settings[enqueue_css]" value="1" <?php checked(!isset($options['enqueue_css']) || $options['enqueue_css']); ?>>
-                            <?php esc_html_e('Load the built-in style.css file on the front-end.', 'init-live-search'); ?>
-                        </label>
+                        <fieldset>
+                            <label>
+                                <input type="radio" name="init_plugin_suite_live_search_settings[css_style]" value="default" <?php checked(($options['css_style'] ?? 'default') === 'default'); ?>>
+                                <?php esc_html_e('Default (modal-style)', 'init-live-search'); ?>
+                            </label><br>
+                            <label>
+                                <input type="radio" name="init_plugin_suite_live_search_settings[css_style]" value="full" <?php checked(($options['css_style'] ?? 'default') === 'full'); ?>>
+                                <?php esc_html_e('Full Screen Overlay', 'init-live-search'); ?>
+                            </label><br>
+                            <label>
+                                <input type="radio" name="init_plugin_suite_live_search_settings[css_style]" value="topbar" <?php checked(($options['css_style'] ?? 'default') === 'topbar'); ?>>
+                                <?php esc_html_e('Top Bar', 'init-live-search'); ?>
+                            </label><br>
+                            <label>
+                                <input type="radio" name="init_plugin_suite_live_search_settings[css_style]" value="none" <?php checked(($options['css_style'] ?? 'default') === 'none'); ?>>
+                                <?php esc_html_e('None (disable all built-in CSS, load manually)', 'init-live-search'); ?>
+                            </label>
+                        </fieldset>
+                        <p class="description">
+                            <?php esc_html_e('Choose how the frontend modal should be styled. You can disable all styles and provide your own if needed.', 'init-live-search'); ?>
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -236,7 +253,11 @@ function init_plugin_suite_live_search_sanitize_settings($input) {
     $output['acf_search_fields'] = sanitize_text_field($input['acf_search_fields'] ?? '');
     $output['seo_search_fields_enabled'] = !empty($input['seo_search_fields_enabled']) ? '1' : '0';
     $output['enable_fallback'] = !empty($input['enable_fallback']) ? '1' : '0';
-    $output['enqueue_css'] = !empty($input['enqueue_css']) ? '1' : '0';
+
+    $output['css_style'] = in_array($input['css_style'], ['default', 'full', 'topbar', 'none'], true)
+        ? $input['css_style']
+        : 'default';
+
     $output['use_cache'] = !empty($input['use_cache']) ? '1' : '0';
     $output['enable_voice'] = !empty($input['enable_voice']) ? '1' : '0';
     $output['max_select_word'] = max(0, min(20, absint($input['max_select_word'] ?? 8)));

@@ -1,12 +1,15 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init Live Search 1.5\n"
+"Project-Id-Version: Init Live Search 1.6\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "A fast, lightweight, and smart live search modal built with Vanilla JS and powered by the WordPress REST API."
+msgid "Init Live Search – Smart, Slash Commands, REST API"
+msgstr ""
+
+msgid "A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API."
 msgstr ""
 
 msgid "Init Live Search Settings"
@@ -87,10 +90,22 @@ msgstr ""
 msgid "Try trimming or using bigrams if not enough results are found."
 msgstr ""
 
-msgid "Enqueue default CSS?"
+msgid "Frontend CSS Style"
 msgstr ""
 
-msgid "Load the built-in style.css file on the front-end."
+msgid "Default (modal-style)"
+msgstr ""
+
+msgid "Full Screen Overlay"
+msgstr ""
+
+msgid "Top Bar"
+msgstr ""
+
+msgid "None (disable all built-in CSS, load manually)"
+msgstr ""
+
+msgid "Choose how the frontend modal should be styled. You can disable all styles and provide your own if needed."
 msgstr ""
 
 msgid "Cache results in localStorage?"

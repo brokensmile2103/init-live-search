@@ -1,13 +1,16 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init Live Search 1.5\n"
+"Project-Id-Version: Init Live Search 1.6\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "A fast, lightweight, and smart live search modal built with Vanilla JS and powered by the WordPress REST API."
-msgstr "Một hộp tìm kiếm hiện đại, nhẹ và thông minh sử dụng Vanilla JS và REST API của WordPress."
+msgid "Init Live Search – Smart, Slash Commands, REST API"
+msgstr "Init Live Search – Tìm kiếm thông minh, Slash Commands, REST API"
+
+msgid "A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API."
+msgstr "Giải pháp tìm kiếm trực tiếp nhanh, gọn và linh hoạt cho WordPress — phát triển bằng JavaScript thuần, tích hợp sâu với REST API."
 
 msgid "Init Live Search Settings"
 msgstr "Cài đặt Init Live Search"
@@ -43,7 +46,7 @@ msgid "Triggers:"
 msgstr "Phím tắt:"
 
 msgid "Click anywhere on the page 3 times within 0.5 seconds"
-msgstr "Nhấp chuột 3 lần liên tiếp vào bất kỳ nơi nào trên trang"
+msgstr "Nhấp 3 lần liên tiếp vào bất kỳ vị trí nào trên trang (trong 0.5 giây)"
 
 msgid "Or press Ctrl + / (or Cmd + / on Mac)"
 msgstr "Hoặc nhấn Ctrl + / (Cmd + / trên Mac)"
@@ -87,11 +90,23 @@ msgstr "Bật khớp dự phòng?"
 msgid "Try trimming or using bigrams if not enough results are found."
 msgstr "Thử rút gọn hoặc sử dụng cụm từ nếu không đủ kết quả."
 
-msgid "Enqueue default CSS?"
-msgstr "Tải CSS mặc định?"
+msgid "Frontend CSS Style"
+msgstr "Kiểu giao diện CSS ở giao diện người dùng"
 
-msgid "Load the built-in style.css file on the front-end."
-msgstr "Tải file style.css tích hợp sẵn ở giao diện người dùng."
+msgid "Default (modal-style)"
+msgstr "Mặc định (kiểu modal)"
+
+msgid "Full Screen Overlay"
+msgstr "Toàn màn hình (overlay)"
+
+msgid "Top Bar"
+msgstr "Thanh trên cùng (Top Bar)"
+
+msgid "None (disable all built-in CSS, load manually)"
+msgstr "Tắt (vô hiệu hóa toàn bộ CSS mặc định, bạn tự thêm thủ công)"
+
+msgid "Choose how the frontend modal should be styled. You can disable all styles and provide your own if needed."
+msgstr "Chọn cách hiển thị modal tìm kiếm ở frontend. Bạn có thể tắt toàn bộ style và tự viết lại nếu muốn."
 
 msgid "Cache results in localStorage?"
 msgstr "Lưu kết quả vào localStorage?"
@@ -211,19 +226,19 @@ msgid "Max Words to Trigger Highlight Search"
 msgstr "Số từ tối đa để bật tìm kiếm khi bôi đen"
 
 msgid "Set maximum word count allowed to trigger tooltip search on text selection. Set 0 to disable."
-msgstr "Thiết lập số từ tối đa được phép để hiển thị nút tìm kiếm khi người dùng bôi đen văn bản. Nhập 0 để tắt chức năng này."
+msgstr "Thiết lập số từ tối đa được phép để hiển thị tooltip tìm kiếm khi người dùng bôi đen văn bản. Nhập 0 để tắt chức năng này."
 
 msgid "Quick search"
 msgstr "Tìm kiếm nhanh"
 
 msgid "Show your favorited posts"
-msgstr "Hiển thị các bài đã lưu"
+msgstr "Hiển thị bài viết bạn đã đánh dấu yêu thích"
 
 msgid "Favorite list has been cleared."
 msgstr "Danh sách yêu thích đã được xóa."
 
 msgid "Clear all favorite posts"
-msgstr "Xóa tất cả bài viết yêu thích"
+msgstr "Xóa toàn bộ danh sách yêu thích"
 
 msgid "Search Triggers"
 msgstr "Cách kích hoạt tìm kiếm"

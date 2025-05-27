@@ -109,12 +109,14 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.innerHTML = `
             <div class="ils-overlay"></div>
             <div class="ils-content">
-                <button class="ils-search"><svg width="20" height="20" viewBox="0 0 20 20"><circle fill="none" stroke="currentColor" stroke-width="1.1" cx="9" cy="9" r="7"></circle><path fill="none" stroke="currentColor" stroke-width="1.1" d="M14,14 L18,18 L14,14 Z"></path></svg></button>
-                <button class="ils-close"><svg width="20" height="20" viewBox="0 0 24 24"><path d="m21 21-9-9m0 0L3 3m9 9 9-9m-9 9-9 9" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                <input type="text" id="init-live-search-input" class="ils-input" placeholder="${InitPluginSuiteLiveSearch.i18n.placeholder}" aria-label="Search input" maxlength="100" />
-                <input type="hidden" class="ils-hidden-url" />
-                <div class="ils-suggestions" role="region" aria-label="Search suggestions"></div>
-                <div class="ils-results" aria-label="Search Results"></div>
+                <div class="ils-inner">
+                    <button class="ils-search"><svg width="20" height="20" viewBox="0 0 20 20"><circle fill="none" stroke="currentColor" stroke-width="1.1" cx="9" cy="9" r="7"></circle><path fill="none" stroke="currentColor" stroke-width="1.1" d="M14,14 L18,18 L14,14 Z"></path></svg></button>
+                    <button class="ils-close"><svg width="20" height="20" viewBox="0 0 24 24"><path d="m21 21-9-9m0 0L3 3m9 9 9-9m-9 9-9 9" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                    <input type="text" id="init-live-search-input" class="ils-input" placeholder="${InitPluginSuiteLiveSearch.i18n.placeholder}" aria-label="Search input" maxlength="100" />
+                    <input type="hidden" class="ils-hidden-url" />
+                    <div class="ils-suggestions" role="region" aria-label="Search suggestions"></div>
+                    <div class="ils-results" aria-label="Search Results"></div>
+                </div>
             </div>
         `;
         document.body.appendChild(modal);
@@ -626,6 +628,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function openModal() {
         if (!modalInitialized) createModal();
         modal.classList.add('open');
+        document.body.classList.add('ils-modal-open');
 
         setTimeout(() => {
             const saved = sessionStorage.getItem('ils-term');
@@ -645,6 +648,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function closeModal() {
         modal.classList.remove('open');
+        document.body.classList.remove('ils-modal-open');
+
         resultsContainer.innerHTML = '';
         inputSearch.value = '';
         hiddenUrl.value = '';
