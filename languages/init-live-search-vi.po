@@ -269,3 +269,12 @@ msgstr "Tìm trong trường ACF (Nâng cao)"
 
 msgid "Optional. Enter comma-separated ACF field keys to include in search (e.g. company_name, project_code). If left blank, ACF fields will not be searched."
 msgstr "Không bắt buộc. Nhập các khóa trường ACF, cách nhau bằng dấu phẩy, để đưa vào tìm kiếm (ví dụ: company_name, project_code). Nếu để trống, plugin sẽ không tìm trong các trường ACF."
+
+msgid "Search in SEO Metadata?"
+msgstr "Tìm trong metadata SEO?"
+
+msgid "Include SEO Title and Meta Description (Yoast, Rank Math, TSF, etc.) in search matching."
+msgstr "Tìm kiếm trong tiêu đề SEO và mô tả meta (Yoast, Rank Math, TSF, v.v...) để cải thiện độ chính xác."
+
+msgid "Enable this to improve accuracy by searching within SEO-optimized content written by the author."
+msgstr "Bật tùy chọn này để cải thiện kết quả bằng cách tìm trong nội dung SEO mà tác giả đã tối ưu."

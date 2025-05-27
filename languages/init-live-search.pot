@@ -266,3 +266,12 @@ msgstr ""
 
 msgid "Optional. Enter comma-separated ACF field keys to include in search (e.g. company_name, project_code). If left blank, ACF fields will not be searched."
 msgstr ""
+
+msgid "Search in SEO Metadata?"
+msgstr ""
+
+msgid "Include SEO Title and Meta Description (Yoast, Rank Math, TSF, etc.) in search matching."
+msgstr ""
+
+msgid "Enable this to improve accuracy by searching within SEO-optimized content written by the author."
+msgstr ""

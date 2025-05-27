@@ -4,7 +4,7 @@ Tags: live search, ajax search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.5.3  
+Stable tag: 1.5.4  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -12,14 +12,14 @@ Blazing-fast live search modal for WordPress. Powered by REST API and Vanilla JS
 
 == Description ==
 
-Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. **Init Live Search** is a lightweight, modern, and fully accessible live search solution for WordPress. Now with semantic keyword matching and smart tag awareness.
+Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. **Init Live Search** is a lightweight, modern, and fully accessible live search solution for WordPress. Now with tag-aware matching, ACF support, and SEO metadata awareness.
 
 It replaces the default `<input name="s">` with a clean, intuitive modal that retrieves results instantly via the WordPress REST API. Everything happens in real-time — without disrupting the browsing flow.
 
 Designed for both blogs and headless sites, it includes optional features like voice input, dark mode, keyword suggestions, and advanced developer hooks for total flexibility.
 
 The plugin supports:
-- Keyboard navigation (↑ ↓ ← → Enter Esc)
+- Keyboard navigation (`↑` `↓` `←` `→` `Enter` `Esc`)
 - Slash commands (e.g. `/recent`, `/id`, `/tag`)
 - Voice input (if supported)
 - Dark mode (`.dark` class or global config)
@@ -31,24 +31,15 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 
 == What's New in Version 1.5.x ==
 
-- New Search Mode: **Init Smart Tag-Aware Search** — combine title and post_tag matching with intelligent fallback using keywords and bi-grams
-- Quick Search tooltip: select 1–8 words on any page to trigger instant search
-- `data-ils` attribute: open modal and prefill slash commands from any HTML element
-- New slash commands: `/fav` and `/fav_clear` to manage favorite posts via `localStorage`
-- Favorite system: add or remove posts directly from result list using a star icon
-- Improved command handling: better stateful rendering and reset behavior
-- `hiddenUrl` logic refined to reset when no result is selected
-- Consistent modal trigger behavior across all entry points
-- UX boost on mobile: auto-focus and select search input with keyboard support
-- Codebase optimized for future extensibility with minimal API changes
-- WooCommerce integration: support for `/product`, `/on-sale`, `/stock`, `/sku`, and `/price {min} {max}` slash commands
-- Display product prices, sale badges, stock status, and "Add to Cart" button in results
-- Smart badge UI: auto-highlight “Sale” and “Sold out” states
-- Added infinite scroll support for WooCommerce-based slash commands
-- Unified command architecture with pagination support across all slash commands
-- Enhanced keyboard navigation and auto-scrolling for commands and suggestions
-- **ACF field search**: search specific ACF fields via settings (`field_a, field_b`), with filter hook for full control
-- **Multilingual support**: built-in language detection + filters for WPML and Polylang compatibility
+- **Init Smart Tag-Aware Search**: match post titles and tags with intelligent fallback using bi-grams
+- **Quick Search** tooltip: select up to 8 words (configurable up to 20) to trigger instant search on text selection; set to 0 to disable
+- `data-ils` attribute: open modal + prefill slash command from any HTML element
+- **Favorites**: manage via `/fav`, `/fav_clear`, and star icon in result list
+- **WooCommerce integration**: new commands `/product`, `/on-sale`, `/stock`, `/sku`, `/price {min} {max}` with price, stock, and "Add to Cart" UI
+- Unified slash command system: consistent pagination, infinite scroll, and keyboard navigation
+- **ACF field search**: search custom ACF fields (configurable via settings)
+- **Multilingual support**: automatic language detection + WPML/Polylang compatibility
+- **Search in SEO Metadata**: match against SEO Titles and Meta Descriptions from major SEO plugins (Yoast, Rank Math, AIOSEO, TSF, SEOPress). Fully extensible via filter.
 
 == Features ==
 
@@ -56,7 +47,8 @@ Everything you expect from a modern live search — and more:
 
 - Live search powered by WordPress REST API (no admin-ajax)
 - Smart tag-aware search mode: match keywords in both titles and post tags
-- Clean modal interface that works with any theme
+- Search in SEO Metadata: match keywords in SEO Titles and Meta Descriptions from popular SEO plugins (Yoast, Rank Math, AIOSEO, TSF, SEOPress)
+- Clean modal interface that works with any theme — no template override required.
 - Fully keyboard accessible (Arrow keys, Enter, Escape)
 - Slash command system (`/recent`, `/popular`, `/tag`, `/id`, `/fav`, etc.)
 - WooCommerce support: search by product, sale status, stock, SKU, or price range
@@ -93,6 +85,7 @@ Options: `dark`, `light`, `auto`
 - Enable slash commands (e.g. /recent, /tag, /id)  
 - Set debounce time, max results, and search mode  
 - Toggle fallback logic (bigrams/trim)  
+- Enable Search in SEO Metadata (optional checkbox for SEO meta matching)  
 - Set max words for tooltip search  
 - Enable voice input (SpeechRecognition API)  
 - Enable result caching (localStorage)  
@@ -100,7 +93,7 @@ Options: `dark`, `light`, `auto`
 - Define or auto-generate keyword suggestions  
 - Add default UTM parameter to result links  
 
-== Keyboard Navigation ==
+== Keyboard Shortcuts ==
 
 - Arrow Up / Down — navigate between results
 - Arrow Right — add selected result to favorites (if not already added)
@@ -186,6 +179,12 @@ Override the taxonomy used to fetch and display category labels in results.
 **Applies to:** all endpoints  
 **Params:** `string $taxonomy`, `int $post_id`
 
+**`init_plugin_suite_live_search_seo_meta_keys`**
+
+Customize the list of meta keys used for matching SEO Titles and Meta Descriptions.  
+**Applies to:** `/search` (when Search in SEO Metadata is enabled)  
+**Params:** `array $meta_keys`
+
 == REST API Endpoints ==
 
 Fully documented, lightweight, and API-first endpoints. Ideal for headless or decoupled builds.
@@ -242,64 +241,78 @@ All endpoints are under namespace: `initlise/v1`
 == FAQ ==
 
 = Does this plugin use jQuery? =  
-No, it’s written entirely in modern Vanilla JavaScript.
+No. It’s built entirely with modern Vanilla JavaScript.
 
 = How is search triggered? =  
-It automatically detects and overrides any `<input name="s">`. You can also trigger the modal by triple-clicking, pressing Ctrl + / (or Cmd + / on Mac), or visiting a URL with `#search` or `?modal=search`.
+It auto-detects `<input name="s">` fields, and can also be triggered by triple-click, Ctrl + / (or Cmd + /), or via URL (`?modal=search`).
 
-= Can I open the modal and prefill a search term via URL? =  
-Yes. Use `?modal=search&term=your+keyword` in the URL to auto-open the modal and prefill the input. The search will start automatically.
+= Can I prefill the modal from a URL? =  
+Yes. Use `?modal=search&term=your+keyword` to open the modal with a prefilled search term.
 
 = Is voice input supported? =  
-Yes. If supported by the browser, it uses the built-in `SpeechRecognition` API for microphone input.
+Yes, via the browser’s built-in SpeechRecognition API (if available).
 
 = Can I generate keyword suggestions automatically? =  
-Yes. You can either enter keywords manually or auto-generate them from your content via the settings panel.
+Yes. You can enter them manually or auto-generate from your content.
 
-= Is caching enabled by default? =  
-Yes. Search results are cached in `localStorage` to improve speed and reduce repeat queries.
+= Is caching enabled? =  
+Yes. Results are cached in `localStorage` to improve performance.
 
-= What happens if no result is selected? =  
-The plugin will fallback to the default WordPress search behavior when you press Enter.
+= What happens when no result is selected? =  
+The plugin falls back to the default WordPress search when you press Enter.
 
-= Can I use this on mobile? =  
-Absolutely. The modal is fully responsive, mobile-friendly, and works seamlessly across devices.
+= Is it mobile-friendly? =  
+Yes. Fully responsive and works across devices.
 
 = What’s the triple-click trigger? =  
-You can triple-click anywhere on the page (within 0.5 seconds) to instantly open the search modal.
+Triple-click anywhere (within 0.5s) to open the search modal.
 
-= Can I disable all triggers and only use the REST API? =  
-Yes. If you turn off all three triggers (input focus, Ctrl + /, and triple-click), the plugin won’t enqueue any assets — only the REST API endpoints will be registered.
+= Can I disable all triggers and use only the REST API? =  
+Yes. Disable all triggers to prevent any frontend assets from loading.
 
 = What are slash commands? =  
-Slash commands are special quick actions you can type like `/recent`, `/id 123`, or `/tag wordpress`. They let you filter or jump directly without typing a keyword.
+Quick commands like `/recent`, `/id 123`, or `/tag wordpress` to jump or filter instantly.
 
-= Can I disable slash commands completely? =  
-Yes. There’s a toggle in the admin settings to turn off all slash command functionality.
+= Can I disable slash commands? =  
+Yes. There’s a setting to turn them off entirely.
 
-= Can I override the search template? =  
-No need — this plugin uses a modal and doesn’t require template overrides. All results are rendered via JavaScript.
-
-= What is Quick Search tooltip? =  
-When you select 1–8 words on any page, a small tooltip appears allowing you to search instantly — no typing required.
-
-= Does it support WooCommerce products? =  
-Yes. It can search and display WooCommerce products including price, stock status, sale badges, and “Add to Cart” buttons — with support for slash commands like `/product`, `/on-sale`, `/stock`, `/sku`, and `/price`.
+= Does it support WooCommerce? =  
+Yes. Supports product search, pricing, stock status, sale badges, and "Add to Cart" — including commands like `/product`, `/on-sale`, `/stock`, `/sku`, `/price`.
 
 = Can I filter products by price or stock? =  
-Yes. Use the slash command `/price 100 500` to filter by price range, or `/stock` to show in-stock products only.
+Yes. Use `/price 100 500` or `/stock` for quick filtering.
 
-= What is “Init Smart Tag-Aware Search”? =  
-It’s an advanced search mode that matches keywords not only in post titles but also in post tags — with automatic fallback using word splitting and bi-grams. This helps catch results like “JavaScript” or “SEO” even if they’re only used as tags.
+= What is Quick Search tooltip? =  
+When you select 1 to 8 words on any page, a tooltip appears to trigger instant search.  
+This limit is configurable in settings (max 20; set 0 to disable).
+
+= What is Smart Tag-Aware Search? =  
+An advanced mode that matches keywords in post titles and tags, with fallback using word splitting and bi-grams.
+
+= What is Search in SEO Metadata? =  
+A feature that matches keywords in SEO Titles and Meta Descriptions set by popular SEO plugins (Yoast, Rank Math, AIOSEO, TSF, SEOPress).
 
 == Installation ==
 
-1. Upload the plugin folder to /wp-content/plugins/ or install via the admin panel.
-2. Activate the plugin from the Plugins menu.
-3. It will automatically enhance all `<input name="s">` fields.
-4. (Optional) Configure advanced settings in Settings → Init Live Search.
+1. Upload the plugin folder to `/wp-content/plugins/` or install via the WordPress admin panel.
+2. Activate the plugin through **Plugins → Installed Plugins**.
+3. Go to **Settings → Init Live Search** to configure options.
+4. The search modal can be triggered by default using:
+   - Focusing any `<input name="s">` field
+   - Pressing **Ctrl + /** (or **Cmd + /** on Mac)
+   - Triple-clicking anywhere on the page (within 0.5s)
+   - Clicking an element with a `data-ils` attribute
+   - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.5.4 – May 27, 2025 =
+- Introduced semantic SEO-aware search layer with lightweight logic and zero AI dependencies
+  → Enable searching within SEO Titles and Meta Descriptions
+  → Supports Yoast SEO, Rank Math, AIOSEO, The SEO Framework, and SEOPress
+  → Optional setting in admin panel, with filter hook to customize meta keys
+- New developer filter: `init_plugin_suite_live_search_seo_meta_keys`
+  → Customize which SEO meta fields are searched (e.g. `_yoast_wpseo_title`, `rank_math_description`, etc.)
 
 = 1.5.3 – May 27, 2025 =
 - Added support for searching specific ACF fields (Advanced Custom Fields)

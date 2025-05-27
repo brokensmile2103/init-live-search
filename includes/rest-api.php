@@ -226,9 +226,54 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
 }
 
 function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like, $post_types, $placeholders, $search_mode, $limit) {
+    $options = get_option('init_plugin_suite_live_search_settings', []);
+    $enable_seo_fields = !empty($options['seo_search_fields_enabled']);
+    $seo_ids = [];
+
+    if ($enable_seo_fields && in_array($search_mode, ['title', 'title_tag', 'title_excerpt'], true)) {
+        $seo_title_keys = [
+            '_yoast_wpseo_title',
+            'rank_math_title',
+            '_aioseo_title',
+            '_genesis_title',
+            '_seopress_titles_title',
+        ];
+
+        $seo_description_keys = [
+            '_yoast_wpseo_metadesc',
+            'rank_math_description',
+            '_aioseo_description',
+            '_genesis_description',
+            '_seopress_titles_desc',
+        ];
+
+        $seo_meta_keys = ($search_mode === 'title_excerpt')
+            ? array_merge($seo_title_keys, $seo_description_keys)
+            : $seo_title_keys;
+
+        $seo_meta_keys = apply_filters('init_plugin_suite_live_search_seo_meta_keys', $seo_meta_keys);
+
+        $meta_placeholders = implode(', ', array_fill(0, count($seo_meta_keys), '%s'));
+        $seo_like = '%' . $wpdb->esc_like($term) . '%';
+
+        $seo_ids = $wpdb->get_col($wpdb->prepare(
+            "
+            SELECT DISTINCT pm.post_id
+            FROM {$wpdb->postmeta} pm
+            INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+            WHERE pm.meta_key IN ($meta_placeholders)
+            AND pm.meta_value LIKE %s
+            AND p.post_status = 'publish'
+            AND p.post_type IN ($placeholders)
+            LIMIT %d
+            ",
+            ...array_merge($seo_meta_keys, [$seo_like, ...$post_types, $limit])
+        ));
+    }
+
     switch ($search_mode) {
         case 'title':
-            return $wpdb->get_col($wpdb->prepare(
+            $ids_title = $wpdb->get_col($wpdb->prepare(
                 "
                 SELECT ID FROM {$wpdb->posts}
                 WHERE post_status = 'publish'
@@ -239,9 +284,9 @@ function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like,
                 ",
                 ...array_merge($post_types, [$like, $term, $limit])
             ));
+            return array_unique(array_merge($ids_title, $seo_ids));
 
         case 'title_tag':
-            // Từ khóa chính
             $ids_title = $wpdb->get_col($wpdb->prepare(
                 "
                 SELECT ID FROM {$wpdb->posts}
@@ -254,7 +299,6 @@ function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like,
                 ...array_merge($post_types, [$like, $term, $limit])
             ));
 
-            // Quét tag theo full term
             $ids_tag = $wpdb->get_col($wpdb->prepare(
                 "
                 SELECT DISTINCT p.ID
@@ -272,9 +316,8 @@ function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like,
                 ...array_merge($post_types, [$like, $limit])
             ));
 
-            // Nếu từ khóa chỉ có đúng 2 từ → fallback thêm từng từ đơn
             $ids_tag_extra = [];
-            $words = preg_split('/\s+/', $term);
+            $words = preg_split('/\\s+/', $term);
             if (count($words) === 2) {
                 foreach ($words as $word) {
                     $like_word = '%' . $wpdb->esc_like($word) . '%';
@@ -298,11 +341,10 @@ function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like,
                 }
             }
 
-            // Gộp hết lại
-            return array_unique(array_merge($ids_title, $ids_tag, $ids_tag_extra));
+            return array_unique(array_merge($ids_title, $ids_tag, $ids_tag_extra, $seo_ids));
 
         case 'title_excerpt':
-            return $wpdb->get_col($wpdb->prepare(
+            $ids = $wpdb->get_col($wpdb->prepare(
                 "
                 SELECT ID FROM {$wpdb->posts}
                 WHERE post_status = 'publish'
@@ -313,6 +355,7 @@ function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like,
                 ",
                 ...array_merge($post_types, [$like, $like, $term, $limit])
             ));
+            return array_unique(array_merge($ids, $seo_ids));
 
         case 'title_content':
         default:
