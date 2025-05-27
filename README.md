@@ -19,6 +19,8 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - **Search in SEO Metadata** (v1.5.4):  
   Match search terms against SEO Titles and Meta Descriptions (Yoast, Rank Math, AIOSEO, TSF, SEOPress).  
   Lightweight, filterable, and optionally toggleable via settings.
+- **Weighted Result Ranking** (v1.5.4):  
+  Control result priority when merging post IDs from title, SEO, tags, etc. via `init_plugin_suite_live_search_weights`.
 - **ACF field search** (v1.5.3):  
   Search within specific ACF fields using a comma-separated list (e.g. `company_name, project_code`)
 - **Multilingual support** (v1.5.3):  
@@ -37,6 +39,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - Clean modal search interface (`Ctrl + /`, triple-click, or `data-ils`)
 - Powered by WordPress REST API — no `admin-ajax`, no jQuery
 - **Search in SEO Metadata** — match keywords in SEO Titles and Meta Descriptions (Yoast, Rank Math, AIOSEO, TSF, SEOPress)
+- **Weighted Result Ranking** — control merging priority using custom filter (e.g. title > SEO > tags)
 - Smart **Slash Commands**: `/recent`, `/fav`, `/id`, `/tag`, `/product`, `/on-sale`, `/sku`, `/price`, etc.
 - **Quick Search Tooltip**: select up to 20 words to trigger instant search (configurable)
 - LocalStorage-based **favorites** and **caching**
