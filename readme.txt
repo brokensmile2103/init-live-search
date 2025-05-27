@@ -112,26 +112,26 @@ This plugin includes multiple filters to help developers customize behavior and 
 **`init_plugin_suite_live_search_enable_fallback`**
 
 Enable or disable fallback logic (trimming or bigrams) when few results are found.  
-**Applies to:** `/search`  
+**Applies to:** search  
 **Params:** `bool $enabled`, `string $term`, `array $args`
 
 **`init_plugin_suite_live_search_post_ids`**
 
 Customize the array of post IDs returned from the search query.  
-**Applies to:** `/search`  
+**Applies to:** search  
 **Params:** `array $post_ids`, `string $term`, `array $args`
 
 **`init_plugin_suite_live_search_result_item`**
 
 Modify each result item before it's sent in the response.  
-**Applies to:** `/search`  
+**Applies to:** search  
 **Params:** `array $item`, `int $post_id`, `string $term`, `array $args`
 
 **`init_plugin_suite_live_search_results`**
 
 Filter the final array of results before being returned.  
-**Applies to:** `/search`  
-**Params:** `array $results`, `array $post_ids`, `string $term`, `array $args`  
+**Applies to:** search  
+**Params:** `array $results`, `array $post_ids`, `string $term`, `array $args`
 
 **`init_plugin_suite_live_search_category`**
 
@@ -148,7 +148,7 @@ Override the default thumbnail if the post lacks a featured image.
 **`init_plugin_suite_live_search_query_args`**
 
 Modify WP_Query arguments for recent, date, taxonomy-based, or product-based commands.  
-**Applies to:** `/recent`, `/date`, `/tax`, `/product`, `/random`  
+**Applies to:** `recent`, `date`, `tax`, `product`, `random`  
 **Params:** `array $args`, `string $type`, `WP_REST_Request $request`
 
 **`init_plugin_suite_live_search_stop_single_words`**
@@ -165,13 +165,13 @@ Customize the stop-word list used when auto-generating suggested keywords.
 **`init_plugin_suite_live_search_taxonomy_cache_ttl`**
 
 Customize the cache duration (in seconds) for the `/taxonomies` endpoint. Return `0` to disable caching.  
-**Applies to:** `/taxonomies`  
+**Applies to:** `taxonomies`  
 **Params:** `int $ttl`, `string $taxonomy`, `int $limit`
 
 **`init_plugin_suite_live_search_filter_lang`**
 
 Filter the list of post IDs by the current language. Supports Polylang and WPML.  
-**Applies to:** `/search`, `/related`, `/read`, and other multilingual-aware endpoints  
+**Applies to:** search, related, read, and other multilingual-aware endpoints  
 **Params:** `array $post_ids`, `string $term`, `array $args`
 
 **`init_plugin_suite_live_search_category_taxonomy`**
@@ -183,13 +183,13 @@ Override the taxonomy used to fetch and display category labels in results.
 **`init_plugin_suite_live_search_seo_meta_keys`**
 
 Customize the list of meta keys used for matching SEO Titles and Meta Descriptions.  
-**Applies to:** `/search` (when Search in SEO Metadata is enabled)  
+**Applies to:** search (when Search in SEO Metadata is enabled)  
 **Params:** `array $meta_keys`
 
 **`init_plugin_suite_live_search_weights`**
 
 Customize the weighting array used to merge and sort post IDs from multiple sources (title, SEO, tag, etc.).  
-**Applies to:** `/search` (search modes: `title`, `title_tag`, `title_excerpt`)  
+**Applies to:** search (search modes: `title`, `title_tag`, `title_excerpt`)  
 **Params:** `array $weights`, `string $search_mode`
 
 == REST API Endpoints ==
