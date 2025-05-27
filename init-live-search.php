@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Init Live Search – Smart, Slash Commands, REST API
+ * Plugin Name: Init Live Search
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
- * Description: A fast, lightweight, and smart live search modal built with Vanilla JS and powered by the WordPress REST API.
+ * Description: A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API.
  * Version: 1.6
  * Author: Init HTML
  * Author URI: https://inithtml.com/
