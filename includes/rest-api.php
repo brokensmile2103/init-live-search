@@ -63,6 +63,7 @@ add_action('rest_api_init', function () {
     ]);
 });
 
+// Handle the main search REST endpoint, applies fallback, bigram, SEO, and ACF logic.
 function init_plugin_suite_live_search_search($request) {
     $term = $request->get_param('term');
     $args = [
@@ -72,10 +73,10 @@ function init_plugin_suite_live_search_search($request) {
     return rest_ensure_response(init_plugin_suite_live_search_get_results($term, $args));
 }
 
+// Execute internal search logic and return final result list.
 function init_plugin_suite_live_search_get_results($term, $args = []) {
     global $wpdb;
 
-    // Tự động phát hiện ngôn ngữ hiện tại nếu dùng WPML hoặc Polylang
     if (empty($args['lang'])) {
         if (function_exists('pll_current_language')) {
             $args['lang'] = pll_current_language();
@@ -116,7 +117,6 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
     } else {
         if (!$term || strlen($term) < 2) return [];
 
-        // Default search mode fallback is 'title' for clean, fast matching
         $search_mode = !empty($args['force_mode'])
             ? $args['force_mode']
             : (!empty($options['search_mode']) ? $options['search_mode'] : 'title');
@@ -169,7 +169,6 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
                 }
             }
 
-            // Hỗ trợ tìm trong ACF nếu có thiết lập
             if (function_exists('get_field') && !empty($options['acf_search_fields'])) {
                 $acf_fields = array_map('trim', explode(',', $options['acf_search_fields']));
                 $acf_fields = array_filter($acf_fields, function($f) { return $f !== ''; });
@@ -197,8 +196,8 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
             }
 
             $post_ids = apply_filters('init_plugin_suite_live_search_post_ids', $post_ids, $term, $args);
-            // Lọc post_ids theo ngôn ngữ (WPML/Polylang) nếu có
             $post_ids = apply_filters('init_plugin_suite_live_search_filter_lang', $post_ids, $term, $args);
+
             if ($paged === 1) {
                 wp_cache_set($cache_key, $post_ids, 'init_plugin_suite_live_search', 300);
             }
@@ -232,6 +231,7 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
     return apply_filters('init_plugin_suite_live_search_results', $results, $post_ids, $term, $args);
 }
 
+// Retrieve post IDs by specific search mode: title, tag, excerpt, etc.
 function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like, $post_types, $placeholders, $search_mode, $limit) {
     $options = get_option('init_plugin_suite_live_search_settings', []);
     $enable_seo_fields = !empty($options['seo_search_fields_enabled']);
@@ -394,110 +394,7 @@ function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like,
     }
 }
 
-function init_plugin_suite_live_search_generate_bigrams($term) {
-    $words = preg_split('/\s+/', $term);
-    $bigrams = [];
-    for ($i = 0; $i < count($words) - 1; $i++) {
-        $bigrams[] = $words[$i] . ' ' . $words[$i + 1];
-    }
-    return $bigrams;
-}
-
-function init_plugin_suite_live_search_ranked_merge_weighted(array $arrays, array $weights = []) {
-    $non_empty = array_filter($arrays, function($arr) {
-        return is_array($arr) && !empty($arr);
-    });
-
-    if (count($non_empty) <= 1) {
-        return array_unique(array_merge(...$non_empty));
-    }
-
-    $score_map = [];
-
-    foreach ($arrays as $i => $arr) {
-        $weight = $weights[$i] ?? 1; // default weight = 1
-        foreach ((array)$arr as $id) {
-            $score_map[$id] = ($score_map[$id] ?? 0) + $weight;
-        }
-    }
-
-    arsort($score_map);
-    return array_keys($score_map);
-}
-
-function init_plugin_suite_live_search_highlight_keyword($text, $keywords) {
-    if (empty($text) || empty($keywords)) return $text;
-
-    $remove_accents = function($str) {
-        static $patterns = null, $replacements = null;
-        if (!$patterns) {
-            $patterns = [
-                '/[áàảãạăắằẳẵặâấầẩẫậ]/u', '/[ÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬ]/u',
-                '/[éèẻẽẹêếềểễệ]/u', '/[ÉÈẺẼẸÊẾỀỂỄỆ]/u',
-                '/[íìỉĩị]/u', '/[ÍÌỈĨỊ]/u',
-                '/[óòỏõọôốồổỗộơớờởỡợ]/u', '/[ÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢ]/u',
-                '/[úùủũụưứừửữự]/u', '/[ÚÙỦŨỤƯỨỪỬỮỰ]/u',
-                '/[ýỳỷỹỵ]/u', '/[ÝỲỶỸỴ]/u',
-                '/[đ]/u', '/[Đ]/u'
-            ];
-            $replacements = [
-                'a','A','e','E','i','I','o','O','u','U','y','Y','d','D'
-            ];
-        }
-        return preg_replace($patterns, $replacements, $str);
-    };
-
-    $original_text = $text;
-    $text_no_diacritics = $remove_accents(mb_strtolower($text));
-    if (is_string($keywords)) {
-        $keywords = [$keywords];
-    }
-
-    $highlights = [];
-
-    foreach ($keywords as $keyword) {
-        $keyword_no_diacritics = $remove_accents(mb_strtolower($keyword));
-        if (empty($keyword_no_diacritics)) continue;
-
-        $len = mb_strlen($keyword_no_diacritics);
-        $offset = 0;
-
-        while (true) {
-            $pos = mb_stripos($text_no_diacritics, $keyword_no_diacritics, $offset);
-            if ($pos === false) break;
-
-            $overlap = false;
-            foreach ($highlights as $h) {
-                if (!($pos + $len <= $h['start'] || $pos >= $h['end'])) {
-                    $overlap = true;
-                    break;
-                }
-            }
-            if (!$overlap) {
-                $highlights[] = ['start' => $pos, 'end' => $pos + $len];
-            }
-            $offset = $pos + $len;
-        }
-    }
-
-    if (empty($highlights)) return $text;
-
-    usort($highlights, function($a, $b) {
-        return $a['start'] <=> $b['start'];
-    });
-
-    $result = '';
-    $last_pos = 0;
-    foreach ($highlights as $hl) {
-        $result .= mb_substr($original_text, $last_pos, $hl['start'] - $last_pos);
-        $result .= '<mark>' . mb_substr($original_text, $hl['start'], $hl['end'] - $hl['start']) . '</mark>';
-        $last_pos = $hl['end'];
-    }
-    $result .= mb_substr($original_text, $last_pos);
-
-    return $result;
-}
-
+// Return the permalink of a post given its ID.
 function init_plugin_suite_live_search_get_post_by_id($request) {
     $id = absint($request['id']);
     if (!$id || get_post_status($id) !== 'publish') {
@@ -509,6 +406,7 @@ function init_plugin_suite_live_search_get_post_by_id($request) {
     ], $id));
 }
 
+// Return latest posts for `/recent` slash command.
 function init_plugin_suite_live_search_recent($request) {
     $options = get_option('init_plugin_suite_live_search_settings', []);
     $post_types = !empty($options['post_types']) && is_array($options['post_types'])
@@ -564,6 +462,7 @@ function init_plugin_suite_live_search_recent($request) {
     return rest_ensure_response($results);
 }
 
+// Return posts by parsed date string (year, month, day).
 function init_plugin_suite_live_search_date($request) {
     $value = sanitize_text_field($request->get_param('value'));
     if (!$value) return rest_ensure_response([]);
@@ -621,26 +520,7 @@ function init_plugin_suite_live_search_date($request) {
     return rest_ensure_response($results);
 }
 
-function init_plugin_suite_live_search_parse_date_value($value) {
-    if (preg_match('/^\d{4}$/', $value)) {
-        return ['year' => (int) $value];
-    }
-
-    if (preg_match('/^(\d{4})\/(\d{1,2})$/', $value, $matches)) {
-        return ['year' => (int) $matches[1], 'month' => (int) $matches[2]];
-    }
-
-    if (preg_match('/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/', $value, $matches)) {
-        return [
-            'year'  => (int) $matches[1],
-            'month' => (int) $matches[2],
-            'day'   => (int) $matches[3]
-        ];
-    }
-
-    return false;
-}
-
+// Return posts filtered by taxonomy term (e.g., category, tag).
 function init_plugin_suite_live_search_tax_query($request) {
     $taxonomy   = sanitize_key($request->get_param('taxonomy'));
     $term_input = sanitize_text_field($request->get_param('term'));
@@ -715,6 +595,7 @@ function init_plugin_suite_live_search_tax_query($request) {
     return rest_ensure_response($results);
 }
 
+// Return related posts by analyzing title similarity.
 function init_plugin_suite_live_search_related($request) {
     $raw = sanitize_text_field($request->get_param('title'));
     if (!$raw || strlen($raw) < 3) return rest_ensure_response([]);
@@ -749,6 +630,7 @@ function init_plugin_suite_live_search_related($request) {
     return rest_ensure_response($results);
 }
 
+// Return posts previously read, identified by `ids` param.
 function init_plugin_suite_live_search_get_reading_posts($request) {
     $ids = sanitize_text_field($request->get_param('ids'));
     $ids = array_filter(array_map('absint', explode(',', $ids)));
@@ -764,6 +646,7 @@ function init_plugin_suite_live_search_get_reading_posts($request) {
     ]));
 }
 
+// Return a random post URL from allowed post types.
 function init_plugin_suite_live_search_random($request) {
     $options = get_option('init_plugin_suite_live_search_settings', []);
 
@@ -792,6 +675,7 @@ function init_plugin_suite_live_search_random($request) {
     ]);
 }
 
+// Return a list of taxonomy terms with count and link.
 function init_plugin_suite_live_search_get_taxonomies_list($request) {
     $taxonomy = sanitize_key($request->get_param('taxonomy'));
     if (!in_array($taxonomy, ['category', 'post_tag'])) {
@@ -840,6 +724,7 @@ function init_plugin_suite_live_search_get_taxonomies_list($request) {
     return rest_ensure_response($results);
 }
 
+// Fetch WooCommerce products with filters: SKU, price, stock, sale.
 function init_plugin_suite_live_search_products($request) {
     if (!function_exists('wc_get_product')) {
         return rest_ensure_response([]);
@@ -858,7 +743,6 @@ function init_plugin_suite_live_search_products($request) {
     $min_price = is_numeric($request->get_param('min_price')) ? floatval($request->get_param('min_price')) : null;
     $max_price = is_numeric($request->get_param('max_price')) ? floatval($request->get_param('max_price')) : null;
 
-    // Tạo cache key
     $cache_key = 'ils_product_' . md5(json_encode([
         'term' => $term,
         'sku' => $sku,
@@ -869,7 +753,9 @@ function init_plugin_suite_live_search_products($request) {
         'paged' => $paged,
         'per_page' => $per_page
     ]));
+
     $results = wp_cache_get($cache_key, 'init_plugin_suite_live_search');
+
     if ($results !== false) {
         return rest_ensure_response($results);
     }
@@ -971,83 +857,7 @@ function init_plugin_suite_live_search_products($request) {
         $default_thumb
     );
 
-    // Cache kết quả cho 5 phút
     wp_cache_set($cache_key, $results, 'init_plugin_suite_live_search', 300);
 
     return rest_ensure_response($results);
-}
-
-function init_plugin_suite_live_search_get_product_data($post_id) {
-    if (!function_exists('wc_get_product')) return [];
-
-    $product = wc_get_product($post_id);
-    if (!$product) return [];
-
-    $data = [
-        'price'         => $product->get_price_html(),
-        'regular_price' => wc_price($product->get_regular_price()),
-        'on_sale'       => $product->is_on_sale(),
-        'stock_status'  => $product->get_stock_status(),
-        'add_to_cart_url' => $product->add_to_cart_url(),
-    ];
-
-    return $data;
-}
-
-function init_plugin_suite_live_search_build_result_item($post_id, $term = '', $keywords = [], $default_thumb = '') {
-    $thumb_id  = get_post_thumbnail_id($post_id);
-    $thumb_url = $thumb_id ? wp_get_attachment_image_url($thumb_id, 'thumbnail') : $default_thumb;
-
-    $post_type_slug = get_post_type($post_id);
-    $post_type_obj  = get_post_type_object($post_type_slug);
-    $post_type_name = $post_type_obj ? $post_type_obj->labels->singular_name : $post_type_slug;
-
-    $taxonomy = apply_filters('init_plugin_suite_live_search_category_taxonomy', 'category', $post_id);
-    $category = get_the_terms($post_id, $taxonomy);
-    $category_name = ($category && !is_wp_error($category)) ? $category[0]->name : '';
-
-    $title = get_the_title($post_id);
-    if (!empty($keywords)) {
-        $title = init_plugin_suite_live_search_highlight_keyword(esc_html($title), $keywords);
-    }
-
-    $item = [
-        'id'        => $post_id,
-        'title'     => $title,
-        'url'       => get_permalink($post_id),
-        'type'      => $post_type_name,
-        'post_type' => $post_type_slug,
-        'thumb'     => $thumb_url,
-        'date'      => get_the_date('d/m/Y', $post_id),
-        'category'  => apply_filters('init_plugin_suite_live_search_category', $category_name, $post_id),
-    ];
-
-    if ($post_type_slug === 'product') {
-        $item = array_merge($item, init_plugin_suite_live_search_get_product_data($post_id));
-    }
-
-    return apply_filters('init_plugin_suite_live_search_result_item', $item, $post_id, $term, $args);
-}
-
-function init_plugin_suite_live_search_build_result_list($post_ids, $args = [], $term = '', $keywords = [], $default_thumb = '') {
-    if (!is_array($post_ids)) return [];
-
-    $exclude = !empty($args['exclude']) ? (int)$args['exclude'] : null;
-    $results = [];
-
-    foreach ($post_ids as $post_id) {
-        if ($exclude && $post_id === $exclude) continue;
-        $results[] = init_plugin_suite_live_search_build_result_item($post_id, $term, $keywords, $default_thumb);
-    }
-
-    return $results;
-}
-
-function init_plugin_suite_live_search_detect_lang() {
-    if (function_exists('pll_current_language')) {
-        return pll_current_language();
-    } elseif (function_exists('apply_filters')) {
-        return apply_filters('wpml_current_language', null);
-    }
-    return get_locale();
 }

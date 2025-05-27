@@ -153,7 +153,7 @@ add_action('wp_enqueue_scripts', function () {
 });
 
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'init_live_search_add_settings_link');
-
+// Add a "Settings" link to the plugin row in the Plugins admin screen
 function init_live_search_add_settings_link($links) {
     $settings_link = '<a href="' . admin_url('options-general.php?page=init-live-search-settings') . '">' . __('Settings', 'init-live-search') . '</a>';
     array_unshift($links, $settings_link);
@@ -162,14 +162,15 @@ function init_live_search_add_settings_link($links) {
 
 // Includes
 if (is_dir(INIT_PLUGIN_SUITE_LS_INCLUDES_PATH)) {
-    // Load required logic: REST API and settings page
-    foreach (['rest-api.php', 'settings-page.php'] as $file) {
+    // Load internal modules (utils first, then main logic)
+    foreach (['utils.php', 'rest-api.php', 'settings-page.php'] as $file) {
         $path = INIT_PLUGIN_SUITE_LS_INCLUDES_PATH . $file;
         if (file_exists($path)) {
             require_once $path;
         }
     }
 
+    // Load admin-specific logic
     if (is_admin()) {
         $admin_path = INIT_PLUGIN_SUITE_LS_INCLUDES_PATH . 'ajax.php';
         if (file_exists($admin_path)) {

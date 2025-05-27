@@ -50,7 +50,6 @@ function init_plugin_suite_live_search_generate_keywords() {
 
         $stop_single_words = apply_filters('init_plugin_suite_live_search_stop_single_words', $default_stop_words, $locale);
 
-        // Loại bỏ stopwords đơn trước khi tạo bigram
         $title_arr = array_values(array_filter($title_arr, function($word) use ($stop_single_words) {
             return !in_array($word, $stop_single_words, true);
         }));
