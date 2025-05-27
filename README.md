@@ -1,10 +1,10 @@
 # Init Live Search
 
-> REST-API-powered live search for WordPress — with slash commands, WooCommerce filters, ACF + SEO metadata support, voice input, and local cache. Built with pure JavaScript.
+> Fast, modern live search for WordPress. REST API-powered with slash commands, SEO-aware search, ACF field support, WooCommerce integration, and custom UI styles.
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.5.4-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.6-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -14,25 +14,13 @@ Init Live Search replaces your default WordPress search with a sleek, fast, comm
 
 Whether you're building a blog, an eCommerce site, a headless frontend, or a high-performance content portal, this plugin adapts to your workflow.
 
-## What's New in v1.5.x
+## What's New in v1.6
 
-- **Search in SEO Metadata** (v1.5.4):  
-  Match search terms against SEO Titles and Meta Descriptions (Yoast, Rank Math, AIOSEO, TSF, SEOPress).  
-  Lightweight, filterable, and optionally toggleable via settings.
-- **Weighted Result Ranking** (v1.5.4):  
-  Control result priority when merging post IDs from title, SEO, tags, etc. via `init_plugin_suite_live_search_weights`.
-- **ACF field search** (v1.5.3):  
-  Search within specific ACF fields using a comma-separated list (e.g. `company_name, project_code`)
-- **Multilingual support** (v1.5.3):  
-  Auto-detect WPML/Polylang language and filter results by locale.
-- **Smart Tag-Aware Search** (v1.5.2):  
-  Combines title + tag matching with keyword and bigram fallback.
-- **Quick Search tooltip**:  
-  Now works on single-word selections. Configurable limit (1–20 words).
-- **WooCommerce integration**:  
-  Show prices, badges, stock, and "Add to Cart" buttons via slash commands like `/product`, `/price`, etc.
-- **Unified slash command engine** with pagination, infinite scroll, and better keyboard nav
-- Smarter caching, reset logic, and consistent modal triggers across devices
+- **UI Style Presets**: choose between `style-full.css` (fullscreen) and `style-topbar.css` (admin-bar style)
+- **Theme CSS Override**: drop a `style.css` file into your theme’s `init-live-search/` folder to override all styles
+- **Full CSS Control**: disable all built-in CSS for complete customization
+- **Updated Settings UI**: select UI style directly in admin panel
+- **Scoped Style Loading**: prevent style collisions with themes or builders
 
 ## Features
 
