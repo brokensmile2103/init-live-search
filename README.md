@@ -1,4 +1,4 @@
-# Init Live Search
+# Init Live Search – Smart, Slash Commands, REST API
 
 > Fast, modern live search for WordPress. REST API-powered with slash commands, SEO-aware search, ACF field support, WooCommerce integration, and custom UI styles.
 
