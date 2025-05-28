@@ -346,6 +346,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (hiddenUrl.value) {
                     selectedIndex = -1;
                     window.location.href = hiddenUrl.value;
+                } else {
+                    const term = inputSearch.value.trim();
+                    if (term.length >= 2) {
+                        window.location.href = `${InitPluginSuiteLiveSearch.search_page || '/'}?s=${encodeURIComponent(term)}`;
+                    }
                 }
                 return;
             }

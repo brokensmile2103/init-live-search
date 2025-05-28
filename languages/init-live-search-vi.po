@@ -297,8 +297,8 @@ msgstr "Bật tùy chọn này để cải thiện kết quả bằng cách tìm
 msgid "Enable Search Analytics?"
 msgstr "Bật phân tích tìm kiếm?"
 
-msgid "Log search queries (term, slash command, result count) for analytics purposes."
-msgstr "Ghi lại các truy vấn tìm kiếm (từ khóa, slash command, số lượng kết quả) để phục vụ phân tích."
+msgid "Log search queries (term, result count) for analytics purposes."
+msgstr "Ghi lại các truy vấn tìm kiếm (từ khóa, số lượng kết quả) để phục vụ phân tích."
 
 msgid "When enabled, search data will be stored temporarily using transients to help analyze usage trends. No IPs or personal data are stored."
 msgstr "Khi được bật, dữ liệu tìm kiếm sẽ được lưu tạm thời bằng transient để phân tích xu hướng sử dụng. Không lưu địa chỉ IP hoặc dữ liệu cá nhân."

@@ -171,6 +171,7 @@ add_action('wp_enqueue_scripts', function () {
         'trigger'            => $trigger,
         'post_id'            => is_singular() ? get_the_ID() : 0,
         'default_thumb'      => INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'img/thumbnail.svg',
+        'search_page'        => home_url('/'),
         'i18n' => [
             'placeholder'           => __('Type to search...', 'init-live-search'),
             'no_results'            => __('No results found.', 'init-live-search'),

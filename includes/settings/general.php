@@ -108,7 +108,7 @@ $post_types = get_post_types(['public' => true], 'objects');
             <td>
                 <label>
                     <input type="checkbox" name="init_plugin_suite_live_search_settings[enable_analytics]" value="1" <?php checked(!empty($options['enable_analytics'])); ?>>
-                    <?php esc_html_e('Log search queries (term, slash command, result count) for analytics purposes.', 'init-live-search'); ?>
+                    <?php esc_html_e('Log search queries (term, result count) for analytics purposes.', 'init-live-search'); ?>
                 </label>
                 <p class="description"><?php esc_html_e('When enabled, search data will be stored temporarily using transients to help analyze usage trends. No IPs or personal data are stored.', 'init-live-search'); ?></p>
             </td>

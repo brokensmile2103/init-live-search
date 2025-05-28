@@ -294,7 +294,7 @@ msgstr ""
 msgid "Enable Search Analytics?"
 msgstr ""
 
-msgid "Log search queries (term, slash command, result count) for analytics purposes."
+msgid "Log search queries (term, result count) for analytics purposes."
 msgstr ""
 
 msgid "When enabled, search data will be stored temporarily using transients to help analyze usage trends. No IPs or personal data are stored."
