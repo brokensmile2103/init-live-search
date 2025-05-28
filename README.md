@@ -4,7 +4,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.6.1-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.6.2-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -18,6 +18,8 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 
 ## What's New in v1.6.x
 
+- **Default Slash Command**: preload `/recent`, `/related`, `/popular`, or `/read` on modal open
+- **Smart Detection Mode**: auto-select slash command based on current page (post, category, tag, shop, etc.)
 - **UI Style Presets**: choose between `style-full.css` (fullscreen) and `style-topbar.css` (admin-bar style)
 - **Theme CSS Override**: drop a `style.css` file into your theme’s `init-live-search/` folder to override styles
 - **Full CSS Control**: disable all built-in CSS for complete customization
