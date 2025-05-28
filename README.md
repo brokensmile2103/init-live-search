@@ -14,6 +14,8 @@ Init Live Search replaces your default WordPress search with a sleek, fast, comm
 
 Whether you're building a blog, an eCommerce site, a headless frontend, or a high-performance content portal, this plugin adapts to your workflow.
 
+![Demo of Init Live Search](https://inithtml.com/wp-content/uploads/2025/05/Init-Live-Search-Demo.gif)
+
 ## What's New in v1.6.x
 
 - **UI Style Presets**: choose between `style-full.css` (fullscreen) and `style-topbar.css` (admin-bar style)
