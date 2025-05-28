@@ -293,3 +293,51 @@ msgstr "Tìm kiếm trong tiêu đề SEO và mô tả meta (Yoast, Rank Math, T
 
 msgid "Enable this to improve accuracy by searching within SEO-optimized content written by the author."
 msgstr "Bật tùy chọn này để cải thiện kết quả bằng cách tìm trong nội dung SEO mà tác giả đã tối ưu."
+
+msgid "Enable Search Analytics?"
+msgstr "Bật phân tích tìm kiếm?"
+
+msgid "Log search queries (term, slash command, result count) for analytics purposes."
+msgstr "Ghi lại các truy vấn tìm kiếm (từ khóa, slash command, số lượng kết quả) để phục vụ phân tích."
+
+msgid "When enabled, search data will be stored temporarily using transients to help analyze usage trends. No IPs or personal data are stored."
+msgstr "Khi được bật, dữ liệu tìm kiếm sẽ được lưu tạm thời bằng transient để phân tích xu hướng sử dụng. Không lưu địa chỉ IP hoặc dữ liệu cá nhân."
+
+msgid "General Settings"
+msgstr "Cài đặt chung"
+
+msgid "Analytics"
+msgstr "Phân tích dữ liệu"
+
+msgid "Search Analytics"
+msgstr "Thống kê tìm kiếm"
+
+msgid "Below is a temporary log of recent search queries. No IPs or personal data are stored."
+msgstr "Dưới đây là nhật ký tạm thời của các truy vấn tìm kiếm gần đây. Không lưu IP hay dữ liệu cá nhân."
+
+msgid "Group similar queries"
+msgstr "Gộp các truy vấn giống nhau"
+
+msgid "Clear All Logs"
+msgstr "Xóa toàn bộ nhật ký"
+
+msgid "Export CSV"
+msgstr "Xuất CSV"
+
+msgid "No data recorded yet."
+msgstr "Chưa có dữ liệu được ghi lại."
+
+msgid "Time"
+msgstr "Thời gian"
+
+msgid "Query"
+msgstr "Truy vấn"
+
+msgid "Results"
+msgstr "Kết quả"
+
+msgid "User ID"
+msgstr "ID người dùng"
+
+msgid "Source"
+msgstr "Nguồn"

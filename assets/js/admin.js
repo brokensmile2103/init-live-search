@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    input.value = data.data;
+                    input.value = data.data || '';
                 } else {
                     alert('Failed to generate keywords');
                 }

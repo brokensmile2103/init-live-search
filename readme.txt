@@ -4,7 +4,7 @@ Tags: live search, ajax search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.6  
+Stable tag: 1.6.1  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -12,7 +12,7 @@ Fast, modern live search for WordPress. REST API-powered with slash commands, SE
 
 == Description ==
 
-Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. **Init Live Search** is a modern, lightweight, and fully accessible live search solution for WordPress — now with tag-aware matching, SEO metadata support, ACF integration, and customizable UI presets.
+Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. Init Live Search is a modern, lightweight, and fully accessible live search solution for WordPress — now with tag-aware matching, SEO metadata support, ACF integration, WooCommerce product filters, and customizable UI presets.
 
 It replaces the default `<input name="s">` with a clean, intuitive search modal powered entirely by the WordPress REST API. Everything loads in real-time — with zero disruption to browsing flow.
 
@@ -33,18 +33,19 @@ This plugin is part of the [Init Plugin Suite](https://inithtml.com/init-plugin-
 
 GitHub repository: [https://github.com/brokensmile2103/init-live-search](https://github.com/brokensmile2103/init-live-search)
 
-== What's New in Version 1.6 ==
+== What's New in Version 1.6.x ==
 
-- **UI Style Presets**: choose from built-in layouts like fullscreen overlay (`style-full.css`) or top bar search (`style-topbar.css`) for a tailored frontend experience
-- **Theme CSS Override**: drop a `style.css` file into your theme's `init-live-search/` folder to fully control styling
-- **Disable All Plugin CSS**: advanced option to turn off built-in styles and start from scratch
-- **New UI Style Picker**: select your preferred style directly in the admin settings
-- **Improved CSS Loader**: cleaner separation of default styles, theme overrides, and preset layouts
-- **Better Developer Control**: presets are scoped and non-invasive, ensuring minimal conflict with themes or page builders
+- **New UI Style Presets**: choose from fullscreen (`style-full.css`) or top bar (`style-topbar.css`) layouts
+- **Theme CSS Override**: place `init-live-search/style.css` in your theme to customize styles
+- **Disable Built-in CSS**: turn off all plugin styles and build your own from scratch
+- **UI Style Picker**: select a style directly from the admin settings
+- **Scoped CSS Loader**: clean separation of core, presets, and theme overrides
+- **Developer-Friendly**: styles are minimal and safe to integrate with any theme or builder
+- **Search Analytics (New Tab)**: track search queries, view counts, export CSV, and group results by frequency
 
 == Features ==
 
-Everything you expect from a modern live search — and more:
+Packed with everything a modern live search needs — and more:
 
 - Live search powered by WordPress REST API (no admin-ajax)
 - Smart tag-aware search mode: match keywords in both titles and post tags
@@ -65,6 +66,7 @@ Everything you expect from a modern live search — and more:
 - UI style presets: choose between default, fullscreen (`style-full.css`), or topbar (`style-topbar.css`) layouts
 - Theme override support: add `init-live-search/style.css` to fully customize design
 - Option to disable all built-in CSS and style from scratch
+- Search analytics: track queries, group results, export CSV — all without storing personal data
 - Developer-friendly with filters and custom REST API endpoints
 - Built with pure JavaScript — no jQuery required
 
@@ -96,6 +98,7 @@ Options: `dark`, `light`, `auto`
 - Choose frontend UI style (default, fullscreen, or topbar)  
 - Allow theme override via `init-live-search/style.css`  
 - Option to disable all built-in CSS completely  
+- Enable Search Analytics to log queries (no personal data stored)  
 - Add default UTM parameter to result links  
 - Define or auto-generate keyword suggestions  
 
@@ -231,7 +234,7 @@ All endpoints are under namespace: `initlise/v1`
   Return a list of taxonomy terms (e.g., categories, tags), sorted by count.
 
 - `/product?page=1&on_sale=1&in_stock=1&sku=ABC&min_price=100&max_price=500`  
-  Fetch WooCommerce products using flexible query parameters. Supports slash commands like `/product`, `/on-sale`, `/stock`, `/sku`, and `/price`.  
+  Fetch WooCommerce products using flexible query parameters. Supports slash commands: `/product`, `/on-sale`, `/stock`, `/sku`, `/price`.  
   Accepts:  
     - `term`: Search keyword  
     - `sku`: Partial or full SKU match  
@@ -244,13 +247,14 @@ All endpoints are under namespace: `initlise/v1`
 == Screenshots ==
 
 1. Admin settings with search behavior options  
-2. Clean modal interface with keyword suggestions  
-3. Search results with filter pills and post types  
-4. Fully supports dark mode (auto or manual)  
-5. Slash command dropdown helper with real-time suggestions  
-6. WooCommerce product search via `/product` slash command with price, sale, and out-of-stock indicators  
-7. Fullscreen search interface using the `style-full.css` preset  
-8. Top bar search layout using the `style-topbar.css` preset
+2. Search Analytics tab: view and export recent query logs  
+3. Clean modal interface with keyword suggestions  
+4. Search results with filter pills and post types  
+5. Fully supports dark mode (auto or manual)  
+6. Slash command dropdown helper with real-time suggestions  
+7. WooCommerce product search via `/product` slash command with price, sale, and out-of-stock indicators  
+8. Fullscreen search interface using the `style-full.css` preset  
+9. Top bar search layout using the `style-topbar.css` preset
 
 == Frequently Asked Questions ==
 
@@ -294,8 +298,14 @@ Yes. The UI is fully responsive and optimized for all devices.
 = Is search result caching enabled? =  
 Yes. Results are cached in `localStorage` for faster repeat access.
 
+= Does it track or log searches? =  
+Optionally, yes. You can enable Search Analytics in settings to log recent queries (no IPs or personal data are stored).
+
 = What happens when no result is selected? =  
 Pressing Enter will redirect to the default WordPress search page.
+
+= Can I use this plugin with headless WordPress? =
+Yes. All features are powered by the REST API with clean, documented endpoints — ideal for decoupled frontends or JavaScript-based rendering.
 
 == Installation ==
 
@@ -310,6 +320,24 @@ Pressing Enter will redirect to the default WordPress search page.
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.6.1 – May 28, 2025 =
+- Introduced **Search Analytics** panel in admin settings (`Analytics` tab)
+  - Log every keyword-based search query (term, result count, timestamp, source, user ID)
+  - Store logs in rotating chunks using WordPress transients (lightweight, privacy-respecting)
+  - Group similar queries and sort by frequency with one click (client-side JS powered)
+  - Export logs to CSV directly from admin
+  - Clear all logs with secure nonce validation
+- Refined tracking logic
+  - Only logs meaningful search terms (ignores empty or slash-only commands)
+  - Excludes slash commands like `/recent` or `/fav` from analytics for relevance and clarity
+- Optimized admin UX
+  - Group toggle now sorts results by most frequent queries
+  - Improved layout with responsive buttons and compact styling
+  - Nonce protection for all form actions
+- Internal improvements
+  - Cleaned up tracking hook and filters for future extensibility
+  - Renamed internal tracking file (`analytics.php` → `tracking.php`) to avoid conflicts with analytics view logic
 
 = 1.6 – May 27, 2025 =
 - Introduced optional frontend UI presets for enhanced search experience  

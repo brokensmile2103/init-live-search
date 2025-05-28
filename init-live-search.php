@@ -3,7 +3,7 @@
  * Plugin Name: Init Live Search
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
  * Description: A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API.
- * Version: 1.6
+ * Version: 1.6.1
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-live-search
@@ -18,7 +18,7 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.6');
+define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.6.1');
 define('INIT_PLUGIN_SUITE_LS_SLUG',           'init-live-search');
 define('INIT_PLUGIN_SUITE_LS_OPTION',         'init_plugin_suite_live_search_settings');
 define('INIT_PLUGIN_SUITE_LS_NAMESPACE',      'initlise/v1');
@@ -200,7 +200,7 @@ function init_live_search_add_settings_link($links) {
 // Includes
 if (is_dir(INIT_PLUGIN_SUITE_LS_INCLUDES_PATH)) {
     // Load internal modules (utils first, then main logic)
-    foreach (['utils.php', 'rest-api.php', 'settings-page.php'] as $file) {
+    foreach (['utils.php', 'rest-api.php', 'settings-page.php', 'tracking.php'] as $file) {
         $path = INIT_PLUGIN_SUITE_LS_INCLUDES_PATH . $file;
         if (file_exists($path)) {
             require_once $path;

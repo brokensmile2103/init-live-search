@@ -156,7 +156,7 @@ function init_plugin_suite_live_search_get_product_data($post_id) {
 }
 
 // Build result item for a post: title, thumb, category, etc.
-function init_plugin_suite_live_search_build_result_item($post_id, $term = '', $keywords = [], $default_thumb = '') {
+function init_plugin_suite_live_search_build_result_item($post_id, $term = '', $keywords = [], $default_thumb = '', $args = []) {
     $thumb_id  = get_post_thumbnail_id($post_id);
     $thumb_url = $thumb_id ? wp_get_attachment_image_url($thumb_id, 'thumbnail') : $default_thumb;
 
@@ -200,7 +200,7 @@ function init_plugin_suite_live_search_build_result_list($post_ids, $args = [], 
 
     foreach ($post_ids as $post_id) {
         if ($exclude && $post_id === $exclude) continue;
-        $results[] = init_plugin_suite_live_search_build_result_item($post_id, $term, $keywords, $default_thumb);
+        $results[] = init_plugin_suite_live_search_build_result_item($post_id, $term, $keywords, $default_thumb, $args);
     }
 
     return $results;
