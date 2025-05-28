@@ -4,11 +4,11 @@ Tags: live search, ajax search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.6.1  
+Stable tag: 1.6.2  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
-Fast, modern live search for WordPress. REST API-powered with slash commands, SEO-aware, ACF, WooCommerce, and custom UI styles.
+Fast, modern live search powered by REST API — with slash commands, SEO-aware, ACF, WooCommerce, and custom UI presets.
 
 == Description ==
 
@@ -35,13 +35,14 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 
 == What's New in Version 1.6.x ==
 
-- **New UI Style Presets**: choose from fullscreen (`style-full.css`) or top bar (`style-topbar.css`) layouts
-- **Theme CSS Override**: place `init-live-search/style.css` in your theme to customize styles
-- **Disable Built-in CSS**: turn off all plugin styles and build your own from scratch
-- **UI Style Picker**: select a style directly from the admin settings
-- **Scoped CSS Loader**: clean separation of core, presets, and theme overrides
-- **Developer-Friendly**: styles are minimal and safe to integrate with any theme or builder
-- **Search Analytics (New Tab)**: track search queries, view counts, export CSV, and group results by frequency
+- **New UI Style Presets**: choose from fullscreen (`style-full.css`) or top bar (`style-topbar.css`) layouts  
+- **Theme CSS Override**: place `init-live-search/style.css` in your theme to customize styles  
+- **Disable Built-in CSS**: turn off all plugin styles and build your own from scratch  
+- **UI Style Picker**: select a style directly from the admin settings  
+- **Scoped CSS Loader**: clean separation of core, presets, and theme overrides  
+- **Developer-Friendly**: styles are minimal and safe to integrate with any theme or builder  
+- **Search Analytics (New Tab)**: track search queries, view counts, export CSV, and group results by frequency  
+- **Default Slash Command**: preload a command like `/recent`, `/related`, `/popular`, or `/read` when modal opens  
 
 == Features ==
 
@@ -89,18 +90,21 @@ Options: `dark`, `light`, `auto`
 - Choose post types to include in search  
 - Configure modal triggers (input focus, triple click, Ctrl+/)  
 - Enable slash commands (e.g. /recent, /tag, /id)  
-- Set debounce time, max results, and search mode  
+- Set **default slash command to run on modal open** (only if slash is enabled)   
+- Set debounce time and max results  
+- Choose search mode (title-only, tag-aware, full content)  
+- Define custom ACF fields to include in search (optional)  
+- Enable Search in SEO Metadata (Yoast, Rank Math, etc.)  
 - Toggle fallback logic (bigrams/trim)  
-- Enable Search in SEO Metadata (optional checkbox for SEO meta matching)  
+- Enable Search Analytics to log queries (no personal data stored)  
 - Set max words for tooltip search  
 - Enable voice input (SpeechRecognition API)  
 - Enable result caching (localStorage)  
 - Choose frontend UI style (default, fullscreen, or topbar)  
 - Allow theme override via `init-live-search/style.css`  
 - Option to disable all built-in CSS completely  
-- Enable Search Analytics to log queries (no personal data stored)  
 - Add default UTM parameter to result links  
-- Define or auto-generate keyword suggestions  
+- Define or auto-generate keyword suggestions   
 
 == Keyboard Shortcuts ==
 
@@ -307,6 +311,10 @@ Pressing Enter will redirect to the default WordPress search page.
 = Can I use this plugin with headless WordPress? =
 Yes. All features are powered by the REST API with clean, documented endpoints — ideal for decoupled frontends or JavaScript-based rendering.
 
+= Can I set a default slash command when the modal opens? =  
+Yes. In plugin settings, you can choose a default command like `/recent`, `/related`, or use “Smart Detection” to auto-select based on current page.  
+You can also choose `/popular` or `/read` — but these options only appear if their respective plugins are active.
+
 == Installation ==
 
 1. Upload the plugin folder to `/wp-content/plugins/` or install via the WordPress admin panel.
@@ -320,6 +328,19 @@ Yes. All features are powered by the REST API with clean, documented endpoints �
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.6.2 – May 28, 2025 =
+- New setting: **Default Slash Command on Modal Open**
+  - Automatically preload slash commands like `/recent`, `/related`, `/popular`, or `/read` when modal opens
+  - Includes “Smart Detection” mode to auto-select command based on current page context
+  - Supports WooCommerce (`/product`), categories, tags, single post, and search results
+- Slash command options are **plugin-aware**
+  - `/popular` only available if Init View Count is active
+  - `/read` only available if Init Reading Position is active
+- New admin option: setting is only active if **slash commands are enabled**
+- Improved validation and security
+  - Only allow known valid default command values during settings save
+  - Prevent command injection when slash is disabled
 
 = 1.6.1 – May 28, 2025 =
 - Introduced **Search Analytics** panel in admin settings (`Analytics` tab)

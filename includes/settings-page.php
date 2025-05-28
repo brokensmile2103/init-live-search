@@ -69,6 +69,21 @@ function init_plugin_suite_live_search_sanitize_settings($input) {
     $output['trigger_triple_click'] = !empty($input['trigger_triple_click']) ? '1' : '0';
     $output['trigger_ctrl_slash'] = !empty($input['trigger_ctrl_slash']) ? '1' : '0';
     $output['trigger_input_focus'] = !empty($input['trigger_input_focus']) ? '1' : '0';
+
+    $allowed_default_commands = ['none', 'default', 'related', 'auto'];
+
+    if (defined('INIT_PLUGIN_SUITE_VIEW_COUNT_VERSION')) {
+        $allowed_default_commands[] = 'popular';
+    }
+
+    if (defined('INIT_PLUGIN_SUITE_RP_VERSION')) {
+        $allowed_default_commands[] = 'read';
+    }
+
+    $output['default_command'] = in_array($input['default_command'] ?? 'none', $allowed_default_commands, true)
+        ? $input['default_command']
+        : 'none';
+
     $output['enable_slash'] = !empty($input['enable_slash']) ? '1' : '0';
     $output['max_results'] = min(100, max(1, absint($input['max_results'] ?? 10)));
     

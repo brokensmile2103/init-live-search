@@ -3,7 +3,7 @@
  * Plugin Name: Init Live Search
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
  * Description: A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API.
- * Version: 1.6.1
+ * Version: 1.6.2
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-live-search
@@ -18,7 +18,7 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.6.1');
+define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.6.2');
 define('INIT_PLUGIN_SUITE_LS_SLUG',           'init-live-search');
 define('INIT_PLUGIN_SUITE_LS_OPTION',         'init_plugin_suite_live_search_settings');
 define('INIT_PLUGIN_SUITE_LS_NAMESPACE',      'initlise/v1');
@@ -152,6 +152,38 @@ add_action('wp_enqueue_scripts', function () {
     ];
 
     $enable_slash = !isset($options['enable_slash']) || $options['enable_slash'];
+
+    $default_command = '';
+    if ($enable_slash) {
+        $raw_default_command = $options['default_command'] ?? 'none';
+
+        if ($raw_default_command === 'default') {
+            $default_command = '/recent';
+        } elseif ($raw_default_command === 'related') {
+            $default_command = '/related';
+        } elseif ($raw_default_command === 'popular') {
+            $default_command = '/popular';
+        } elseif ($raw_default_command === 'read') {
+            $default_command = '/read';
+        } elseif ($raw_default_command === 'auto') {
+            if (is_single()) {
+                $default_command = '/related';
+            } elseif (is_category()) {
+                $term = get_queried_object();
+                $default_command = $term ? '/category ' . $term->slug : '/recent';
+            } elseif (is_tag()) {
+                $term = get_queried_object();
+                $default_command = $term ? '/tag ' . $term->slug : '/recent';
+            } elseif (is_search()) {
+                $default_command = get_search_query();
+            } elseif (function_exists('is_shop') && (is_shop() || is_product_category())) {
+                $default_command = '/product';
+            } else {
+                $default_command = '/recent';
+            }
+        }
+    }
+
     $use_cache = !isset($options['use_cache']) || $options['use_cache'];
     $enable_voice = !isset($options['enable_voice']) || $options['enable_voice'];
 
@@ -187,6 +219,7 @@ add_action('wp_enqueue_scripts', function () {
             'popular_not_supported' => __('Popular feature is not supported. Please install Init View Count plugin.', 'init-live-search'),
         ],
         'commands' => $commands,
+        'default_command' => $enable_slash ? $default_command : '',
     ]);
 });
 

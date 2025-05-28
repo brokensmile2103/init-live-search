@@ -637,8 +637,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         setTimeout(() => {
             const saved = sessionStorage.getItem('ils-term');
+            const defaultCommand = window.InitPluginSuiteLiveSearch?.default_command?.trim();
+
             if (saved) {
                 inputSearch.value = saved + ' ';
+            } else if (defaultCommand) {
+                inputSearch.value = defaultCommand;
+                inputSearch.dispatchEvent(new Event('input'));
             }
 
             inputSearch.focus();

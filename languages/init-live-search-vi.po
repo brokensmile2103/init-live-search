@@ -341,3 +341,33 @@ msgstr "ID người dùng"
 
 msgid "Source"
 msgstr "Nguồn"
+
+msgid "Default Slash Command on Modal Open"
+msgstr "Slash command mặc định khi mở hộp tìm kiếm"
+
+msgid "None (do not preload anything)"
+msgstr "Không tải trước gì cả"
+
+msgid "Default (/recent)"
+msgstr "Mặc định (/recent)"
+
+msgid "Related Posts (use /related)"
+msgstr "Bài viết liên quan (dùng /related)"
+
+msgid "Smart Detection (based on current page)"
+msgstr "Tự động nhận diện (theo trang hiện tại)"
+
+msgid "Popular Posts (use /popular)"
+msgstr "Bài viết phổ biến (dùng /popular)"
+
+msgid "Continue Reading (use /read)"
+msgstr "Đọc tiếp (dùng /read)"
+
+msgid "Choose a default slash command to run automatically when the search modal opens."
+msgstr "Chọn slash command mặc định để tự động chạy khi hộp tìm kiếm được mở."
+
+msgid "“Smart Detection” automatically detects based on current page: /related for posts, /product for shop pages, taxonomy-based commands, etc."
+msgstr "“Tự động nhận diện” sẽ chọn lệnh phù hợp theo trang hiện tại: /related cho bài viết, /product cho trang cửa hàng, hoặc các lệnh dựa trên chuyên mục, thẻ, v.v."
+
+msgid "“Popular” and “Read” options are only available if their respective plugins are active."
+msgstr "Tuỳ chọn “Popular” và “Read” chỉ hiển thị nếu các plugin tương ứng đang hoạt động."

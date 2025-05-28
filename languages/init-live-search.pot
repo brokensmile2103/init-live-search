@@ -338,3 +338,33 @@ msgstr ""
 
 msgid "Source"
 msgstr ""
+
+msgid "Default Slash Command on Modal Open"
+msgstr ""
+
+msgid "None (do not preload anything)"
+msgstr ""
+
+msgid "Default (/recent)"
+msgstr ""
+
+msgid "Related Posts (use /related)"
+msgstr ""
+
+msgid "Smart Detection (based on current page)"
+msgstr ""
+
+msgid "Popular Posts (use /popular)"
+msgstr ""
+
+msgid "Continue Reading (use /read)"
+msgstr ""
+
+msgid "Choose a default slash command to run automatically when the search modal opens."
+msgstr ""
+
+msgid "“Smart Detection” automatically detects based on current page: /related for posts, /product for shop pages, taxonomy-based commands, etc."
+msgstr ""
+
+msgid "“Popular” and “Read” options are only available if their respective plugins are active."
+msgstr ""

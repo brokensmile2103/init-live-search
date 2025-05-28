@@ -56,6 +56,43 @@ $post_types = get_post_types(['public' => true], 'objects');
             </td>
         </tr>
         <tr>
+            <th scope="row"><?php esc_html_e('Default Slash Command on Modal Open', 'init-live-search'); ?></th>
+            <td>
+                <?php
+                    $raw_default_command = $options['default_command'] ?? 'none';
+
+                    $default_command_options = [
+                        'none'    => __('None (do not preload anything)', 'init-live-search'),
+                        'default' => __('Default (/recent)', 'init-live-search'),
+                        'related' => __('Related Posts (use /related)', 'init-live-search'),
+                        'auto'    => __('Smart Detection (based on current page)', 'init-live-search'),
+                    ];
+
+                    if (defined('INIT_PLUGIN_SUITE_VIEW_COUNT_VERSION')) {
+                        $default_command_options['popular'] = __('Popular Posts (use /popular)', 'init-live-search');
+                    }
+
+                    if (defined('INIT_PLUGIN_SUITE_RP_VERSION')) {
+                        $default_command_options['read'] = __('Continue Reading (use /read)', 'init-live-search');
+                    }
+
+                    foreach ($default_command_options as $value => $label) :
+                        ?>
+                        <label>
+                            <input type="radio" name="init_plugin_suite_live_search_settings[default_command]" value="<?php echo esc_attr($value); ?>"
+                                <?php checked($raw_default_command === $value); ?>>
+                            <?php echo esc_html($label); ?>
+                        </label><br>
+                    <?php endforeach; ?>
+
+                <p class="description">
+                    <?php esc_html_e('Choose a default slash command to run automatically when the search modal opens.', 'init-live-search'); ?><br>
+                    <?php esc_html_e('“Smart Detection” automatically detects based on current page: /related for posts, /product for shop pages, taxonomy-based commands, etc.', 'init-live-search'); ?><br>
+                    <?php esc_html_e('“Popular” and “Read” options are only available if their respective plugins are active.', 'init-live-search'); ?>
+                </p>
+            </td>
+        </tr>
+        <tr>
             <th scope="row"><?php esc_html_e('Search Mode', 'init-live-search'); ?></th>
             <td>
                 <label>
