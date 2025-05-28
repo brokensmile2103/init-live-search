@@ -4,7 +4,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.6-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.6.1-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -14,13 +14,14 @@ Init Live Search replaces your default WordPress search with a sleek, fast, comm
 
 Whether you're building a blog, an eCommerce site, a headless frontend, or a high-performance content portal, this plugin adapts to your workflow.
 
-## What's New in v1.6
+## What's New in v1.6.x
 
 - **UI Style Presets**: choose between `style-full.css` (fullscreen) and `style-topbar.css` (admin-bar style)
-- **Theme CSS Override**: drop a `style.css` file into your theme’s `init-live-search/` folder to override all styles
+- **Theme CSS Override**: drop a `style.css` file into your theme’s `init-live-search/` folder to override styles
 - **Full CSS Control**: disable all built-in CSS for complete customization
-- **Updated Settings UI**: select UI style directly in admin panel
-- **Scoped Style Loading**: prevent style collisions with themes or builders
+- **Search Analytics**: log keyword queries (term, source, timestamp), group by frequency, and export CSV — no personal data collected
+- **Updated Settings UI**: choose styles, manage analytics, and tweak options from a polished, responsive panel
+- **Scoped Style & File Refactor**: improved loading logic and renamed files (`analytics.php` → `tracking.php`) for clarity
 
 ## Features
 
@@ -38,6 +39,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - **WooCommerce integration**: show price, stock, sale badges, "Add to Cart"
 - **ACF support**: search custom fields with comma-separated keys
 - Developer-friendly: hooks, filters, events, modular JS, REST-first architecture
+- Built-in Analytics: track search queries (term, count, source) and export CSV (optional)
 
 ## Slash Command Examples
 
@@ -53,6 +55,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 | `/on-sale`        | Products currently on sale                   |
 | `/stock`          | In-stock products only                       |
 | `/sku ABC123`     | Lookup product by SKU                        |
+| `/price 100 500`  | Show products in a specific price range      |
 | `/fav`            | Show favorite posts                          |
 | `/fav_clear`      | Clear all favorites                          |
 | `/random`         | Open a random published post instantly       |
