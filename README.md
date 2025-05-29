@@ -4,7 +4,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.6.2-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.6.3-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -18,6 +18,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 
 ## What's New in v1.6.x
 
+- **New Slash Commands**: `/day`, `/week`, `/month` show most viewed posts by time range (requires Init View Count)
 - **Default Slash Command**: preload `/recent`, `/related`, `/popular`, or `/read` on modal open
 - **Smart Detection Mode**: auto-select slash command based on current page (post, category, tag, shop, etc.)
 - **UI Style Presets**: choose between `style-full.css` (fullscreen) and `style-topbar.css` (admin-bar style)
@@ -51,6 +52,9 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 |-------------------|----------------------------------------------|
 | `/recent`         | Show latest posts                            |
 | `/popular`        | Show most viewed posts (with Init View Count)|
+| `/day`            | Most viewed today (requires Init View Count) |
+| `/week`           | Most viewed this week                        |
+| `/month`          | Most viewed this month                       |
 | `/id 123`         | Jump to post with ID                         |
 | `/date 2025/05`   | Posts by month                               |
 | `/category wp`    | Filter by category slug                      |
