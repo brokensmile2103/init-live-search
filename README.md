@@ -19,6 +19,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 ## What's New in v1.6.x
 
 - **New Slash Commands**: `/day`, `/week`, `/month` show most viewed posts by time range (requires Init View Count)
+- **Search History Commands**: recall recent queries with `/history` and clear them with `/history_clear`
 - **Default Slash Command**: preload `/recent`, `/related`, `/popular`, or `/read` on modal open
 - **Smart Detection Mode**: auto-select slash command based on current page (post, category, tag, shop, etc.)
 - **UI Style Presets**: choose between `style-full.css` (fullscreen) and `style-topbar.css` (admin-bar style)
@@ -66,6 +67,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 | `/price 100 500`  | Show products in a specific price range      |
 | `/fav`            | Show favorite posts                          |
 | `/fav_clear`      | Clear all favorites                          |
+| `/history`        | Show recent search queries                   |
 | `/random`         | Open a random published post instantly       |
 
 ## Developer Docs
