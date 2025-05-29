@@ -44,6 +44,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 - **Search Analytics (New Tab)**: track search queries, view counts, export CSV, and group results by frequency  
 - **Default Slash Command**: preload a command like `/recent`, `/related`, `/popular`, or `/read` when modal opens  
 - **New Slash Commands**: `/day`, `/week`, and `/month` show most viewed posts by timeframe (requires Init View Count)  
+- **Search History Commands**: recall recent queries with `/history` and clear them with `/history_clear`
 
 == Features ==
 
@@ -337,6 +338,7 @@ You can also choose `/popular` or `/read` — but these options only appear if t
 - Improved command detection logic  
   - Slash commands are now dynamically registered based on plugin availability and settings  
   - Cleaner UI behavior with consistent fallback if commands are unavailable  
+- Added support for search history commands: `/history` to recall recent queries and `/history_clear` to wipe them
 
 = 1.6.2 – May 28, 2025 =
 - New setting: **Default Slash Command on Modal Open**

@@ -380,3 +380,15 @@ msgstr "“Tự động nhận diện” sẽ chọn lệnh phù hợp theo tran
 
 msgid "“Popular” and “Read” options are only available if their respective plugins are active."
 msgstr "Tuỳ chọn “Popular” và “Read” chỉ hiển thị nếu các plugin tương ứng đang hoạt động."
+
+msgid "Show past search keywords"
+msgstr "Hiển thị từ khóa đã tìm trước đó"
+
+msgid "Clear past search keywords"
+msgstr "Xóa toàn bộ từ khóa đã tìm trước đó"
+
+msgid "You haven't searched for anything yet."
+msgstr "Bạn chưa từng tìm kiếm gì cả."
+
+msgid "Past search keywords have been cleared."
+msgstr "Đã xoá toàn bộ lịch sử tìm kiếm."

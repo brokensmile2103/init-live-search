@@ -150,15 +150,17 @@ add_action('wp_enqueue_scripts', function () {
     }
 
     $commands += [
-        'random'     => __('Open a random post', 'init-live-search'),
-        'category'   => __('Filter by category', 'init-live-search'),
-        'tag'        => __('Filter by tag', 'init-live-search'),
-        'categories' => __('Show list of categories', 'init-live-search'),
-        'tags'       => __('Show list of tags', 'init-live-search'),
-        'date'       => __('Filter by date (Y, Y/m, or Y/m/d)', 'init-live-search'),
-        'id'         => __('Go to post by ID', 'init-live-search'),
-        'clear'      => __('Clear local cache', 'init-live-search'),
-        'reset'      => __('Reset search field', 'init-live-search'),
+        'random'        => __('Open a random post', 'init-live-search'),
+        'category'      => __('Filter by category', 'init-live-search'),
+        'tag'           => __('Filter by tag', 'init-live-search'),
+        'categories'    => __('Show list of categories', 'init-live-search'),
+        'tags'          => __('Show list of tags', 'init-live-search'),
+        'date'          => __('Filter by date (Y, Y/m, or Y/m/d)', 'init-live-search'),
+        'id'            => __('Go to post by ID', 'init-live-search'),
+        'history'       => __('Show past search keywords', 'init-live-search'),
+        'history_clear' => __('Clear past search keywords', 'init-live-search'),
+        'clear'         => __('Clear local cache', 'init-live-search'),
+        'reset'         => __('Reset search field', 'init-live-search'),
     ];
 
     $enable_slash = !isset($options['enable_slash']) || $options['enable_slash'];
@@ -227,6 +229,8 @@ add_action('wp_enqueue_scripts', function () {
             'on_sale'               => __('Sale', 'init-live-search'),
             'out_of_stock'          => __('Sold out', 'init-live-search'),
             'supported_commands'    => __('Supported Commands:', 'init-live-search'),
+            'no_history'            => __('You haven\'t searched for anything yet.', 'init-live-search'),
+            'history_cleared'       => __('Past search keywords have been cleared.', 'init-live-search'),
         ],
         'commands' => $commands,
         'default_command' => $enable_slash ? $default_command : '',

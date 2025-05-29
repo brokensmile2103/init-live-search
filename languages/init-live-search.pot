@@ -377,3 +377,15 @@ msgstr ""
 
 msgid "“Popular” and “Read” options are only available if their respective plugins are active."
 msgstr ""
+
+msgid "Show past search keywords"
+msgstr ""
+
+msgid "Clear past search keywords"
+msgstr ""
+
+msgid "You haven't searched for anything yet."
+msgstr ""
+
+msgid "Past search keywords have been cleared."
+msgstr ""

@@ -817,6 +817,19 @@ document.addEventListener('DOMContentLoaded', function () {
             return true;
         }
 
+        if (cmd === 'history') {
+            if (!renderHistoryPills(10)) {
+                showMessage(InitPluginSuiteLiveSearch.i18n.no_history);
+            }
+            return true;
+        }
+
+        if (cmd === 'history_clear') {
+            localStorage.removeItem('ils-history');
+            showMessage(InitPluginSuiteLiveSearch.i18n.history_cleared);
+            return true;
+        }
+
         if (cmd === 'help') {
             showHelpCommandList();
             return true;
@@ -1361,6 +1374,74 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
     }
 
+    function saveSearchTerm(term) {
+        const words = term.trim().split(/\s+/);
+        if (
+            term.startsWith('/') ||         // Không lưu slash command
+            words.length < 1 ||             // Ít nhất 1 từ
+            words.length > 10               // Tối đa 10 từ
+        ) return;
+
+        const key = 'ils-history';
+        let history = [];
+
+        try {
+            const raw = localStorage.getItem(key);
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                history = parsed;
+            }
+        } catch (e) {
+            localStorage.removeItem(key);
+        }
+
+        const normalized = term.toLowerCase().trim();
+        const existingIndex = history.findIndex(t => t.toLowerCase() === normalized);
+        if (existingIndex !== -1) {
+            history.splice(existingIndex, 1);
+        }
+
+        history.unshift(term.trim());
+        if (history.length > 30) history.length = 30;
+
+        localStorage.setItem(key, JSON.stringify(history));
+    }
+
+    function renderHistoryPills(limit = 10) {
+        let terms = [];
+        try {
+            const raw = localStorage.getItem('ils-history');
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                terms = parsed.slice(0, limit);
+            }
+        } catch (e) {
+            localStorage.removeItem('ils-history');
+        }
+
+        if (!terms.length) return false;
+
+        suggestionBox.innerHTML = terms.map(term =>
+            `<span class="ils-suggest-pill" role="button" tabindex="0">${term}</span>`
+        ).join('');
+
+        suggestionBox.classList.remove('ils-command-list');
+        suggestionBox.style.display = 'block';
+
+        suggestionBox.querySelectorAll('.ils-suggest-pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                if (!inputSearch) return;
+                inputSearch.value = pill.textContent;
+                inputSearch.dispatchEvent(new Event('input'));
+                inputSearch.focus();
+                handleSearch();
+                suggestionBox.style.display = 'none';
+            }, { once: true });
+        });
+
+        return true;
+    }
+
     // ===== Render Result Items =====
     // Duyệt từng object kết quả, vẽ HTML, gắn sự kiện fav, filter danh mục động.
     function renderResults(data, append = false) {
@@ -1393,6 +1474,7 @@ document.addEventListener('DOMContentLoaded', function () {
             a.setAttribute('data-id', postId);
             a.setAttribute('data-title', stripHtml(item.title));
             a.setAttribute('data-category', item.category || '');
+            a.setAttribute('data-type', item.post_type || item.type || '');
 
             // SVG icon
             const iconSvg = isProduct
@@ -1562,6 +1644,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (term.length < 2) {
+            renderHistoryPills(10);
             hasMoreResults = false;
             resultsContainer.innerHTML = '';
             return;
@@ -1594,6 +1677,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 setCommand('search', 'term', term);
+                saveSearchTerm(term);
                 renderResults(data);
             })
             .catch(() => {
