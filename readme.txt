@@ -4,7 +4,7 @@ Tags: live search, ajax search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.6.2  
+Stable tag: 1.6.3  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -43,6 +43,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 - **Developer-Friendly**: styles are minimal and safe to integrate with any theme or builder  
 - **Search Analytics (New Tab)**: track search queries, view counts, export CSV, and group results by frequency  
 - **Default Slash Command**: preload a command like `/recent`, `/related`, `/popular`, or `/read` when modal opens  
+- **New Slash Commands**: `/day`, `/week`, and `/month` show most viewed posts by timeframe (requires Init View Count)  
 
 == Features ==
 
@@ -115,7 +116,7 @@ Options: `dark`, `light`, `auto`
 - Escape — close modal and reset state
 - Slash (/) — start a command instantly (e.g., `/recent`, `/id 123`)
 
-== Developer Reference ==
+== Developer Reference: Filters and Hooks ==
 
 == Filters for Developers ==
 
@@ -328,6 +329,14 @@ You can also choose `/popular` or `/read` — but these options only appear if t
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.6.3 – May 29, 2025 =
+- Added new slash commands: `/day`, `/week`, and `/month` to display the most viewed posts by day, week, or month  
+  - Powered by Init View Count plugin (commands only available if plugin is active)  
+  - Fully supports infinite scroll and REST API queries for high-traffic sites  
+- Improved command detection logic  
+  - Slash commands are now dynamically registered based on plugin availability and settings  
+  - Cleaner UI behavior with consistent fallback if commands are unavailable  
 
 = 1.6.2 – May 28, 2025 =
 - New setting: **Default Slash Command on Modal Open**

@@ -3,7 +3,7 @@
  * Plugin Name: Init Live Search
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
  * Description: A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API.
- * Version: 1.6.2
+ * Version: 1.6.3
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-live-search
@@ -18,7 +18,7 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.6.2');
+define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.6.3');
 define('INIT_PLUGIN_SUITE_LS_SLUG',           'init-live-search');
 define('INIT_PLUGIN_SUITE_LS_OPTION',         'init_plugin_suite_live_search_settings');
 define('INIT_PLUGIN_SUITE_LS_NAMESPACE',      'initlise/v1');
@@ -121,12 +121,22 @@ add_action('wp_enqueue_scripts', function () {
 
     $commands = [
         'recent'     => __('Show latest posts', 'init-live-search'),
-        'popular'    => __('Show popular posts (if available)', 'init-live-search'),
-        'related'    => __('Find posts related to current page title', 'init-live-search'),
-        'read'       => __('Show posts you recently read (local only)', 'init-live-search'),
-        'fav'        => __('Show your favorited posts', 'init-live-search'),
-        'fav_clear'  => __('Clear all favorite posts', 'init-live-search'),
     ];
+
+    if (defined('INIT_PLUGIN_SUITE_VIEW_COUNT_VERSION')) {
+        $commands['popular'] = __('Show most viewed posts (all time)', 'init-live-search');
+        $commands['day']     = __('Show most viewed posts today', 'init-live-search');
+        $commands['week']    = __('Show most viewed posts this week', 'init-live-search');
+        $commands['month']   = __('Show most viewed posts this month', 'init-live-search');
+    }
+
+    if (defined('INIT_PLUGIN_SUITE_RP_VERSION')) {
+        $commands['read'] = __('Show posts you recently read (local only)', 'init-live-search');
+    }
+
+    $commands['related']   = __('Find posts related to the current page', 'init-live-search');
+    $commands['fav']       = __('Show your favorited posts', 'init-live-search');
+    $commands['fav_clear'] = __('Clear all favorite posts', 'init-live-search');
 
     if (!empty($options['post_types']) && in_array('product', $options['post_types'], true)) {
         $woo_commands = [
@@ -213,10 +223,10 @@ add_action('wp_enqueue_scripts', function () {
             'fav_cleared'           => __('Favorite list has been cleared.', 'init-live-search'),
             'cache_failed'          => __('Failed to clear cache.', 'init-live-search'),
             'quick_search'          => __('Quick search', 'init-live-search'),
+            'views'                 => __('views', 'init-live-search'),
             'on_sale'               => __('Sale', 'init-live-search'),
             'out_of_stock'          => __('Sold out', 'init-live-search'),
             'supported_commands'    => __('Supported Commands:', 'init-live-search'),
-            'popular_not_supported' => __('Popular feature is not supported. Please install Init View Count plugin.', 'init-live-search'),
         ],
         'commands' => $commands,
         'default_command' => $enable_slash ? $default_command : '',

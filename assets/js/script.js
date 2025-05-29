@@ -424,6 +424,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            if (['popular', 'day', 'week', 'month'].includes(cmd)) {
+                isLoadingMore = true;
+                currentPage++;
+
+                loadViewCountPage(cmd, currentPage)
+                    .then(data => {
+                        isLoadingMore = false;
+
+                        if (!data.length) {
+                            hasMoreResults = false;
+                            return;
+                        }
+
+                        if (data.length < 10) hasMoreResults = false;
+
+                        const prevUrls = Array.from(resultsContainer.querySelectorAll('.ils-item'))
+                            .map(el => el.getAttribute('data-url')?.replace(/\/$/, ''));
+
+                        const fresh = data.filter(item => !prevUrls.includes((item.url || '').replace(/\/$/, '')));
+                        if (fresh.length) {
+                            renderResults(fresh, true);
+                        }
+                    })
+                    .catch(() => {
+                        isLoadingMore = false;
+                        hasMoreResults = false;
+                    });
+
+                return;
+            }
+
             if (cmd === 'read') {
                 isLoadingMore = true;
                 currentPage++;
@@ -551,6 +582,38 @@ document.addEventListener('DOMContentLoaded', function () {
               isLoadingMore = false;
               hasMoreResults = false;
           });
+    }
+
+    function loadViewCountPage(cmd, page = 1) {
+        const rangeMap = {
+            popular: 'total',
+            day: 'day',
+            week: 'week',
+            month: 'month',
+        };
+
+        const range = rangeMap[cmd] || 'total';
+        const url = `${location.origin}/wp-json/initvico/v1/top?number=10&page=${page}&range=${range}`;
+
+        return fetch(url)
+            .then(res => {
+                if (!res.ok) throw new Error('not-supported');
+                return res.json();
+            })
+            .then(posts => {
+                if (!Array.isArray(posts)) return [];
+
+                return posts.map(post => ({
+                    id: post.id,
+                    title: post.title,
+                    url: post.url || post.link,
+                    type: post.type || post.post_type || '',
+                    thumb: post.thumbnail || post.thumb || InitPluginSuiteLiveSearch.default_thumb,
+                    date: post.date || '',
+                    category: post.category || '',
+                    views: typeof post.views === 'number' ? post.views : undefined,
+                }));
+            });
     }
 
     function loadMoreRead() {
@@ -817,15 +880,15 @@ document.addEventListener('DOMContentLoaded', function () {
             return true;
         }
 
-        if (cmd === 'popular') {
-            const cacheKey = 'ils-cache-popular';
+        if (['popular', 'day', 'week', 'month'].includes(cmd)) {
+            const cacheKey = `ils-cache-${cmd}`;
 
             if (InitPluginSuiteLiveSearch.use_cache) {
                 const cached = localStorage.getItem(cacheKey);
                 if (cached) {
                     try {
                         const data = JSON.parse(cached);
-                        setCommand('popular');
+                        setCommand(cmd);
                         renderResults(data);
                         return true;
                     } catch (e) {
@@ -836,41 +899,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
             showLoading();
 
-            const endpoint = `${location.origin}/wp-json/initvico/v1/top?number=10&fields=full`;
-
-            fetch(endpoint)
-                .then(res => {
-                    if (!res.ok) throw new Error('not-supported');
-                    return res.json();
-                })
-                .then(posts => {
-                    if (!Array.isArray(posts) || posts.length === 0) {
+            loadViewCountPage(cmd, 1)
+                .then(data => {
+                    if (!data.length) {
                         showMessage(InitPluginSuiteLiveSearch.i18n.no_results);
                         return;
                     }
-
-                    const data = posts.map(post => ({
-                        title: post.title,
-                        url: post.url || post.link,
-                        type: post.type || '',
-                        thumb: (typeof post.thumbnail === 'undefined' ? (post.thumb || InitPluginSuiteLiveSearch.default_thumb) : post.thumbnail),
-                        date: post.date || '',
-                        category: post.category || ''
-                    }));
 
                     if (InitPluginSuiteLiveSearch.use_cache) {
                         localStorage.setItem(cacheKey, JSON.stringify(data));
                     }
 
-                    setCommand('popular');
+                    setCommand(cmd);
                     renderResults(data);
                 })
-                .catch(err => {
-                    if (err.message === 'not-supported') {
-                        showMessage(InitPluginSuiteLiveSearch.i18n.popular_not_supported);
-                    } else {
-                        showMessage(InitPluginSuiteLiveSearch.i18n.error);
-                    }
+                .catch(() => {
+                    showMessage(InitPluginSuiteLiveSearch.i18n.error);
                 });
 
             return true;
@@ -1387,7 +1431,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 infoHtml = [saleBadge, price, stockBadge].filter(Boolean).join(' &middot; ');
             } else {
-                infoHtml = [item.date, item.type].filter(Boolean).join(' &middot; ');
+                const viewLabel = InitPluginSuiteLiveSearch.i18n?.views || 'views';
+                const viewCount = typeof item.views === 'number' ? `${item.views.toLocaleString()} ${viewLabel}` : '';
+                infoHtml = [item.date, viewCount, item.type].filter(Boolean).join(' &middot; ');
             }
 
             // Inner HTML

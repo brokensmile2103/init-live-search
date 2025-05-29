@@ -159,14 +159,20 @@ msgstr "Đã xóa cache thành công."
 msgid "Failed to clear cache."
 msgstr "Không thể xóa cache."
 
-msgid "Popular feature is not supported. Please install Init View Count plugin."
-msgstr "Chức năng xem nhiều không khả dụng. Hãy cài plugin Init View Count."
-
 msgid "Show latest posts"
 msgstr "Hiển thị bài viết mới nhất"
 
-msgid "Show popular posts (if available)"
-msgstr "Hiển thị bài viết phổ biến (nếu có)"
+msgid "Show most viewed posts (all time)"
+msgstr "Hiển thị bài viết được xem nhiều nhất (mọi thời điểm)"
+
+msgid "Show most viewed posts today"
+msgstr "Hiển thị bài viết được xem nhiều nhất hôm nay"
+
+msgid "Show most viewed posts this week"
+msgstr "Hiển thị bài viết được xem nhiều nhất tuần này"
+
+msgid "Show most viewed posts this month"
+msgstr "Hiển thị bài viết được xem nhiều nhất tháng này"
 
 msgid "Filter by category"
 msgstr "Lọc theo chuyên mục"
@@ -251,6 +257,9 @@ msgstr "Hiệu năng & Trải nghiệm người dùng"
 
 msgid "Styling & Suggestions"
 msgstr "Giao diện & Gợi ý từ khóa"
+
+msgid "views"
+msgstr "lượt xem"
 
 msgid "Sale"
 msgstr "Sale"

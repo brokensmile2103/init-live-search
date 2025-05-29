@@ -159,13 +159,19 @@ msgstr ""
 msgid "Failed to clear cache."
 msgstr ""
 
-msgid "Popular feature is not supported. Please install Init View Count plugin."
-msgstr ""
-
 msgid "Show latest posts"
 msgstr ""
 
-msgid "Show popular posts (if available)"
+msgid "Show most viewed posts (all time)"
+msgstr ""
+
+msgid "Show most viewed posts today"
+msgstr ""
+
+msgid "Show most viewed posts this week"
+msgstr ""
+
+msgid "Show most viewed posts this month"
 msgstr ""
 
 msgid "Filter by category"
@@ -247,6 +253,9 @@ msgid "Performance & UX"
 msgstr ""
 
 msgid "Styling & Suggestions"
+msgstr ""
+
+msgid "views"
 msgstr ""
 
 msgid "Sale"
