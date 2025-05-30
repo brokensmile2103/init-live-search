@@ -31,6 +31,8 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - **Updated Settings UI**: choose styles, manage analytics, and tweak options from a polished, responsive panel
 - **Scoped Style & File Refactor**: improved loading logic and renamed files (`analytics.php` → `tracking.php`) for clarity
 - **Smart Excerpts with Highlight**: 1-line contextual snippets extracted from excerpt or content, with keyword highlighting
+- **Weighted Scoring Improvements**: `title_excerpt` and `title_content` modes now rank results using title > excerpt > content logic
+- **Modular Result Engine**: the main `get_results()` logic is now cleanly separated into sub-functions for better performance and extensibility
 
 ## Features
 
