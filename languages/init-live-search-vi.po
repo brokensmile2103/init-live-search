@@ -392,3 +392,12 @@ msgstr "Bạn chưa từng tìm kiếm gì cả."
 
 msgid "Past search keywords have been cleared."
 msgstr "Đã xoá toàn bộ lịch sử tìm kiếm."
+
+msgid "Show Excerpt in Search Results?"
+msgstr "Hiển thị đoạn trích trong kết quả tìm kiếm?"
+
+msgid "Display the post excerpt below each result item in the modal."
+msgstr "Hiển thị đoạn trích của bài viết bên dưới mỗi kết quả trong modal."
+
+msgid "If disabled, excerpt will be omitted from results to simplify the UI."
+msgstr "Nếu tắt, đoạn trích sẽ bị loại bỏ khỏi kết quả để làm giao diện gọn hơn."

@@ -92,6 +92,7 @@ function init_plugin_suite_live_search_sanitize_settings($input) {
     
     $output['acf_search_fields'] = sanitize_text_field($input['acf_search_fields'] ?? '');
     $output['seo_search_fields_enabled'] = !empty($input['seo_search_fields_enabled']) ? '1' : '0';
+    $output['show_excerpt'] = !empty($input['show_excerpt']) ? '1' : '0';
     $output['enable_fallback'] = !empty($input['enable_fallback']) ? '1' : '0';
     $output['enable_analytics'] = !empty($input['enable_analytics']) ? '1' : '0';
 

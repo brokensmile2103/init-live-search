@@ -389,3 +389,12 @@ msgstr ""
 
 msgid "Past search keywords have been cleared."
 msgstr ""
+
+msgid "Show Excerpt in Search Results?"
+msgstr ""
+
+msgid "Display the post excerpt below each result item in the modal."
+msgstr ""
+
+msgid "If disabled, excerpt will be omitted from results to simplify the UI."
+msgstr ""

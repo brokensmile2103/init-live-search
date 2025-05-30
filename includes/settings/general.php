@@ -115,6 +115,16 @@ $post_types = get_post_types(['public' => true], 'objects');
             </td>
         </tr>
         <tr>
+            <th scope="row"><?php esc_html_e('Show Excerpt in Search Results?', 'init-live-search'); ?></th>
+            <td>
+                <label>
+                    <input type="checkbox" name="init_plugin_suite_live_search_settings[show_excerpt]" value="1" <?php checked(!isset($options['show_excerpt']) || $options['show_excerpt']); ?>>
+                    <?php esc_html_e('Display the post excerpt below each result item in the modal.', 'init-live-search'); ?>
+                </label>
+                <p class="description"><?php esc_html_e('If disabled, excerpt will be omitted from results to simplify the UI.', 'init-live-search'); ?></p>
+            </td>
+        </tr>
+        <tr>
             <th scope="row"><?php esc_html_e('Search in ACF Fields (Advanced)', 'init-live-search'); ?></th>
             <td>
                 <input type="text" name="init_plugin_suite_live_search_settings[acf_search_fields]" value="<?php echo esc_attr($options['acf_search_fields'] ?? ''); ?>" class="regular-text">

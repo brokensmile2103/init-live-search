@@ -4,7 +4,7 @@ Tags: live search, ajax search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.6.5  
+Stable tag: 1.6.6  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -35,21 +35,23 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 
 == What's New in Version 1.6.x ==
 
-- **New UI Style Presets**: choose from fullscreen (`style-full.css`) or top bar (`style-topbar.css`) layouts  
-- **Theme CSS Override**: place `init-live-search/style.css` in your theme to customize styles  
-- **Disable Built-in CSS**: turn off all plugin styles and build your own from scratch  
-- **UI Style Picker**: select a style directly from the admin settings  
-- **Scoped CSS Loader**: clean separation of core, presets, and theme overrides  
-- **Developer-Friendly**: styles are minimal and safe to integrate with any theme or builder  
 - **Search Analytics (New Tab)**: track search queries, view counts, export CSV, and group results by frequency  
-- **Default Slash Command**: preload a command like `/recent`, `/related`, `/popular`, or `/read` when modal opens  
+- **Contextual 1-Line Excerpts**: auto-highlight and display a short snippet from content or excerpt in all search results  
+- **Weighted Search Ranking**: smarter scoring system prioritizes title > excerpt > content in relevance-based modes  
+- **Single Word Fallback**: automatically splits search terms into individual words if no results found  
+- **SEO Metadata Matching**: checks SEO Titles and Meta Descriptions for matches during fallback  
 - **New Slash Commands**: `/day`, `/week`, and `/month` show most viewed posts by timeframe (requires Init View Count)  
 - **Search History Commands**: recall recent queries with `/history` and clear them with `/history_clear`  
 - **Improved Voice Search**: optimized mic control, language detection, and error handling  
+- **Default Slash Command**: preload a command like `/recent`, `/related`, `/popular`, or `/read` when modal opens  
+- **New Filter: `init_plugin_suite_live_search_commands`**: register custom slash commands from theme or plugin, define your own REST endpoint if needed, and handle results via `ils:*` JavaScript events  
 - **New Event: `ils:result-clicked`**: track clicks on search results with full metadata  
-- **New Filter: `init_plugin_suite_live_search_commands`**: register custom slash commands from theme or plugin, define your own REST endpoint if needed, and handle results via `ils:*` JavaScript events
-- **Contextual 1-Line Excerpts**: auto-highlight and display a short snippet from content or excerpt in all search results
-- **Weighted Search Ranking**: smarter scoring system prioritizes title > excerpt > content in relevance-based modes
+- **New UI Style Presets**: choose from fullscreen (`style-full.css`) or top bar (`style-topbar.css`) layouts  
+- **UI Style Picker**: select a style directly from the admin settings  
+- **Theme CSS Override**: place `init-live-search/style.css` in your theme to customize styles  
+- **Disable Built-in CSS**: turn off all plugin styles and build your own from scratch  
+- **Scoped CSS Loader**: clean separation of core, presets, and theme overrides  
+- **Developer-Friendly**: styles are minimal and safe to integrate with any theme or builder  
 
 == Features ==
 
@@ -62,6 +64,7 @@ Packed with everything a modern live search needs — and more:
 - Fully keyboard accessible (Arrow keys, Enter, Escape)
 - Slash command system (`/recent`, `/popular`, `/tag`, `/id`, `/fav`, etc.)
 - WooCommerce support: search by product, sale status, stock, SKU, or price range
+- Contextual excerpts: auto-generate 1-line snippet containing the keyword, improving scan-ability
 - Favorites support: manage with slash commands or heart icon in results
 - Quick Search tooltip: select text to trigger instant search
 - Voice input support using built-in SpeechRecognition
@@ -102,6 +105,7 @@ Options: `dark`, `light`, `auto`
 - Choose search mode (title-only, tag-aware, full content)  
 - Define custom ACF fields to include in search (optional)  
 - Enable Search in SEO Metadata (Yoast, Rank Math, etc.)  
+- Toggle excerpt display below each result (1-line contextual snippet)  
 - Toggle fallback logic (bigrams/trim)  
 - Enable Search Analytics to log queries (no personal data stored)  
 - Set max words for tooltip search  
@@ -341,6 +345,24 @@ You can also choose `/popular` or `/read` — but these options only appear if t
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.6.6 – May 30, 2025 =
+- Major fallback upgrade: added intelligent single-word fallback logic  
+  - Automatically breaks long queries into single words if no results found  
+  - Matches each word as full term only (e.g. `trộn` won't match `trong`)  
+  - Each match is scored and weighted for relevance  
+- Improved result ranking with weight-based merge  
+  - Dynamically ranks fallback results based on number of keyword hits  
+  - Prioritizes stronger matches while still showing broader coverage  
+- SEO-aware fallback integration  
+  - When enabled, fallback searches also include SEO meta fields (title + description)  
+  - Respects existing setting and filter: `init_plugin_suite_live_search_seo_meta_keys`  
+- Full refactor: search fallback logic moved to `search-core.php`  
+  - Improves code maintainability and separation of concerns  
+  - Paves the way for future optimizations like partial streaming  
+- Debug-friendly logging (optional) to trace fallback phases and match weight distribution  
+- Bugfix: fixed false matches where short terms matched inside longer words  
+  - Uses strict word boundaries in SQL REGEXP to avoid overmatching  
 
 = 1.6.5 – May 30, 2025 =
 - Introduced intelligent 1-line excerpt for all search results  

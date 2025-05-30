@@ -190,27 +190,31 @@ function init_plugin_suite_live_search_build_result_item($post_id, $term = '', $
         $item = array_merge($item, init_plugin_suite_live_search_get_product_data($post_id));
     }
 
-    // Process excerpt based on keywords
-    $raw_content = get_post_field('post_excerpt', $post_id) ?: get_post_field('post_content', $post_id);
-    $clean_text = wp_strip_all_tags($raw_content);
+    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
+    $show_excerpt = apply_filters('init_live_search_show_excerpt', !isset($options['show_excerpt']) || $options['show_excerpt']);
 
-    if (!empty($keywords)) {
-        foreach ($keywords as $keyword) {
-            if (stripos($clean_text, $keyword) !== false) {
-                $item['excerpt'] = init_plugin_suite_live_search_extract_snippet($clean_text, $keyword);
-                break;
+    if ($show_excerpt) {
+        $raw_content = get_post_field('post_excerpt', $post_id) ?: get_post_field('post_content', $post_id);
+        $clean_text = wp_strip_all_tags($raw_content);
+
+        if (!empty($keywords)) {
+            foreach ($keywords as $keyword) {
+                if (stripos($clean_text, $keyword) !== false) {
+                    $item['excerpt'] = init_plugin_suite_live_search_extract_snippet($clean_text, $keyword);
+                    break;
+                }
             }
         }
-    }
 
-    if (empty($item['excerpt'])) {
-        $fallback = get_the_excerpt($post_id);
-        $fallback = wp_strip_all_tags($fallback);
-        $item['excerpt'] = wp_trim_words($fallback, 15, '...');
-    }
+        if (empty($item['excerpt'])) {
+            $fallback = get_the_excerpt($post_id);
+            $fallback = wp_strip_all_tags($fallback);
+            $item['excerpt'] = wp_trim_words($fallback, 15, '...');
+        }
 
-    if (!empty($item['excerpt']) && !empty($keywords)) {
-        $item['excerpt'] = init_plugin_suite_live_search_highlight_keyword($item['excerpt'], $keywords);
+        if (!empty($item['excerpt']) && !empty($keywords)) {
+            $item['excerpt'] = init_plugin_suite_live_search_highlight_keyword($item['excerpt'], $keywords);
+        }
     }
 
     return apply_filters('init_plugin_suite_live_search_result_item', $item, $post_id, $term, $args);
@@ -250,10 +254,23 @@ function init_plugin_suite_live_search_extract_snippet($text, $keyword, $word_li
 
 // Prepare keyword list and default thumbnail
 function init_plugin_suite_live_search_prepare_keywords_and_thumb($term) {
-    $keywords = $term ? [$term] : [];
-    if ($term && str_word_count($term) >= 3) {
-        $keywords = array_merge($keywords, init_plugin_suite_live_search_generate_bigrams($term));
-        $keywords = array_unique($keywords);
+    $keywords = [];
+
+    if ($term) {
+        $keywords[] = $term;
+
+        // Bigrams (từ ghép 2)
+        if (str_word_count($term) >= 3) {
+            $keywords = array_merge($keywords, init_plugin_suite_live_search_generate_bigrams($term));
+        }
+
+        // Single words
+        $single_words = preg_split('/\s+/', $term);
+        if (!empty($single_words)) {
+            $keywords = array_merge($keywords, $single_words);
+        }
+
+        $keywords = array_unique(array_filter($keywords));
     }
 
     $default_thumb = apply_filters(
