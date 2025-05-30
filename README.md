@@ -4,7 +4,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.6.4-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.6.5-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -30,6 +30,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - **Search Analytics**: log keyword queries (term, source, timestamp), group by frequency, and export CSV — no personal data collected
 - **Updated Settings UI**: choose styles, manage analytics, and tweak options from a polished, responsive panel
 - **Scoped Style & File Refactor**: improved loading logic and renamed files (`analytics.php` → `tracking.php`) for clarity
+- **Smart Excerpts with Highlight**: 1-line contextual snippets extracted from excerpt or content, with keyword highlighting
 
 ## Features
 
