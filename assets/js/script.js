@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function () {
             voiceBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 1920 1920" fill="currentColor"><path d="M960.3 96.8a339 339 0 0 0-338.8 338.9v484c0 187 152 339 338.8 339s338.9-152 338.9-339v-484c0-186.9-152-338.9-338.9-338.9M427.8 710v233.4c0 293.6 239 532.5 532.5 532.5 293.6 0 532.5-239 532.5-532.5V710h96.8v233.4a630 630 0 0 1-580.9 627.5v252.3h242v96.8H670v-96.8h242v-252.3a630 630 0 0 1-581-627.5V710zM960.3 0A436 436 0 0 1 1396 435.7v484a436 436 0 0 1-435.7 435.7 436 436 0 0 1-435.7-435.6V435.7A436 436 0 0 1 960.3 0" fill-rule="evenodd"/></svg>';
             inputSearch.insertAdjacentElement('beforebegin', voiceBtn);
 
-            recognition = new SpeechRecognition();
+            const recognition = new SpeechRecognition();
             const langMap = {
                 vi: 'vi-VN',
                 en: 'en-US',
@@ -158,13 +158,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const htmlLang = (document.documentElement.lang || 'vi').replace('_', '-').toLowerCase();
             recognition.lang = langMap[htmlLang] || (htmlLang.includes('-') ? htmlLang : `${htmlLang}-VN`);
-            recognition.interimResults = false;
+            recognition.interimResults = true;
+
+            let isRecognizing = false;
+            let voiceTimeout;
 
             function safeStartRecognition() {
                 if (isRecognizing) return;
                 try {
                     recognition.start();
                     isRecognizing = true;
+                    voiceBtn.classList.add('ils-voice-active');
+
+                    clearTimeout(voiceTimeout);
+                    voiceTimeout = setTimeout(() => {
+                        if (isRecognizing) {
+                            recognition.stop();
+                        }
+                    }, 5000);
                 } catch (e) {
                     console.warn('[Init Live Search] Recognition already started or blocked.', e);
                 }
@@ -175,16 +186,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 try {
                     recognition.stop();
                     isRecognizing = false;
+                    voiceBtn.classList.remove('ils-voice-active');
                 } catch (e) {
                     console.warn('[Init Live Search] Failed to stop recognition.', e);
                 }
             }
 
             recognition.onresult = function(event) {
-                const text = event.results[0][0].transcript;
-                inputSearch.value = text;
-                sessionStorage.setItem('ils-term', text);
-                handleSearch();
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                if (finalTranscript.trim()) {
+                    inputSearch.value = finalTranscript;
+                    sessionStorage.setItem('ils-term', finalTranscript);
+                    handleSearch();
+                }
             };
 
             recognition.onerror = function(event) {
@@ -193,8 +213,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             recognition.onend = function() {
                 isRecognizing = false;
-                if (!modal.classList.contains('open')) return;
+                clearTimeout(voiceTimeout);
+                voiceBtn.classList.remove('ils-voice-active');
 
+                if (!modal.classList.contains('open')) return;
                 if (voiceAutoRestart && !voiceAutoStop) {
                     safeStartRecognition();
                 }
@@ -1553,6 +1575,19 @@ document.addEventListener('DOMContentLoaded', function () {
                         btn.classList.add('active');
                     }
                 }
+            });
+
+            a.addEventListener('click', (e) => {
+                window.dispatchEvent(new CustomEvent('ils:result-clicked', {
+                    detail: {
+                        id: postId,
+                        url: finalUrl,
+                        title: stripHtml(item.title),
+                        type: item.post_type || '',
+                        category: item.category || '',
+                        command: currentCommand?.cmd || null
+                    }
+                }));
             });
 
             fragment.appendChild(a);

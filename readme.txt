@@ -4,7 +4,7 @@ Tags: live search, ajax search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.6.3  
+Stable tag: 1.6.4  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -44,7 +44,10 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 - **Search Analytics (New Tab)**: track search queries, view counts, export CSV, and group results by frequency  
 - **Default Slash Command**: preload a command like `/recent`, `/related`, `/popular`, or `/read` when modal opens  
 - **New Slash Commands**: `/day`, `/week`, and `/month` show most viewed posts by timeframe (requires Init View Count)  
-- **Search History Commands**: recall recent queries with `/history` and clear them with `/history_clear`
+- **Search History Commands**: recall recent queries with `/history` and clear them with `/history_clear`  
+- **Improved Voice Search**: optimized mic control, language detection, and error handling  
+- **New Event: `ils:result-clicked`**: track clicks on search results with full metadata  
+- **New Filter: `init_plugin_suite_live_search_commands`**: register custom slash commands from theme or plugin, define your own REST endpoint if needed, and handle results via `ils:*` JavaScript events
 
 == Features ==
 
@@ -206,6 +209,12 @@ Customize the weighting array used to merge and sort post IDs from multiple sour
 **Applies to:** search (search modes: `title`, `title_tag`, `title_excerpt`)  
 **Params:** `array $weights`, `string $search_mode`
 
+**`init_plugin_suite_live_search_commands`**  
+
+Allow registration of custom slash commands to be displayed in the command list and handled via custom logic.  
+**Applies to:** slash command system (`/` prefix input)  
+**Params:** `array $commands`, `array $options`
+
 == REST API Endpoints ==
 
 Fully documented, lightweight, and API-first endpoints. Ideal for headless or decoupled builds.
@@ -331,6 +340,22 @@ You can also choose `/popular` or `/read` — but these options only appear if t
 
 == Changelog ==
 
+= 1.6.4 – May 30, 2025 =
+- Enhanced slash command integration and developer extensibility  
+  - Extracted and finalized `init_plugin_suite_live_search_commands` filter logic into a stable API pattern  
+  - Developers can now fully register custom commands and define their handling logic via JavaScript events  
+  - Improved consistency and compatibility across different command sources  
+- Added new custom event: `ils:result-clicked`  
+  - Fires when a user clicks on a search result  
+  - Provides full metadata in `detail`, including `id`, `url`, `title`, `type`, `category`, and `command`  
+  - Enables better tracking, analytics, and advanced UX features
+- Optimized voice search engine with `SpeechRecognition`  
+  - Language detection based on `<html lang="">` with fallback mapping for `vi`, `en`, `fr`, `ja`  
+  - Improved error handling and auto-stop behavior  
+  - Added auto-restart option (`voice_auto_restart`) with timeout logic  
+  - Fully responsive mic UI toggle via `.ils-voice-active`  
+  - Voice input result is stored in sessionStorage and automatically triggers a search  
+
 = 1.6.3 – May 29, 2025 =
 - Added new slash commands: `/day`, `/week`, and `/month` to display the most viewed posts by day, week, or month  
   - Powered by Init View Count plugin (commands only available if plugin is active)  
@@ -338,7 +363,7 @@ You can also choose `/popular` or `/read` — but these options only appear if t
 - Improved command detection logic  
   - Slash commands are now dynamically registered based on plugin availability and settings  
   - Cleaner UI behavior with consistent fallback if commands are unavailable  
-- Added support for search history commands: `/history` to recall recent queries and `/history_clear` to wipe them
+- Added support for search history commands: `/history` to recall recent queries and `/history_clear` to wipe them  
 
 = 1.6.2 – May 28, 2025 =
 - New setting: **Default Slash Command on Modal Open**

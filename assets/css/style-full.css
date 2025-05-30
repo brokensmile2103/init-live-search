@@ -82,6 +82,9 @@
 #ils-modal .ils-close:hover {
     color: #999;
 }
+#ils-modal .ils-voice-active {
+    animation: pulse 1s infinite;
+}
 
 /* Input */
 #ils-modal .ils-input {
@@ -376,6 +379,11 @@
 @keyframes ils-spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
 }
 
 /* Scrollbar (Webkit only) */
