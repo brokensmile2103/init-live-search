@@ -49,6 +49,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 - **New Event: `ils:result-clicked`**: track clicks on search results with full metadata  
 - **New Filter: `init_plugin_suite_live_search_commands`**: register custom slash commands from theme or plugin, define your own REST endpoint if needed, and handle results via `ils:*` JavaScript events
 - **Contextual 1-Line Excerpts**: auto-highlight and display a short snippet from content or excerpt in all search results
+- **Weighted Search Ranking**: smarter scoring system prioritizes title > excerpt > content in relevance-based modes
 
 == Features ==
 
@@ -349,7 +350,12 @@ You can also choose `/popular` or `/read` — but these options only appear if t
   - Improves result clarity, especially in `title_excerpt` and `title_content` search modes  
 - Mobile-optimized: excerpt is displayed as a single line with ellipsis (`-webkit-line-clamp: 1`)  
 - Fully integrated into existing REST API output with no performance impact  
-- No settings required — feature is enabled by default for all search modes
+- No settings required — feature is enabled by default for all search modes  
+- Improved relevance ranking for `title_excerpt` and `title_content` modes  
+  - Weighted scoring system prioritizes `title > excerpt > content`  
+- Refactored result handler logic into modular functions  
+  - Simplified `get_results()` into clean subroutines (language, fallback, ACF, result assembly)  
+  - Improves readability, performance, and extensibility for future features
 
 = 1.6.4 – May 30, 2025 =
 - Enhanced slash command integration and developer extensibility  

@@ -247,3 +247,51 @@ function init_plugin_suite_live_search_extract_snippet($text, $keyword, $word_li
 
     return wp_trim_words($text, $word_limit, '...');
 }
+
+// Prepare keyword list and default thumbnail
+function init_plugin_suite_live_search_prepare_keywords_and_thumb($term) {
+    $keywords = $term ? [$term] : [];
+    if ($term && str_word_count($term) >= 3) {
+        $keywords = array_merge($keywords, init_plugin_suite_live_search_generate_bigrams($term));
+        $keywords = array_unique($keywords);
+    }
+
+    $default_thumb = apply_filters(
+        'init_plugin_suite_live_search_default_thumb',
+        INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'img/thumbnail.svg'
+    );
+
+    return [$keywords, $default_thumb];
+}
+
+// Detect current language using Polylang, WPML or fallback
+function init_plugin_suite_live_search_detect_language() {
+    if (function_exists('pll_current_language')) {
+        return pll_current_language();
+    }
+    if (function_exists('apply_filters')) {
+        return apply_filters('wpml_current_language', null);
+    }
+    return get_locale();
+}
+
+// Determine which post types to search against
+function init_plugin_suite_live_search_resolve_post_types($options, $args) {
+    if (!empty($args['post_types']) && is_array($args['post_types'])) {
+        return array_map('sanitize_key', $args['post_types']);
+    }
+    return !empty($options['post_types']) && is_array($options['post_types'])
+        ? array_map('sanitize_key', $options['post_types'])
+        : ['post'];
+}
+
+// Determine result limit from args or settings
+function init_plugin_suite_live_search_resolve_limit($options, $args) {
+    if (!empty($args['limit']) && is_numeric($args['limit'])) {
+        return (int) $args['limit'];
+    }
+    if (!empty($options['max_results']) && is_numeric($options['max_results'])) {
+        return (int) $options['max_results'];
+    }
+    return 10;
+}
