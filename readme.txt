@@ -1,6 +1,6 @@
 === Init Live Search – Smart, Slash Commands, REST API ===
 Contributors: brokensmile.2103  
-Tags: live search, ajax search, woocommerce, rest api, slash command  
+Tags: live search, headless wordpress, rest api, slash command, woocommerce 
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
@@ -280,57 +280,95 @@ All endpoints are under namespace: `initlise/v1`
 == Frequently Asked Questions ==
 
 = Does this plugin use jQuery? =  
-No. It’s built entirely with modern Vanilla JavaScript.
+No. It’s built entirely with modern Vanilla JavaScript — no jQuery, no dependencies.
 
 = How is search triggered? =  
-It auto-detects `<input name="s">` fields. You can also trigger it via triple-click, keyboard shortcut (Ctrl + /), selection tooltip, or `?modal=search` URL.
+Search is auto-bound to `<input name="s">`, but you can also trigger it via:  
+- Ctrl + / (or Cmd + /)  
+- Triple-click on blank space  
+- Text selection tooltip  
+- `?modal=search` in the URL  
+- Any element with `data-ils` attribute
 
-= Can I prefill the modal from a URL? =  
-Yes. Use `?modal=search&term=your+keyword` to open the modal with a prefilled term.
+= Can I prefill the modal from a link? =  
+Yes. Append `?modal=search&term=your+keyword` or `#search` to any URL.
 
-= Is voice input supported? =  
-Yes, via the browser’s built-in SpeechRecognition API (if available).
+= Is voice search supported? =  
+Yes. It uses the browser’s SpeechRecognition API, with auto-stop, language detection, and optional auto-restart.
 
 = What are slash commands? =  
-Slash commands let you filter instantly with `/recent`, `/tag {slug}`, `/id {post_id}`, `/product`, `/price 100 500`, etc.
+They’re typed commands starting with `/`, like:  
+- `/recent`, `/popular`, `/read`, `/fav`  
+- `/product`, `/on-sale`, `/stock`, `/sku`  
+- `/day`, `/week`, `/month`  
+- `/tag seo`, `/id 123`, `/price 100 300`
 
 = Can I disable slash commands? =  
-Yes. There’s an option in settings to disable them completely.
+Yes. You can turn off the entire system via plugin settings.
 
-= What is Quick Search tooltip? =  
-When you highlight 1–8 words, a tooltip appears to trigger instant search.  
-This is configurable in settings (max 20; set 0 to disable).
+= What is the Quick Search tooltip? =  
+When users select 1–8 words, a tooltip appears to let them search instantly.  
+Fully configurable or can be disabled.
 
 = What is Smart Tag-Aware Search? =  
-An advanced mode that matches keywords in titles and tags with fallback using split terms and bi-gram logic.
+A special mode that searches both post titles and tags, and uses fallback logic like trimmed terms and bigrams to increase result coverage.
 
-= What is Search in SEO Metadata? =  
-Allows searching within SEO Titles and Meta Descriptions from plugins like Yoast SEO, Rank Math, AIOSEO, The SEO Framework, and SEOPress.
+= What is “Search in SEO Metadata”? =  
+This allows searching SEO Titles and Meta Descriptions from plugins like:  
+- Yoast SEO  
+- Rank Math  
+- AIOSEO  
+- The SEO Framework  
+- SEOPress
+
+Fully customizable via filters.
 
 = Does it support WooCommerce? =  
-Yes. Product commands like `/product`, `/on-sale`, `/stock`, and `/sku` show prices, badges, and “Add to Cart” links.
+Yes. You can search products by:  
+- Keyword  
+- SKU  
+- Price range (`/price`)  
+- Stock status (`/stock`)  
+- On sale (`/on-sale`)  
+Results display price, sale badge, stock state, and Add to Cart links.
+
+= Is excerpt supported in results? =  
+Yes. It auto-extracts a 1-line contextual snippet with the keyword highlighted — improves scan-ability.
 
 = Can I override the plugin’s CSS? =  
-Yes. Add `init-live-search/style.css` to your theme, or choose from built-in UI styles like `style-full.css` or `style-topbar.css`.
+Yes:  
+- Drop `init-live-search/style.css` in your theme  
+- Or select built-in presets like `style-full.css` or `style-topbar.css`  
+- Or disable all styles and write from scratch
 
 = Is it mobile-friendly? =  
-Yes. The UI is fully responsive and optimized for all devices.
+Yes. The modal and styles are responsive, with mobile-specific UI optimizations (excerpt clamping, floating mic button, etc.)
 
-= Is search result caching enabled? =  
-Yes. Results are cached in `localStorage` for faster repeat access.
+= Is result caching enabled? =  
+Yes. `localStorage` is used to cache queries and results for faster subsequent access.
 
-= Does it track or log searches? =  
-Optionally, yes. You can enable Search Analytics in settings to log recent queries (no IPs or personal data are stored).
+= Does it log or track user data? =  
+Only if you enable **Search Analytics**.  
+Logs:  
+- Search term  
+- Timestamp  
+- Result count  
+- Source (user, guest, trigger)  
+No personal info (IP, user agent, etc.) is stored.
 
-= What happens when no result is selected? =  
-Pressing Enter will redirect to the default WordPress search page.
+= What happens when no result is selected and I press Enter? =  
+The plugin falls back to WordPress’s native search page.
 
-= Can I use this plugin with headless WordPress? =
-Yes. All features are powered by the REST API with clean, documented endpoints — ideal for decoupled frontends or JavaScript-based rendering.
+= Can I use this with a headless setup? =  
+Absolutely. All functionality is powered via REST API under the `initlise/v1` namespace — perfect for decoupled frontends.
 
 = Can I set a default slash command when the modal opens? =  
-Yes. In plugin settings, you can choose a default command like `/recent`, `/related`, or use “Smart Detection” to auto-select based on current page.  
-You can also choose `/popular` or `/read` — but these options only appear if their respective plugins are active.
+Yes. From the settings panel, you can preload `/recent`, `/read`, `/related`, etc.  
+Smart detection mode is also available, selecting a command based on page context.
+
+= Does the plugin support multiple languages? =  
+Yes. It auto-detects current language when Polylang or WPML is active.  
+A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logic.
 
 == Installation ==
 
@@ -360,9 +398,6 @@ You can also choose `/popular` or `/read` — but these options only appear if t
 - Full refactor: search fallback logic moved to `search-core.php`  
   - Improves code maintainability and separation of concerns  
   - Paves the way for future optimizations like partial streaming  
-- Debug-friendly logging (optional) to trace fallback phases and match weight distribution  
-- Bugfix: fixed false matches where short terms matched inside longer words  
-  - Uses strict word boundaries in SQL REGEXP to avoid overmatching  
 
 = 1.6.5 – May 30, 2025 =
 - Introduced intelligent 1-line excerpt for all search results  
@@ -450,7 +485,7 @@ You can also choose `/popular` or `/read` — but these options only appear if t
 - Updated plugin assets and settings screen to reflect new style options
 
 = 1.5.4 – May 27, 2025 =
-- Introduced semantic SEO-aware search layer with lightweight logic and zero AI dependencies  
+- Introduced semantic SEO-aware search layer with efficient logic and zero AI dependencies  
   - Enable searching within SEO Titles and Meta Descriptions  
   - Supports Yoast SEO, Rank Math, AIOSEO, The SEO Framework, and SEOPress  
   - Optional setting in admin panel, with filter hook to customize meta keys
