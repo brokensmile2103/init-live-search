@@ -4,7 +4,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.6.3-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.6.4-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -20,6 +20,8 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 
 - **New Slash Commands**: `/day`, `/week`, `/month` show most viewed posts by time range (requires Init View Count)
 - **Search History Commands**: recall recent queries with `/history` and clear them with `/history_clear`
+- **Result Click Tracking**: new JS event `ils:result-clicked` to track user interactions with search results
+- **Custom Slash Command Filter**: use `init_plugin_suite_live_search_commands` to define your own commands (plus JS event handling)
 - **Default Slash Command**: preload `/recent`, `/related`, `/popular`, or `/read` on modal open
 - **Smart Detection Mode**: auto-select slash command based on current page (post, category, tag, shop, etc.)
 - **UI Style Presets**: choose between `style-full.css` (fullscreen) and `style-topbar.css` (admin-bar style)
