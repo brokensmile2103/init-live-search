@@ -1540,6 +1540,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 infoHtml = [item.date, viewCount, item.type].filter(Boolean).join(' &middot; ');
             }
 
+            let excerpt = (item.excerpt || '').trim();
+
+            // Limit to 15 words max
+            if (excerpt) {
+              const words = excerpt.split(/\s+/);
+              if (words.length > 15) {
+                excerpt = words.slice(0, 15).join(' ') + '...';
+              }
+            }
+
+            const excerptHtml = excerpt ? `<p class="ils-excerpt">${excerpt}</p>` : '';
+
             // Inner HTML
             a.innerHTML = `
                 <div class="ils-thumb">
@@ -1547,7 +1559,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <div class="ils-meta">
                     <div class="ils-title">${item.title}</div>
-                    <div class="ils-info">${infoHtml}</div>
+                    <div class="ils-info">${infoHtml}${excerptHtml}</div>
                     <button class="${btnClass}${isFavorite ? ' active' : ''}${outOfStockClass}"
                             title="${isProduct ? 'Add to Cart' : 'Favorite'}"
                             aria-label="${isProduct ? 'Add to Cart' : 'Favorite'}"

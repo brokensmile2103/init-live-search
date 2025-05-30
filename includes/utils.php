@@ -1,4 +1,6 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 // Generate bi-grams from search term.
 function init_plugin_suite_live_search_generate_bigrams($term) {
     $words = preg_split('/\s+/', $term);
@@ -188,6 +190,29 @@ function init_plugin_suite_live_search_build_result_item($post_id, $term = '', $
         $item = array_merge($item, init_plugin_suite_live_search_get_product_data($post_id));
     }
 
+    // Process excerpt based on keywords
+    $raw_content = get_post_field('post_excerpt', $post_id) ?: get_post_field('post_content', $post_id);
+    $clean_text = wp_strip_all_tags($raw_content);
+
+    if (!empty($keywords)) {
+        foreach ($keywords as $keyword) {
+            if (stripos($clean_text, $keyword) !== false) {
+                $item['excerpt'] = init_plugin_suite_live_search_extract_snippet($clean_text, $keyword);
+                break;
+            }
+        }
+    }
+
+    if (empty($item['excerpt'])) {
+        $fallback = get_the_excerpt($post_id);
+        $fallback = wp_strip_all_tags($fallback);
+        $item['excerpt'] = wp_trim_words($fallback, 15, '...');
+    }
+
+    if (!empty($item['excerpt']) && !empty($keywords)) {
+        $item['excerpt'] = init_plugin_suite_live_search_highlight_keyword($item['excerpt'], $keywords);
+    }
+
     return apply_filters('init_plugin_suite_live_search_result_item', $item, $post_id, $term, $args);
 }
 
@@ -204,4 +229,21 @@ function init_plugin_suite_live_search_build_result_list($post_ids, $args = [], 
     }
 
     return $results;
+}
+
+// Extracts a short snippet around the keyword, or falls back to trimmed text.
+function init_plugin_suite_live_search_extract_snippet($text, $keyword, $word_limit = 15) {
+    $text = wp_strip_all_tags($text);
+    $text = preg_replace('/\s+/', ' ', $text);
+
+    $pattern = '/((?:\S+\s+){0,' . floor($word_limit / 2) . '})(' . preg_quote($keyword, '/') . ')((?:\s+\S+){0,' . floor($word_limit / 2) . '})/iu';
+    if (preg_match($pattern, $text, $matches)) {
+        $before = trim($matches[1]);
+        $match  = $matches[2];
+        $after  = trim($matches[3]);
+
+        return ($before ? '... ' : '') . $before . ' ' . $match . ' ' . $after . ($after ? ' ...' : '');
+    }
+
+    return wp_trim_words($text, $word_limit, '...');
 }

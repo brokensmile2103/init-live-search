@@ -1,5 +1,5 @@
 <?php
-defined('ABSPATH') || exit;
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 add_filter('init_plugin_suite_live_search_results', 'init_plugin_suite_live_search_track_query', 100, 4);
 

@@ -1,7 +1,7 @@
 <?php
 // Handle AJAX: Generate suggested keywords from post titles
 
-if (!defined('ABSPATH')) exit;
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 add_action('wp_ajax_init_plugin_suite_live_search_generate_keywords', 'init_plugin_suite_live_search_generate_keywords');
 

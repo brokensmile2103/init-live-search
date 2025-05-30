@@ -1,5 +1,5 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 // Handle current tab outside the render function to avoid linter warnings
 $current_tab = 'general';

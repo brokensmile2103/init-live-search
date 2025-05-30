@@ -4,7 +4,7 @@ Tags: live search, ajax search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.6.4  
+Stable tag: 1.6.5  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -48,6 +48,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 - **Improved Voice Search**: optimized mic control, language detection, and error handling  
 - **New Event: `ils:result-clicked`**: track clicks on search results with full metadata  
 - **New Filter: `init_plugin_suite_live_search_commands`**: register custom slash commands from theme or plugin, define your own REST endpoint if needed, and handle results via `ils:*` JavaScript events
+- **Contextual 1-Line Excerpts**: auto-highlight and display a short snippet from content or excerpt in all search results
 
 == Features ==
 
@@ -339,6 +340,16 @@ You can also choose `/popular` or `/read` — but these options only appear if t
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.6.5 – May 30, 2025 =
+- Introduced intelligent 1-line excerpt for all search results  
+  - Automatically extracts a short snippet containing the search keyword from excerpt or content  
+  - Falls back to `get_the_excerpt()` if no relevant match is found  
+  - Keyword is highlighted within the snippet using existing highlighter logic  
+  - Improves result clarity, especially in `title_excerpt` and `title_content` search modes  
+- Mobile-optimized: excerpt is displayed as a single line with ellipsis (`-webkit-line-clamp: 1`)  
+- Fully integrated into existing REST API output with no performance impact  
+- No settings required — feature is enabled by default for all search modes
 
 = 1.6.4 – May 30, 2025 =
 - Enhanced slash command integration and developer extensibility  

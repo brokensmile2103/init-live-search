@@ -1,5 +1,5 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
 $post_types = get_post_types(['public' => true], 'objects');
