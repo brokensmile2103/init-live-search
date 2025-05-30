@@ -4,7 +4,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.6.5-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.6.6-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -18,6 +18,10 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 
 ## What's New in v1.6.x
 
+- **Smart Excerpts with Highlight**: 1-line contextual snippets extracted from excerpt or content, with keyword highlighting
+- **Single Word Fallback**: automatically splits search terms into individual words if no results found  
+- **SEO Metadata Matching**: checks SEO Titles and Meta Descriptions for matches during fallback  
+- **Weighted Scoring Improvements**: `title_excerpt` and `title_content` modes now rank results using title > excerpt > content logic
 - **New Slash Commands**: `/day`, `/week`, `/month` show most viewed posts by time range (requires Init View Count)
 - **Search History Commands**: recall recent queries with `/history` and clear them with `/history_clear`
 - **Result Click Tracking**: new JS event `ils:result-clicked` to track user interactions with search results
@@ -30,8 +34,6 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - **Search Analytics**: log keyword queries (term, source, timestamp), group by frequency, and export CSV — no personal data collected
 - **Updated Settings UI**: choose styles, manage analytics, and tweak options from a polished, responsive panel
 - **Scoped Style & File Refactor**: improved loading logic and renamed files (`analytics.php` → `tracking.php`) for clarity
-- **Smart Excerpts with Highlight**: 1-line contextual snippets extracted from excerpt or content, with keyword highlighting
-- **Weighted Scoring Improvements**: `title_excerpt` and `title_content` modes now rank results using title > excerpt > content logic
 - **Modular Result Engine**: the main `get_results()` logic is now cleanly separated into sub-functions for better performance and extensibility
 
 ## Features
