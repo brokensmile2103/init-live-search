@@ -1,6 +1,6 @@
 === Init Live Search – Smart, Slash Commands, REST API ===
 Contributors: brokensmile.2103  
-Tags: live search, headless wordpress, rest api, slash command, woocommerce 
+Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
