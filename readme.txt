@@ -384,10 +384,10 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
 
 == Changelog ==
 
-= 1.6.6 – May 30, 2025 =
+= 1.6.6 – May 31, 2025 =
 - Major fallback upgrade: added intelligent single-word fallback logic  
   - Automatically breaks long queries into single words if no results found  
-  - Matches each word as full term only (e.g. `trộn` won't match `trong`)  
+  - Matches each word as full term only (e.g. `sea` won't match `search`)  
   - Each match is scored and weighted for relevance  
 - Improved result ranking with weight-based merge  
   - Dynamically ranks fallback results based on number of keyword hits  
