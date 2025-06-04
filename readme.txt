@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.6.6  
+Stable tag: 1.6.7  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -297,11 +297,25 @@ Yes. Append `?modal=search&term=your+keyword` or `#search` to any URL.
 Yes. It uses the browser’s SpeechRecognition API, with auto-stop, language detection, and optional auto-restart.
 
 = What are slash commands? =  
-They’re typed commands starting with `/`, like:  
-- `/recent`, `/popular`, `/read`, `/fav`  
-- `/product`, `/on-sale`, `/stock`, `/sku`  
-- `/day`, `/week`, `/month`  
-- `/tag seo`, `/id 123`, `/price 100 300`
+They’re typed commands starting with `/`, like:
+
+**Built-in commands (no extra plugins needed):**  
+- `/recent` — show latest posts  
+- `/tag seo` — filter by tag  
+- `/category news` — filter by category  
+- `/id 123` — fetch a post by ID  
+- `/fav`, `/fav_clear` — manage favorite posts  
+- `/random` — get a random post  
+- `/product`, `/sku`, `/price`, `/stock`, `/on-sale` — WooCommerce product filters (if WooCommerce is active)  
+- `/history`, `/history_clear` — manage recent search history (stored in browser)
+
+**Plugin-powered commands (require other Init plugins):**  
+- `/popular` — requires **Init View Count**  
+- `/day`, `/week`, `/month` — requires **Init View Count**  
+- `/read` — requires **Init Reading Position**
+
+You can disable the entire slash command system in the plugin settings.  
+Developers can register custom commands via the `init_plugin_suite_live_search_commands` filter.
 
 = Can I disable slash commands? =  
 Yes. You can turn off the entire system via plugin settings.
@@ -384,7 +398,22 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
 
 == Changelog ==
 
-= 1.6.6 – May 31, 2025 =
+### = 1.6.7 – June 4, 2025 =
+- Internal refinements for long-term maintainability and performance  
+  - Removed duplicate language detection logic (`detect_language` → unified `detect_lang`)  
+  - Cleaned up legacy utility functions and renamed for clarity  
+  - Standardized excerpt highlighting, thumbnail fallback, and WooCommerce integration logic  
+- Finalized keyword generator via admin AJAX  
+  - Automatically extracts bi-gram keywords from post titles  
+  - Includes locale-aware stop word filters for Vietnamese and English  
+  - Returns up to 7 randomized high-signal keywords  
+- Codebase deemed stable and feature-complete  
+  - All core features are modular, reusable, and optimized for extensibility  
+  - No major architectural changes planned beyond slash command expansions  
+- Added JavaScript support for custom slash commands from theme/plugins  
+  - Developers can now hook into `ils:search-started` to render their own commands without touching plugin internals
+
+### = 1.6.6 – May 31, 2025 =
 - Major fallback upgrade: added intelligent single-word fallback logic  
   - Automatically breaks long queries into single words if no results found  
   - Matches each word as full term only (e.g. `sea` won't match `search`)  
@@ -392,230 +421,163 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
 - Improved result ranking with weight-based merge  
   - Dynamically ranks fallback results based on number of keyword hits  
   - Prioritizes stronger matches while still showing broader coverage  
-- SEO-aware fallback integration  
-  - When enabled, fallback searches also include SEO meta fields (title + description)  
-  - Respects existing setting and filter: `init_plugin_suite_live_search_seo_meta_keys`  
-- Full refactor: search fallback logic moved to `search-core.php`  
+- SEO-aware fallback reuse  
+  - Reuses existing SEO meta fields (title + description) in fallback queries  
+  - Controlled by setting and `init_plugin_suite_live_search_seo_meta_keys` filter  
+- Full refactor: fallback logic moved to `search-core.php`  
   - Improves code maintainability and separation of concerns  
   - Paves the way for future optimizations like partial streaming  
 
-= 1.6.5 – May 30, 2025 =
+### = 1.6.5 – May 30, 2025 =
 - Introduced intelligent 1-line excerpt for all search results  
   - Automatically extracts a short snippet containing the search keyword from excerpt or content  
   - Falls back to `get_the_excerpt()` if no relevant match is found  
-  - Keyword is highlighted within the snippet using existing highlighter logic  
-  - Improves result clarity, especially in `title_excerpt` and `title_content` search modes  
+  - Keyword is highlighted within the snippet  
 - Mobile-optimized: excerpt is displayed as a single line with ellipsis (`-webkit-line-clamp: 1`)  
-- Fully integrated into existing REST API output with no performance impact  
-- No settings required — feature is enabled by default for all search modes  
+- Fully integrated into existing REST API output  
 - Improved relevance ranking for `title_excerpt` and `title_content` modes  
-  - Weighted scoring system prioritizes `title > excerpt > content`  
-- Refactored result handler logic into modular functions  
-  - Simplified `get_results()` into clean subroutines (language, fallback, ACF, result assembly)  
-  - Improves readability, performance, and extensibility for future features
+  - Weighted scoring: `title > excerpt > content`  
+- Refactored result handler logic into modular subroutines  
+  - Improves readability, performance, and extensibility  
 
-= 1.6.4 – May 30, 2025 =
-- Enhanced slash command integration and developer extensibility  
-  - Extracted and finalized `init_plugin_suite_live_search_commands` filter logic into a stable API pattern  
-  - Developers can now fully register custom commands and define their handling logic via JavaScript events  
-  - Improved consistency and compatibility across different command sources  
-- Added new custom event: `ils:result-clicked`  
-  - Fires when a user clicks on a search result  
-  - Provides full metadata in `detail`, including `id`, `url`, `title`, `type`, `category`, and `command`  
-  - Enables better tracking, analytics, and advanced UX features
-- Optimized voice search engine with `SpeechRecognition`  
-  - Language detection based on `<html lang="">` with fallback mapping for `vi`, `en`, `fr`, `ja`  
-  - Improved error handling and auto-stop behavior  
-  - Added auto-restart option (`voice_auto_restart`) with timeout logic  
-  - Fully responsive mic UI toggle via `.ils-voice-active`  
-  - Voice input result is stored in sessionStorage and automatically triggers a search  
+### = 1.6.4 – May 30, 2025 =
+- Enhanced slash command system and developer API  
+  - Finalized `init_plugin_suite_live_search_commands` filter logic  
+  - Register custom commands and handle them via JS events  
+- Added `ils:result-clicked` custom event  
+  - Fires on result click with full metadata payload (`id`, `url`, `type`, etc.)  
+- Optimized voice search engine  
+  - Language detection from `<html lang>` with fallback map  
+  - Improved error handling and auto-stop logic  
+  - Mic UI toggle and sessionStorage keyword injection  
 
-= 1.6.3 – May 29, 2025 =
-- Added new slash commands: `/day`, `/week`, and `/month` to display the most viewed posts by day, week, or month  
-  - Powered by Init View Count plugin (commands only available if plugin is active)  
-  - Fully supports infinite scroll and REST API queries for high-traffic sites  
-- Improved command detection logic  
-  - Slash commands are now dynamically registered based on plugin availability and settings  
-  - Cleaner UI behavior with consistent fallback if commands are unavailable  
-- Added support for search history commands: `/history` to recall recent queries and `/history_clear` to wipe them  
+### = 1.6.3 – May 29, 2025 =
+- New slash commands: `/day`, `/week`, `/month` (requires Init View Count plugin)  
+- Fully supports infinite scroll and REST API for high-traffic sites  
+- Improved dynamic command registration  
+- Added search history commands: `/history`, `/history_clear`  
 
-= 1.6.2 – May 28, 2025 =
-- New setting: **Default Slash Command on Modal Open**
-  - Automatically preload slash commands like `/recent`, `/related`, `/popular`, or `/read` when modal opens
-  - Includes “Smart Detection” mode to auto-select command based on current page context
-  - Supports WooCommerce (`/product`), categories, tags, single post, and search results
-- Slash command options are **plugin-aware**
-  - `/popular` only available if Init View Count is active
-  - `/read` only available if Init Reading Position is active
-- New admin option: setting is only active if **slash commands are enabled**
-- Improved validation and security
-  - Only allow known valid default command values during settings save
-  - Prevent command injection when slash is disabled
+### = 1.6.2 – May 28, 2025 =
+- New feature: Default Slash Command on Modal Open  
+  - Preload `/recent`, `/related`, `/popular`, etc. based on page context  
+  - Includes “Smart Detection” mode  
+- Plugin-aware slash command detection  
+  - Only shows `/popular`, `/read` if supporting plugins are active  
+- Improved settings validation and injection prevention  
 
-= 1.6.1 – May 28, 2025 =
-- Introduced **Search Analytics** panel in admin settings (`Analytics` tab)
-  - Log every keyword-based search query (term, result count, timestamp, source, user ID)
-  - Store logs in rotating chunks using WordPress transients (lightweight, privacy-respecting)
-  - Group similar queries and sort by frequency with one click (client-side JS powered)
-  - Export logs to CSV directly from admin
-  - Clear all logs with secure nonce validation
-- Refined tracking logic
-  - Only logs meaningful search terms (ignores empty or slash-only commands)
-  - Excludes slash commands like `/recent` or `/fav` from analytics for relevance and clarity
-- Optimized admin UX
-  - Group toggle now sorts results by most frequent queries
-  - Improved layout with responsive buttons and compact styling
-  - Nonce protection for all form actions
-- Internal improvements
-  - Cleaned up tracking hook and filters for future extensibility
-  - Renamed internal tracking file (`analytics.php` → `tracking.php`) to avoid conflicts with analytics view logic
+### = 1.6.1 – May 28, 2025 =
+- Added Search Analytics panel (Analytics tab in settings)  
+  - Log keyword search queries (term, result count, time, source, user ID)  
+  - Stored via transient-based chunk system  
+  - Exportable to CSV  
+- Improved tracking logic  
+  - Ignores empty and slash-only queries  
+  - Excludes structural commands like `/recent`, `/fav`  
+- Renamed tracking file: `analytics.php` → `tracking.php`  
+- Better nonce protection and UX polish  
 
-= 1.6 – May 27, 2025 =
-- Introduced optional frontend UI presets for enhanced search experience  
-  - `style-full.css`: fullscreen modal overlay with centered input, ideal for immersive search UX  
-  - `style-topbar.css`: fixed top bar search layout, similar to Spotlight or admin bar  
-  - Choose preset style from the new “UI Style” setting in plugin options
-- Theme override support  
-  - Place `init-live-search/style.css` in your theme to override plugin styles completely  
-  - Option to disable all default CSS and style from scratch
-- Improved developer experience  
-  - Automatically detects and loads custom `style.css` if placed in theme folder  
-  - Preset styles are scoped and minimal to reduce conflicts
-- Internal CSS loader and selector refactor to support future style expansions
-- Updated plugin assets and settings screen to reflect new style options
+### = 1.6 – May 27, 2025 =
+- Added frontend UI presets:  
+  - `style-full.css`: fullscreen overlay  
+  - `style-topbar.css`: fixed top bar (like Spotlight)  
+- Theme override support: use `init-live-search/style.css` in theme  
+- Option to disable plugin CSS entirely  
+- Internal CSS loader refactor  
 
-= 1.5.4 – May 27, 2025 =
-- Introduced semantic SEO-aware search layer with efficient logic and zero AI dependencies  
-  - Enable searching within SEO Titles and Meta Descriptions  
-  - Supports Yoast SEO, Rank Math, AIOSEO, The SEO Framework, and SEOPress  
-  - Optional setting in admin panel, with filter hook to customize meta keys
-- New developer filter: `init_plugin_suite_live_search_seo_meta_keys`  
-  - Customize which SEO meta fields are searched (e.g. `_yoast_wpseo_title`, `rank_math_description`, etc.)
-- New developer filter: `init_plugin_suite_live_search_weights`  
-  - Customize weighting when merging post IDs from multiple sources (title, SEO, tags) to control result order
+### = 1.5.4 – May 27, 2025 =
+- Added SEO metadata search support (no AI)  
+  - Search within SEO Title and Meta Description  
+  - Compatible with Yoast, Rank Math, AIOSEO, SEOPress, The SEO Framework  
+- New filters for developer control:  
+  - `init_plugin_suite_live_search_seo_meta_keys`  
+  - `init_plugin_suite_live_search_weights`  
 
-= 1.5.3 – May 27, 2025 =
-- Added support for searching specific ACF fields (Advanced Custom Fields)
-  - Optional admin setting to define comma-separated field keys (e.g. `company_name, project_code`)
-  - Only searches published posts and supports intelligent fallback logic
-  - Built-in filter for full control: `init_plugin_suite_live_search_post_ids`
-- Multilingual compatibility enhancements
-  - Automatic language detection with Polylang and WPML
-  - Added `init_plugin_suite_live_search_filter_lang` filter to restrict results by current language
-  - Filterable language-aware REST queries for slash commands like `/recent`, `/tax`, etc.
-- New developer filter: `init_plugin_suite_live_search_category_taxonomy`
-  - Allows customizing the taxonomy used for displaying categories (e.g. use `product_cat` for WooCommerce)
-- Improved ACF query performance and status filtering (joins `postmeta` with published posts only)
-- Internal consistency tweaks and filter documentation improvements
+### = 1.5.3 – May 27, 2025 =
+- ACF search field support (define keys in admin)  
+- Multilingual enhancements  
+  - Supports Polylang, WPML  
+  - Language-aware filters and queries  
+- New developer filters:  
+  - `init_plugin_suite_live_search_filter_lang`  
+  - `init_plugin_suite_live_search_category_taxonomy`  
+- Performance: improved ACF join + status filtering  
 
-= 1.5.2 – May 26, 2025 =
-- Introduced new search mode: **Init Smart Tag-Aware Search**
-  - Combines post title and post tag matching with intelligent fallback using keywords and bi-grams
-  - Automatically splits terms into single words to match short tags like “php”, “css”, or “seo”
-- Improved Quick Search tooltip behavior: now triggers on single-word selections (e.g. “JavaScript”, “PHP”)
-- Minor UI polish and internal consistency improvements
+### = 1.5.2 – May 26, 2025 =
+- New search mode: Init Smart Tag-Aware Search  
+  - Combines title and tag matches  
+  - Auto bi-gram fallback for short terms  
+- Tooltip Quick Search now works on single-word selections  
 
-= 1.5.1 – May 26, 2025 =
-- Added WooCommerce product search with slash commands: `/product`, `/on-sale`, `/stock`, `/sku {code}`, `/price {min} {max}`
-- Display prices, sale badges, stock status, and “Add to Cart” links (with out-of-stock detection)
-- Introduced `/price` command with min/max filters powered by REST API
-- Improved infinite scroll behavior for WooCommerce commands
-- Added visual badges for “Sale” and “Sold out” states in results
-- Slash command visibility now respects `product` post type setting in admin
-- Enhanced keyboard navigation for command lists (scroll + max height)
-- Optimized JS rendering logic for cart buttons and stock display
-- Improved SKU matching accuracy and price filter precision
+### = 1.5.1 – May 26, 2025 =
+- Added WooCommerce slash commands:  
+  - `/product`, `/on-sale`, `/stock`, `/sku`, `/price`  
+- Display product data: price, sale badge, stock, add-to-cart  
+- Visual indicators: “Sale”, “Sold Out”  
+- Infinite scroll and smart SKU/price filtering  
+- Enhanced keyboard nav in result list  
 
-= 1.5 – May 25, 2025 =
-- Added Quick Search tooltip when selecting 2–8 words of text, allowing instant modal activation
-- Added support for `data-ils` attribute to trigger the modal and prefill slash commands from any HTML element
-- Introduced `/fav` and `/fav_clear` commands to manage favorite posts using `localStorage`
-- Enabled adding/removing favorites directly in the result list via a new star icon
-- Improved internal command handling for better stateful list rendering and filter reset
-- Refined `hiddenUrl` logic to reset properly when no result is selected
-- Unified modal trigger behavior for consistent UX across all entry points
-- Optimized codebase for future extensibility with minimal impact on existing API or markup
+### = 1.5 – May 25, 2025 =
+- Quick Search tooltip (2–8 words selection)  
+- Support for `data-ils` attribute to trigger modal  
+- Favorite management via `/fav`, `/fav_clear` commands  
+- Toggle favorite from results list  
+- Unified modal trigger logic  
+- Optimized state handling  
 
-= 1.4.3 – May 24, 2025 =
-- Lazy initialization: modal is only created when the user triggers search
-- Added `ils:search-started`, `ils:results-loaded`, `ils:modal-opened` and `ils:modal-closed` events for developer integrations
-- Improved keyboard UX when navigating suggestions and command lists
-- Enhanced accessibility: ARIA roles and keyboard behavior polish
-- Optimized DOM selection and scroll handling for large result sets
-- Fixed minor bugs related to triple-click and voice recognition edge cases
-- Internal cleanup: separated state logic and added inline documentation
-- Final polish for 1.4.x series — ready for production on large-scale content sites
+### = 1.4.3 – May 24, 2025 =
+- Lazy modal init (only creates DOM on trigger)  
+- New JS events:  
+  - `ils:modal-opened`, `ils:modal-closed`, `ils:search-started`, `ils:results-loaded`  
+- Improved keyboard nav and accessibility  
+- Scroll logic optimized for large result sets  
 
-= 1.4.2 – May 24, 2025 =
-- Improved keyboard navigation UX and modal interactions
-- Added live dropdown suggestions for slash commands (e.g., `/re...`)
-- New admin setting to completely disable slash commands
-- Added support for deep linking via `?modal=search&term=...`
-- Auto-open modal and prefill command term from URL
-- Minor JS improvements and accessibility enhancements
+### = 1.4.2 – May 24, 2025 =
+- Enhanced slash command dropdown (`/re...`)  
+- Added `?modal=search&term=...` URL trigger  
+- Option to disable all slash commands  
+- UI/keyboard refinements  
 
-= 1.4.1 – May 23, 2025 =
-- Extended slash command system: added `/related`, `/read`, `/random`, `/categories`, `/tags`, `/help`, `/clear`, and `/reset`
-- New toggle to enable/disable voice input in admin settings
-- Improved compatibility with Init Reading Position for `/read`
-- Smart highlight and reverse-order support for recently read posts
-- New REST API endpoints for related posts, taxonomy lists, and more
-- Internal command result caching using `localStorage` (e.g., `/date`, `/tax`, `/categories`)
-- Full internationalization (i18n) for commands and messages
-- UI enhancements and pill-style suggestion rendering
-- Refactored JS for modularity and fallback handling
+### = 1.4.1 – May 23, 2025 =
+- Added advanced slash commands:  
+  - `/related`, `/read`, `/random`, `/categories`, `/tags`, `/help`, `/clear`, `/reset`  
+- `/read` integration with Init Reading Position  
+- Internal command result caching with `localStorage`  
+- Fully internationalized commands  
+- Refactored JS modules  
 
-= 1.4 – May 23, 2025 =
-- Introduced slash command system: supports `/recent`, `/popular`, `/tag`, `/category`, `/date`, and `/id`
-- Smart `/date` parsing (supports year, month, and day)
-- `/id` command jumps directly to a post by ID
-- Unified command parsing and custom REST endpoints
-- More powerful taxonomy and date search handling
-- Optimized all WP_Query calls for performance
-- Internal command result caching (`localStorage`)
-- New options to toggle individual triggers: Ctrl + /, triple-click, or input focus
-- Codebase polish and improved JS architecture
+### = 1.4 – May 23, 2025 =
+- Introduced full slash command system  
+  - `/recent`, `/popular`, `/tag`, `/category`, `/date`, `/id`  
+  - Smart `/date` parsing  
+  - REST-powered, cached results  
+- Modal trigger options: Ctrl + /, triple-click, focus  
+- Unified query parser  
 
-= 1.3 – May 22, 2025 =
-- Added new modal triggers:
-  - Keyboard shortcut: Ctrl + /
-  - Triple-click anywhere on blank space
-- Show post type label (e.g. Post, Page) next to each result
-- Client-side category filter UI: auto-generates from results without extra API calls
-- Improved input UX: search icon becomes clear button when input has value
-- Codebase standardization:
-  - All PHP filters and options now use `init_plugin_suite_live_search_*` prefix
-  - REST API namespace renamed to `initlise/v1`
-  - Global JS config moved to `window.InitPluginSuiteLiveSearch`
+### = 1.3 – May 22, 2025 =
+- Added modal triggers:  
+  - Ctrl + /, triple-click  
+- Client-side category filter  
+- Post type badge in results  
+- UI: input clear button, dropdown polish  
+- Refactored codebase, namespacing  
 
-= 1.2 – May 20, 2025 =
-- Added experimental voice input using the SpeechRecognition API (if supported by browser)
-- New settings:
-  - Enable/disable fallback logic (trimmed terms and bigrams)
-  - Enable/disable plugin’s default CSS
-  - Support for dark mode via `.dark` class or global JS config
-- Added developer filters for advanced customization:
-  - `init_plugin_suite_live_search_enable_fallback`
-  - `init_plugin_suite_live_search_post_ids`
-  - `init_plugin_suite_live_search_result_item`
-  - `init_plugin_suite_live_search_results`
+### = 1.2 – May 20, 2025 =
+- Voice input (SpeechRecognition API)  
+- New settings: fallback toggle, CSS toggle, dark mode  
+- Developer filters added for full control  
 
-= 1.1 – May 18, 2025 =
-- Enhanced fallback logic: trim terms and suggest using bigram strategy if no results found
-- Modal remembers and pre-fills the last search term using `sessionStorage`
-- Enforced character limit: input capped at 100 characters
-- New options added:
-  - Enable result caching via `localStorage`
-  - Auto-append default UTM parameters to result URLs
-  - Theme support: switch between light, dark, or auto mode via class or JS config
+### = 1.1 – May 18, 2025 =
+- Trimmed + bigram fallback logic  
+- Remembers last search via `sessionStorage`  
+- Enforces 100-char input limit  
+- Caching, UTM, dark/light theme options  
 
-= 1.0 – May 17, 2025 =
-- First stable release of Init Live Search
-- Modal-based search powered entirely by the WordPress REST API
-- Fully keyboard accessible: Arrow keys, Enter, Escape
-- Manual keyword suggestions with optional fallback
-- Lightweight: no external assets, no jQuery — all icons and fallbacks are inlined SVGs
-- Built with Vanilla JavaScript, optimized for performance and accessibility
+### = 1.0 – May 17, 2025 =
+- First stable release  
+- Modal-based search via REST API  
+- Fully keyboard accessible  
+- Inline fallback + suggestions  
+- Lightweight Vanilla JS, no jQuery  
 
 == License ==
 

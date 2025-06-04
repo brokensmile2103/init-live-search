@@ -15,7 +15,7 @@ function init_plugin_suite_live_search_generate_keywords() {
         wp_send_json_error('Invalid nonce', 403);
     }
 
-    $options = get_option('init_plugin_suite_live_search_settings', []);
+    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
     $post_types = !empty($options['post_types']) ? (array) $options['post_types'] : ['post'];
 
     $post_ids = get_posts([

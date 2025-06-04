@@ -5,9 +5,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 function init_plugin_suite_live_search_get_results($term, $args = []) {
     global $wpdb;
 
-    $args['lang'] = $args['lang'] ?? init_plugin_suite_live_search_detect_language();
+    $args['lang'] = $args['lang'] ?? init_plugin_suite_live_search_detect_lang();
     $term = sanitize_text_field($term);
-    $options = get_option('init_plugin_suite_live_search_settings', []);
+    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
 
     $post_types = init_plugin_suite_live_search_resolve_post_types($options, $args);
     if (empty($post_types)) return [];
@@ -291,7 +291,7 @@ function init_plugin_suite_live_search_get_ids_by_tag($wpdb, $term, $like, $post
 
 // Get post IDs where SEO metadata (title/description) matches the search term
 function init_plugin_suite_live_search_get_seo_ids($wpdb, $term, $like, $post_types, $placeholders, $search_mode, $limit) {
-    $options = get_option('init_plugin_suite_live_search_settings', []);
+    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
     if (empty($options['seo_search_fields_enabled'])) return [];
     if (!in_array($search_mode, ['title', 'title_tag', 'title_excerpt'], true)) return [];
 
@@ -338,7 +338,7 @@ function init_plugin_suite_live_search_get_ids_by_title_exact_word($wpdb, $word,
 
 // Get post IDs from SEO metadata where word matches exactly
 function init_plugin_suite_live_search_get_seo_ids_by_word($wpdb, $word, $post_types, $placeholders, $limit) {
-    $options = get_option('init_plugin_suite_live_search_settings', []);
+    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
     if (empty($options['seo_search_fields_enabled'])) return [];
 
     $search_mode = $options['search_mode'] ?? 'title';

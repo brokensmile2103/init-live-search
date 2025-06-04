@@ -2,61 +2,63 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 add_action('rest_api_init', function () {
-    register_rest_route('initlise/v1', '/search', [
+    $ns = INIT_PLUGIN_SUITE_LS_NAMESPACE;
+
+    register_rest_route($ns, '/search', [
         'methods'             => 'GET',
         'callback'            => 'init_plugin_suite_live_search_search',
         'permission_callback' => '__return_true',
     ]);
 
-    register_rest_route('initlise/v1', '/id/(?P<id>\d+)', [
+    register_rest_route($ns, '/id/(?P<id>\d+)', [
         'methods'             => 'GET',
         'callback'            => 'init_plugin_suite_live_search_get_post_by_id',
         'permission_callback' => '__return_true',
     ]);
 
-    register_rest_route('initlise/v1', '/recent', [
+    register_rest_route($ns, '/recent', [
         'methods'             => 'GET',
         'callback'            => 'init_plugin_suite_live_search_recent',
         'permission_callback' => '__return_true',
     ]);
 
-    register_rest_route('initlise/v1', '/date', [
+    register_rest_route($ns, '/date', [
         'methods'             => 'GET',
         'callback'            => 'init_plugin_suite_live_search_date',
         'permission_callback' => '__return_true',
     ]);
 
-    register_rest_route('initlise/v1', '/tax', [
+    register_rest_route($ns, '/tax', [
         'methods'             => 'GET',
         'callback'            => 'init_plugin_suite_live_search_tax_query',
         'permission_callback' => '__return_true',
     ]);
 
-    register_rest_route('initlise/v1', '/related', [
+    register_rest_route($ns, '/related', [
         'methods' => 'GET',
         'callback' => 'init_plugin_suite_live_search_related',
         'permission_callback' => '__return_true',
     ]);
 
-    register_rest_route('initlise/v1', '/read', [
+    register_rest_route($ns, '/read', [
         'methods' => 'GET',
         'callback' => 'init_plugin_suite_live_search_get_reading_posts',
         'permission_callback' => '__return_true',
     ]);
 
-    register_rest_route('initlise/v1', '/random', [
+    register_rest_route($ns, '/random', [
         'methods' => 'GET',
         'callback' => 'init_plugin_suite_live_search_random',
         'permission_callback' => '__return_true',
     ]);
 
-    register_rest_route('initlise/v1', '/taxonomies', [
+    register_rest_route($ns, '/taxonomies', [
         'methods' => 'GET',
         'callback' => 'init_plugin_suite_live_search_get_taxonomies_list',
         'permission_callback' => '__return_true',
     ]);
 
-    register_rest_route('initlise/v1', '/product', [
+    register_rest_route($ns, '/product', [
         'methods'             => 'GET',
         'callback'            => 'init_plugin_suite_live_search_products',
         'permission_callback' => '__return_true',
@@ -87,7 +89,7 @@ function init_plugin_suite_live_search_get_post_by_id($request) {
 
 // Return latest posts for `/recent` slash command.
 function init_plugin_suite_live_search_recent($request) {
-    $options = get_option('init_plugin_suite_live_search_settings', []);
+    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
     $post_types = !empty($options['post_types']) && is_array($options['post_types'])
         ? array_map('sanitize_key', $options['post_types'])
         : ['post'];
@@ -149,7 +151,7 @@ function init_plugin_suite_live_search_date($request) {
     $date_args = init_plugin_suite_live_search_parse_date_value($value);
     if (!$date_args) return rest_ensure_response([]);
 
-    $options = get_option('init_plugin_suite_live_search_settings', []);
+    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
     $post_types = !empty($options['post_types']) && is_array($options['post_types'])
         ? array_map('sanitize_key', $options['post_types'])
         : ['post'];
@@ -219,7 +221,7 @@ function init_plugin_suite_live_search_tax_query($request) {
 
     $term_id = $term_obj->term_id;
 
-    $options = get_option('init_plugin_suite_live_search_settings', []);
+    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
     $post_types = !empty($options['post_types']) && is_array($options['post_types'])
         ? array_map('sanitize_key', $options['post_types'])
         : ['post'];
@@ -327,7 +329,7 @@ function init_plugin_suite_live_search_get_reading_posts($request) {
 
 // Return a random post URL from allowed post types.
 function init_plugin_suite_live_search_random($request) {
-    $options = get_option('init_plugin_suite_live_search_settings', []);
+    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
 
     $post_types = !empty($options['post_types']) && is_array($options['post_types'])
         ? array_map('sanitize_key', $options['post_types'])
@@ -361,7 +363,7 @@ function init_plugin_suite_live_search_get_taxonomies_list($request) {
         return rest_ensure_response([]);
     }
 
-    $options = get_option('init_plugin_suite_live_search_settings', []);
+    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
     $limit = (!empty($options['max_results']) && is_numeric($options['max_results']) && $options['max_results'] > 0)
         ? (int)$options['max_results'] * 2
         : 20;
@@ -409,7 +411,7 @@ function init_plugin_suite_live_search_products($request) {
         return rest_ensure_response([]);
     }
 
-    $options = get_option('init_plugin_suite_live_search_settings', []);
+    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
     $per_page = (!empty($options['max_results']) && is_numeric($options['max_results']) && $options['max_results'] > 0)
         ? (int) $options['max_results']
         : 10;

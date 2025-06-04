@@ -1651,13 +1651,15 @@ document.addEventListener('DOMContentLoaded', function () {
         commandIndex = -1;
         suggestionIndex = -1;
 
-        window.dispatchEvent(new CustomEvent('ils:search-started'));
-
         currentCommand = null;
         currentPage = 1;
         isLoadingMore = false;
 
         const term = inputSearch.value.trim();
+
+        window.dispatchEvent(new CustomEvent('ils:search-started', {
+            detail: { term }
+        }));
 
         if (!term.length) {
             hasMoreResults = false;
@@ -1922,4 +1924,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     handleSelectionEvent(isMobile);
+
+    window.ilsHelpers = {
+        showLoading,
+        showMessage,
+        setCommand,
+        renderResults
+    };
 });

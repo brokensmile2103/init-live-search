@@ -259,12 +259,10 @@ function init_plugin_suite_live_search_prepare_keywords_and_thumb($term) {
     if ($term) {
         $keywords[] = $term;
 
-        // Bigrams (từ ghép 2)
         if (str_word_count($term) >= 3) {
             $keywords = array_merge($keywords, init_plugin_suite_live_search_generate_bigrams($term));
         }
 
-        // Single words
         $single_words = preg_split('/\s+/', $term);
         if (!empty($single_words)) {
             $keywords = array_merge($keywords, $single_words);
@@ -279,17 +277,6 @@ function init_plugin_suite_live_search_prepare_keywords_and_thumb($term) {
     );
 
     return [$keywords, $default_thumb];
-}
-
-// Detect current language using Polylang, WPML or fallback
-function init_plugin_suite_live_search_detect_language() {
-    if (function_exists('pll_current_language')) {
-        return pll_current_language();
-    }
-    if (function_exists('apply_filters')) {
-        return apply_filters('wpml_current_language', null);
-    }
-    return get_locale();
 }
 
 // Determine which post types to search against
