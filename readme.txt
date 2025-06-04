@@ -403,15 +403,15 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
   - Removed duplicate language detection logic (`detect_language` → unified `detect_lang`)  
   - Cleaned up legacy utility functions and renamed for clarity  
   - Standardized excerpt highlighting, thumbnail fallback, and WooCommerce integration logic  
-- Finalized keyword generator via admin AJAX  
-  - Automatically extracts bi-gram keywords from post titles  
-  - Includes locale-aware stop word filters for Vietnamese and English  
-  - Returns up to 7 randomized high-signal keywords  
+- Improved admin keyword generator for modal default input  
+  - Enhanced bi-gram extraction from post titles  
+  - Now supports locale-aware stop word filtering (Vietnamese, English)  
+  - Outputs up to 7 randomized high-signal keywords for better UX
 - Codebase deemed stable and feature-complete  
   - All core features are modular, reusable, and optimized for extensibility  
   - No major architectural changes planned beyond slash command expansions  
-- Added JavaScript support for custom slash commands from theme/plugins  
-  - Developers can now hook into `ils:search-started` to render their own commands without touching plugin internals
+- Improved JavaScript hook support for custom slash commands  
+  - Developers can now reliably use `ils:search-started` to render their own commands from themes or plugins
 
 ### = 1.6.6 – May 31, 2025 =
 - Major fallback upgrade: added intelligent single-word fallback logic  
@@ -577,6 +577,7 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
 - Modal-based search via REST API  
 - Fully keyboard accessible  
 - Inline fallback + suggestions  
+- Support for manual and auto-generated keyword suggestions  
 - Lightweight Vanilla JS, no jQuery  
 
 == License ==
