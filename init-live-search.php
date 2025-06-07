@@ -124,10 +124,11 @@ add_action('wp_enqueue_scripts', function () {
     ];
 
     if (defined('INIT_PLUGIN_SUITE_VIEW_COUNT_VERSION')) {
-        $commands['popular'] = __('Show most viewed posts (all time)', 'init-live-search');
-        $commands['day']     = __('Show most viewed posts today', 'init-live-search');
-        $commands['week']    = __('Show most viewed posts this week', 'init-live-search');
-        $commands['month']   = __('Show most viewed posts this month', 'init-live-search');
+        $commands['popular']  = __('Show most viewed posts (all time)', 'init-live-search');
+        $commands['trending'] = __('Show trending posts right now', 'init-live-search');
+        $commands['day']      = __('Show most viewed posts today', 'init-live-search');
+        $commands['week']     = __('Show most viewed posts this week', 'init-live-search');
+        $commands['month']    = __('Show most viewed posts this month', 'init-live-search');
     }
 
     if (defined('INIT_PLUGIN_SUITE_RP_VERSION')) {

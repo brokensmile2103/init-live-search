@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            if (['popular', 'day', 'week', 'month'].includes(cmd)) {
+            if (['popular', 'trending', 'day', 'week', 'month'].includes(cmd)) {
                 isLoadingMore = true;
                 currentPage++;
 
@@ -612,6 +612,7 @@ document.addEventListener('DOMContentLoaded', function () {
             day: 'day',
             week: 'week',
             month: 'month',
+            trending: 'trending',
         };
 
         const range = rangeMap[cmd] || 'total';
@@ -634,6 +635,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     date: post.date || '',
                     category: post.category || '',
                     views: typeof post.views === 'number' ? post.views : undefined,
+                    trending: post.trending === true,
+                    trending_position: post.trending_position,
                 }));
             });
     }
@@ -915,7 +918,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return true;
         }
 
-        if (['popular', 'day', 'week', 'month'].includes(cmd)) {
+        if (['popular', 'day', 'week', 'month', 'trending'].includes(cmd)) {
             const cacheKey = `ils-cache-${cmd}`;
 
             if (InitPluginSuiteLiveSearch.use_cache) {
@@ -1543,7 +1546,15 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 const viewLabel = InitPluginSuiteLiveSearch.i18n?.views || 'views';
                 const viewCount = typeof item.views === 'number' ? `${item.views.toLocaleString()} ${viewLabel}` : '';
-                infoHtml = [item.date, viewCount, item.type].filter(Boolean).join(' &middot; ');
+                let trendingBadge = '';
+                if (item.trending === true && typeof item.trending_position === 'number') {
+                    trendingBadge = `
+                        <span class="ils-trending-badge" title="Trending #${item.trending_position}">
+                            <svg width="20" height="20" viewBox="0 0 64 64" stroke-width="3" stroke="currentColor" fill="none"><path d="m8.1 45.3 16.7-16.1 10.5 10.3 20.1-20"/><path d="m45 19.1 10.4.3-.3 10.4"/></svg>
+                            ${item.trending_position}
+                        </span>`;
+                }
+                infoHtml = [item.date, viewCount, item.type, trendingBadge].filter(Boolean).join(' &middot; ');
             }
 
             let excerpt = (item.excerpt || '').trim();

@@ -38,7 +38,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 - **Search Analytics (New Tab)**: track search queries, view counts, export CSV, and group results by frequency  
 - **Contextual 1-Line Excerpts**: auto-highlight and display a short snippet from content or excerpt in all search results  
 - **Weighted Search Ranking**: smarter scoring system prioritizes title > excerpt > content in relevance-based modes  
-- **Smart Slash Commands**: `/day`, `/week`, `/month`, `/history`, `/fav`, and more — with deep plugin integration  
+- **Smart Slash Commands**: `/trending`, `/day`, `/week`, `/month`, `/history`, `/fav`, and more — with deep plugin integration  
 - **SEO Metadata Matching**: fallback logic includes SEO Titles and Descriptions from popular plugins  
 - **Voice Search & UI Presets**: improved voice input, dark mode toggle, and new UI layout options  
 - **Extensible Developer API**: register custom slash commands, filters, and JS event hooks like `ils:result-clicked`  
@@ -300,7 +300,7 @@ Slash commands are typed commands starting with `/`, such as:
 - `/product`, `/sku`, `/price`, `/stock`, `/on-sale`  
 
 **If other Init plugins are active:**  
-- `/popular`, `/day`, `/week`, `/month` — via **Init View Count**  
+- `/popular`, `/trending`, `/day`, `/week`, `/month` — via **Init View Count**  
 - `/read` — via **Init Reading Position**
 
 You can disable slash commands entirely in the plugin settings. Developers can register custom ones using the `init_plugin_suite_live_search_commands` filter.
@@ -381,6 +381,7 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 
 = 1.6.8 – June 7, 2025 =
 - Added support for multi-term filtering in `/tag` and `/category` slash commands (AND logic)
+- Added `/trending` slash command using real-time trending data from Init View Count
 - Excluded "Media" (`attachment`) from selectable post types in settings for cleaner configuration
 - Removed tracking of `user_id` and `source` for simpler and privacy-friendly analytics
 - Optimized internal query limits by adapting to the configured result count (no longer hardcoded to 200)

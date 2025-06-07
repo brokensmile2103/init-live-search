@@ -165,6 +165,9 @@ msgstr "Hiển thị bài viết mới nhất"
 msgid "Show most viewed posts (all time)"
 msgstr "Hiển thị bài viết được xem nhiều nhất (mọi thời điểm)"
 
+msgid "Show trending posts right now"
+msgstr "Hiển thị bài viết đang thịnh hành"
+
 msgid "Show most viewed posts today"
 msgstr "Hiển thị bài viết được xem nhiều nhất hôm nay"
 
