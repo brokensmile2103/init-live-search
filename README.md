@@ -22,7 +22,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - **Single Word Fallback**: automatically splits search terms into individual words if no results found  
 - **SEO Metadata Matching**: checks SEO Titles and Meta Descriptions for matches during fallback  
 - **Weighted Scoring Improvements**: `title_excerpt` and `title_content` modes now rank results using title > excerpt > content logic
-- **New Slash Commands**: `/day`, `/week`, `/month` show most viewed posts by time range (requires Init View Count)
+- **New Slash Commands**: `/day`, `/week`, `/month`, `/trending` show most viewed posts by time range (requires Init View Count)
 - **Search History Commands**: recall recent queries with `/history` and clear them with `/history_clear`
 - **Result Click Tracking**: new JS event `ils:result-clicked` to track user interactions with search results
 - **Custom Slash Command Filter**: use `init_plugin_suite_live_search_commands` to define your own commands (plus JS event handling)
@@ -63,6 +63,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 | `/day`            | Most viewed today (requires Init View Count) |
 | `/week`           | Most viewed this week                        |
 | `/month`          | Most viewed this month                       |
+| `/trending`       | Rapidly rising posts based on view growth    |
 | `/id 123`         | Jump to post with ID                         |
 | `/date 2025/05`   | Posts by month                               |
 | `/category wp`    | Filter by category slug                      |
