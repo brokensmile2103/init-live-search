@@ -3,6 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
 $post_types = get_post_types(['public' => true], 'objects');
+unset($post_types['attachment']);
 ?>
 
 <form method="post" action="options.php">

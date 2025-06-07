@@ -237,6 +237,9 @@ msgstr "Thiết lập số từ tối đa được phép để hiển thị tool
 msgid "Quick search"
 msgstr "Tìm kiếm nhanh"
 
+msgid "Find posts related to the current page"
+msgstr "Tìm các bài viết liên quan đến trang hiện tại"
+
 msgid "Show your favorited posts"
 msgstr "Hiển thị bài viết bạn đã đánh dấu yêu thích"
 

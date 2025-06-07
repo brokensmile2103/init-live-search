@@ -85,9 +85,10 @@ function init_plugin_suite_live_search_fallback_single_words($wpdb, $term, $post
 // Resolve post IDs based on search term, fallback, and ACF fields
 function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_types, $placeholders, $search_mode, $limit, $paged, $options, $args) {
     global $wpdb;
+    $internal_limit = min($limit * 3, 300);
 
     $post_ids = init_plugin_suite_live_search_get_post_ids_by_mode(
-        $wpdb, $term, $like, $post_types, $placeholders, $search_mode, 200
+        $wpdb, $term, $like, $post_types, $placeholders, $search_mode, $internal_limit
     );
 
     $enable_fallback = isset($args['enable_fallback'])
@@ -104,7 +105,7 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
             $short_term = implode(' ', $words);
             $like_short = '%' . $wpdb->esc_like($short_term) . '%';
             $post_ids = init_plugin_suite_live_search_get_post_ids_by_mode(
-                $wpdb, $short_term, $like_short, $post_types, $placeholders, $search_mode, 200
+                $wpdb, $short_term, $like_short, $post_types, $placeholders, $search_mode, $internal_limit
             );
             $cut_attempts++;
         }
@@ -114,7 +115,7 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
             foreach (array_slice($bi_terms, 0, 10) as $bi_term) {
                 $like_bi = '%' . $wpdb->esc_like($bi_term) . '%';
                 $more_ids = init_plugin_suite_live_search_get_post_ids_by_mode(
-                    $wpdb, $bi_term, $like_bi, $post_types, $placeholders, $search_mode, 200
+                    $wpdb, $bi_term, $like_bi, $post_types, $placeholders, $search_mode, $internal_limit
                 );
                 $post_ids = array_merge($post_ids, $more_ids);
             }
@@ -151,7 +152,7 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
                 WHERE pm.meta_key IN ($acf_placeholders)
                 AND pm.meta_value LIKE %s
                 AND p.post_status = 'publish'
-                LIMIT 200
+                LIMIT $internal_limit
                 ",
                 ...array_merge($acf_fields, [$acf_like])
             ));

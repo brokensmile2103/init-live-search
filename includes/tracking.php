@@ -14,8 +14,6 @@ function init_plugin_suite_live_search_track_query($results, $post_ids, $term, $
         'query'   => sanitize_text_field($term),
         'results' => is_array($post_ids) ? count($post_ids) : 0,
         'time'    => current_time('mysql'),
-        'user_id' => get_current_user_id(),
-        'source'  => $args['source'] ?? '',
     ];
 
     // Chunk system

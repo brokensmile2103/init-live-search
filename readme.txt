@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.6.7  
+Stable tag: 1.6.8  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -38,20 +38,10 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 - **Search Analytics (New Tab)**: track search queries, view counts, export CSV, and group results by frequency  
 - **Contextual 1-Line Excerpts**: auto-highlight and display a short snippet from content or excerpt in all search results  
 - **Weighted Search Ranking**: smarter scoring system prioritizes title > excerpt > content in relevance-based modes  
-- **Single Word Fallback**: automatically splits search terms into individual words if no results found  
-- **SEO Metadata Matching**: checks SEO Titles and Meta Descriptions for matches during fallback  
-- **New Slash Commands**: `/day`, `/week`, and `/month` show most viewed posts by timeframe (requires Init View Count)  
-- **Search History Commands**: recall recent queries with `/history` and clear them with `/history_clear`  
-- **Improved Voice Search**: optimized mic control, language detection, and error handling  
-- **Default Slash Command**: preload a command like `/recent`, `/related`, `/popular`, or `/read` when modal opens  
-- **New Filter: `init_plugin_suite_live_search_commands`**: register custom slash commands from theme or plugin, define your own REST endpoint if needed, and handle results via `ils:*` JavaScript events  
-- **New Event: `ils:result-clicked`**: track clicks on search results with full metadata  
-- **New UI Style Presets**: choose from fullscreen (`style-full.css`) or top bar (`style-topbar.css`) layouts  
-- **UI Style Picker**: select a style directly from the admin settings  
-- **Theme CSS Override**: place `init-live-search/style.css` in your theme to customize styles  
-- **Disable Built-in CSS**: turn off all plugin styles and build your own from scratch  
-- **Scoped CSS Loader**: clean separation of core, presets, and theme overrides  
-- **Developer-Friendly**: styles are minimal and safe to integrate with any theme or builder  
+- **Smart Slash Commands**: `/day`, `/week`, `/month`, `/history`, `/fav`, and more — with deep plugin integration  
+- **SEO Metadata Matching**: fallback logic includes SEO Titles and Descriptions from popular plugins  
+- **Voice Search & UI Presets**: improved voice input, dark mode toggle, and new UI layout options  
+- **Extensible Developer API**: register custom slash commands, filters, and JS event hooks like `ils:result-clicked`  
 
 == Features ==
 
@@ -100,13 +90,13 @@ Options: `dark`, `light`, `auto`
 - Choose post types to include in search  
 - Configure modal triggers (input focus, triple click, Ctrl+/)  
 - Enable slash commands (e.g. /recent, /tag, /id)  
-- Set **default slash command to run on modal open** (only if slash is enabled)   
+- Set default slash command to run on modal open (only if slash is enabled)   
 - Set debounce time and max results  
 - Choose search mode (title-only, tag-aware, full content)  
 - Define custom ACF fields to include in search (optional)  
 - Enable Search in SEO Metadata (Yoast, Rank Math, etc.)  
 - Toggle excerpt display below each result (1-line contextual snippet)  
-- Toggle fallback logic (bigrams/trim)  
+- Toggle fallback logic (bigram/trim)  
 - Enable Search Analytics to log queries (no personal data stored)  
 - Set max words for tooltip search  
 - Enable voice input (SpeechRecognition API)  
@@ -134,7 +124,7 @@ This plugin includes multiple filters to help developers customize behavior and 
 
 **`init_plugin_suite_live_search_enable_fallback`**
 
-Enable or disable fallback logic (trimming or bigrams) when few results are found.  
+Enable or disable fallback logic (trimming or bigram) when few results are found.  
 **Applies to:** search  
 **Params:** `bool $enabled`, `string $term`, `array $args`
 
@@ -176,7 +166,7 @@ Modify WP_Query arguments for recent, date, taxonomy-based, or product-based com
 
 **`init_plugin_suite_live_search_stop_single_words`**
 
-Customize the list of single-word stopwords removed before generating bigrams.  
+Customize the list of single-word stopwords removed before generating bigram.  
 **Applies to:** keyword suggestion  
 **Params:** `array $stop_words`, `string $locale`
 
@@ -280,10 +270,10 @@ All endpoints are under namespace: `initlise/v1`
 == Frequently Asked Questions ==
 
 = Does this plugin use jQuery? =  
-No. It’s built entirely with modern Vanilla JavaScript — no jQuery, no dependencies.
+No. It's built entirely with modern Vanilla JavaScript — no jQuery, no external dependencies.
 
-= How is search triggered? =  
-Search is auto-bound to `<input name="s">`, but you can also trigger it via:  
+= How is the search triggered? =  
+By default, it binds to any `<input name="s">`. You can also trigger it via:  
 - Ctrl + / (or Cmd + /)  
 - Triple-click on blank space  
 - Text selection tooltip  
@@ -291,98 +281,89 @@ Search is auto-bound to `<input name="s">`, but you can also trigger it via:
 - Any element with `data-ils` attribute
 
 = Can I prefill the modal from a link? =  
-Yes. Append `?modal=search&term=your+keyword` or `#search` to any URL.
+Yes. Append `?modal=search&term=your+keyword` or `#search` to any URL to prefill the modal and trigger it.
 
 = Is voice search supported? =  
-Yes. It uses the browser’s SpeechRecognition API, with auto-stop, language detection, and optional auto-restart.
+Yes. It uses the browser’s SpeechRecognition API with auto-stop, language detection, and error handling.
 
 = What are slash commands? =  
-They’re typed commands starting with `/`, like:
-
-**Built-in commands (no extra plugins needed):**  
+Slash commands are typed commands starting with `/`, such as:  
 - `/recent` — show latest posts  
 - `/tag seo` — filter by tag  
 - `/category news` — filter by category  
 - `/id 123` — fetch a post by ID  
-- `/fav`, `/fav_clear` — manage favorite posts  
-- `/random` — get a random post  
-- `/product`, `/sku`, `/price`, `/stock`, `/on-sale` — WooCommerce product filters (if WooCommerce is active)  
-- `/history`, `/history_clear` — manage recent search history (stored in browser)
+- `/fav`, `/fav_clear` — manage favorites  
+- `/random` — show a random post  
+- `/history`, `/history_clear` — manage recent search history  
 
-**Plugin-powered commands (require other Init plugins):**  
-- `/popular` — requires **Init View Count**  
-- `/day`, `/week`, `/month` — requires **Init View Count**  
-- `/read` — requires **Init Reading Position**
+**If WooCommerce is active:**  
+- `/product`, `/sku`, `/price`, `/stock`, `/on-sale`  
 
-You can disable the entire slash command system in the plugin settings.  
-Developers can register custom commands via the `init_plugin_suite_live_search_commands` filter.
+**If other Init plugins are active:**  
+- `/popular`, `/day`, `/week`, `/month` — via **Init View Count**  
+- `/read` — via **Init Reading Position**
 
-= Can I disable slash commands? =  
-Yes. You can turn off the entire system via plugin settings.
+You can disable slash commands entirely in the plugin settings. Developers can register custom ones using the `init_plugin_suite_live_search_commands` filter.
 
 = What is the Quick Search tooltip? =  
-When users select 1–8 words, a tooltip appears to let them search instantly.  
-Fully configurable or can be disabled.
+When users select 1–8 words, a floating tooltip appears to trigger an instant search. You can configure or disable it in settings.
 
 = What is Smart Tag-Aware Search? =  
-A special mode that searches both post titles and tags, and uses fallback logic like trimmed terms and bigrams to increase result coverage.
+A search mode that matches keywords in both titles and post tags. Includes fallback logic like trimming and bigrams for broader coverage.
 
 = What is “Search in SEO Metadata”? =  
-This allows searching SEO Titles and Meta Descriptions from plugins like:  
+Search terms are matched against SEO Titles and Meta Descriptions from plugins like:  
 - Yoast SEO  
 - Rank Math  
 - AIOSEO  
 - The SEO Framework  
-- SEOPress
+- SEOPress  
 
-Fully customizable via filters.
+This can be enabled via settings and customized using filters.
 
 = Does it support WooCommerce? =  
-Yes. You can search products by:  
+Yes. You can search for products by:  
 - Keyword  
 - SKU  
 - Price range (`/price`)  
 - Stock status (`/stock`)  
-- On sale (`/on-sale`)  
-Results display price, sale badge, stock state, and Add to Cart links.
+- Sale status (`/on-sale`)  
 
-= Is excerpt supported in results? =  
-Yes. It auto-extracts a 1-line contextual snippet with the keyword highlighted — improves scan-ability.
+Results include title, price, stock status, and Add to Cart links.
 
-= Can I override the plugin’s CSS? =  
-Yes:  
+= Does it support excerpts in search results? =  
+Yes. It generates a 1-line contextual excerpt with the keyword highlighted for better scan-ability.
+
+= Can I override or disable the plugin’s CSS? =  
+Yes. You can:  
 - Drop `init-live-search/style.css` in your theme  
-- Or select built-in presets like `style-full.css` or `style-topbar.css`  
-- Or disable all styles and write from scratch
+- Choose a built-in preset (`style-full.css`, `style-topbar.css`)  
+- Or disable all built-in CSS and style it from scratch
 
 = Is it mobile-friendly? =  
-Yes. The modal and styles are responsive, with mobile-specific UI optimizations (excerpt clamping, floating mic button, etc.)
+Yes. The modal is responsive with mobile optimizations like excerpt clamping and floating mic button.
 
-= Is result caching enabled? =  
-Yes. `localStorage` is used to cache queries and results for faster subsequent access.
+= Is result caching supported? =  
+Yes. It uses `localStorage` to cache search results and reduce repeat queries.
 
-= Does it log or track user data? =  
-Only if you enable **Search Analytics**.  
-Logs:  
+= Does the plugin track user data? =  
+Only if **Search Analytics** is enabled. It logs:  
 - Search term  
 - Timestamp  
-- Result count  
-- Source (user, guest, trigger)  
-No personal info (IP, user agent, etc.) is stored.
+- Result count   
+No personal information (IP, user agent, etc.) is stored.
 
-= What happens when no result is selected and I press Enter? =  
-The plugin falls back to WordPress’s native search page.
+= What happens if I press Enter without selecting a result? =  
+The plugin will redirect to WordPress’s default search results page.
 
-= Can I use this with a headless setup? =  
-Absolutely. All functionality is powered via REST API under the `initlise/v1` namespace — perfect for decoupled frontends.
+= Can I use this in a headless setup? =  
+Yes. All features are powered by REST API (`initlise/v1`) — ideal for decoupled frontends.
 
-= Can I set a default slash command when the modal opens? =  
-Yes. From the settings panel, you can preload `/recent`, `/read`, `/related`, etc.  
-Smart detection mode is also available, selecting a command based on page context.
+= Can I preload a default slash command when the modal opens? =  
+Yes. In settings, you can define a default command like `/recent`, `/read`, or `/related`. There's also a "smart detection" mode based on page context.
 
-= Does the plugin support multiple languages? =  
-Yes. It auto-detects current language when Polylang or WPML is active.  
-A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logic.
+= Does it support multiple languages? =  
+Yes. It auto-detects the active language when Polylang or WPML is installed. You can also filter results via `init_plugin_suite_live_search_filter_lang`.
 
 == Installation ==
 
@@ -398,22 +379,28 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
 
 == Changelog ==
 
-### = 1.6.7 – June 4, 2025 =
-- Internal refinements for long-term maintainability and performance  
-  - Removed duplicate language detection logic (`detect_language` → unified `detect_lang`)  
-  - Cleaned up legacy utility functions and renamed for clarity  
-  - Standardized excerpt highlighting, thumbnail fallback, and WooCommerce integration logic  
-- Improved admin keyword generator for modal default input  
-  - Enhanced bi-gram extraction from post titles  
-  - Now supports locale-aware stop word filtering (Vietnamese, English)  
-  - Outputs up to 7 randomized high-signal keywords for better UX
-- Codebase deemed stable and feature-complete  
-  - All core features are modular, reusable, and optimized for extensibility  
-  - No major architectural changes planned beyond slash command expansions  
-- Improved JavaScript hook support for custom slash commands  
-  - Developers can now reliably use `ils:search-started` to render their own commands from themes or plugins
+= 1.6.8 – June 7, 2025 =
+- Added support for multi-term filtering in `/tag` and `/category` slash commands (AND logic)
+- Excluded "Media" (`attachment`) from selectable post types in settings for cleaner configuration
+- Removed tracking of `user_id` and `source` for simpler and privacy-friendly analytics
+- Optimized internal query limits by adapting to the configured result count (no longer hardcoded to 200)
 
-### = 1.6.6 – May 31, 2025 =
+= 1.6.7 – June 4, 2025 =
+- Internal refinements for long-term maintainability and performance  
+  - Unified duplicate language detection logic (`detect_language` → `detect_lang`)  
+  - Cleaned up legacy utility functions and applied clearer naming conventions  
+  - Standardized logic for excerpt highlighting, thumbnail fallback, and WooCommerce integration  
+- Enhanced admin keyword generator (modal default input)  
+  - Improved bi-gram extraction from post titles  
+  - Added locale-aware stop word filtering (Vietnamese, English)  
+  - Now generates up to 7 randomized high-signal keywords for better UX  
+- Stabilized and extensible codebase  
+  - All core modules are modular, reusable, and optimized for extensibility  
+  - Future development will focus on expanding slash command support and developer experience  
+- Improved JavaScript hook support for slash commands  
+  - Developers can now reliably use `ils:search-started` to render custom commands from themes or plugins
+
+= 1.6.6 – May 31, 2025 =
 - Major fallback upgrade: added intelligent single-word fallback logic  
   - Automatically breaks long queries into single words if no results found  
   - Matches each word as full term only (e.g. `sea` won't match `search`)  
@@ -428,7 +415,7 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
   - Improves code maintainability and separation of concerns  
   - Paves the way for future optimizations like partial streaming  
 
-### = 1.6.5 – May 30, 2025 =
+= 1.6.5 – May 30, 2025 =
 - Introduced intelligent 1-line excerpt for all search results  
   - Automatically extracts a short snippet containing the search keyword from excerpt or content  
   - Falls back to `get_the_excerpt()` if no relevant match is found  
@@ -440,7 +427,7 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
 - Refactored result handler logic into modular subroutines  
   - Improves readability, performance, and extensibility  
 
-### = 1.6.4 – May 30, 2025 =
+= 1.6.4 – May 30, 2025 =
 - Enhanced slash command system and developer API  
   - Finalized `init_plugin_suite_live_search_commands` filter logic  
   - Register custom commands and handle them via JS events  
@@ -451,13 +438,13 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
   - Improved error handling and auto-stop logic  
   - Mic UI toggle and sessionStorage keyword injection  
 
-### = 1.6.3 – May 29, 2025 =
+= 1.6.3 – May 29, 2025 =
 - New slash commands: `/day`, `/week`, `/month` (requires Init View Count plugin)  
 - Fully supports infinite scroll and REST API for high-traffic sites  
 - Improved dynamic command registration  
 - Added search history commands: `/history`, `/history_clear`  
 
-### = 1.6.2 – May 28, 2025 =
+= 1.6.2 – May 28, 2025 =
 - New feature: Default Slash Command on Modal Open  
   - Preload `/recent`, `/related`, `/popular`, etc. based on page context  
   - Includes “Smart Detection” mode  
@@ -465,7 +452,7 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
   - Only shows `/popular`, `/read` if supporting plugins are active  
 - Improved settings validation and injection prevention  
 
-### = 1.6.1 – May 28, 2025 =
+= 1.6.1 – May 28, 2025 =
 - Added Search Analytics panel (Analytics tab in settings)  
   - Log keyword search queries (term, result count, time, source, user ID)  
   - Stored via transient-based chunk system  
@@ -476,7 +463,7 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
 - Renamed tracking file: `analytics.php` → `tracking.php`  
 - Better nonce protection and UX polish  
 
-### = 1.6 – May 27, 2025 =
+= 1.6 – May 27, 2025 =
 - Added frontend UI presets:  
   - `style-full.css`: fullscreen overlay  
   - `style-topbar.css`: fixed top bar (like Spotlight)  
@@ -484,7 +471,7 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
 - Option to disable plugin CSS entirely  
 - Internal CSS loader refactor  
 
-### = 1.5.4 – May 27, 2025 =
+= 1.5.4 – May 27, 2025 =
 - Added SEO metadata search support (no AI)  
   - Search within SEO Title and Meta Description  
   - Compatible with Yoast, Rank Math, AIOSEO, SEOPress, The SEO Framework  
@@ -492,7 +479,7 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
   - `init_plugin_suite_live_search_seo_meta_keys`  
   - `init_plugin_suite_live_search_weights`  
 
-### = 1.5.3 – May 27, 2025 =
+= 1.5.3 – May 27, 2025 =
 - ACF search field support (define keys in admin)  
 - Multilingual enhancements  
   - Supports Polylang, WPML  
@@ -502,13 +489,13 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
   - `init_plugin_suite_live_search_category_taxonomy`  
 - Performance: improved ACF join + status filtering  
 
-### = 1.5.2 – May 26, 2025 =
+= 1.5.2 – May 26, 2025 =
 - New search mode: Init Smart Tag-Aware Search  
   - Combines title and tag matches  
   - Auto bi-gram fallback for short terms  
 - Tooltip Quick Search now works on single-word selections  
 
-### = 1.5.1 – May 26, 2025 =
+= 1.5.1 – May 26, 2025 =
 - Added WooCommerce slash commands:  
   - `/product`, `/on-sale`, `/stock`, `/sku`, `/price`  
 - Display product data: price, sale badge, stock, add-to-cart  
@@ -516,7 +503,7 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
 - Infinite scroll and smart SKU/price filtering  
 - Enhanced keyboard nav in result list  
 
-### = 1.5 – May 25, 2025 =
+= 1.5 – May 25, 2025 =
 - Quick Search tooltip (2–8 words selection)  
 - Support for `data-ils` attribute to trigger modal  
 - Favorite management via `/fav`, `/fav_clear` commands  
@@ -524,20 +511,20 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
 - Unified modal trigger logic  
 - Optimized state handling  
 
-### = 1.4.3 – May 24, 2025 =
+= 1.4.3 – May 24, 2025 =
 - Lazy modal init (only creates DOM on trigger)  
 - New JS events:  
   - `ils:modal-opened`, `ils:modal-closed`, `ils:search-started`, `ils:results-loaded`  
 - Improved keyboard nav and accessibility  
 - Scroll logic optimized for large result sets  
 
-### = 1.4.2 – May 24, 2025 =
+= 1.4.2 – May 24, 2025 =
 - Enhanced slash command dropdown (`/re...`)  
 - Added `?modal=search&term=...` URL trigger  
 - Option to disable all slash commands  
 - UI/keyboard refinements  
 
-### = 1.4.1 – May 23, 2025 =
+= 1.4.1 – May 23, 2025 =
 - Added advanced slash commands:  
   - `/related`, `/read`, `/random`, `/categories`, `/tags`, `/help`, `/clear`, `/reset`  
 - `/read` integration with Init Reading Position  
@@ -545,7 +532,7 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
 - Fully internationalized commands  
 - Refactored JS modules  
 
-### = 1.4 – May 23, 2025 =
+= 1.4 – May 23, 2025 =
 - Introduced full slash command system  
   - `/recent`, `/popular`, `/tag`, `/category`, `/date`, `/id`  
   - Smart `/date` parsing  
@@ -553,7 +540,7 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
 - Modal trigger options: Ctrl + /, triple-click, focus  
 - Unified query parser  
 
-### = 1.3 – May 22, 2025 =
+= 1.3 – May 22, 2025 =
 - Added modal triggers:  
   - Ctrl + /, triple-click  
 - Client-side category filter  
@@ -561,18 +548,18 @@ A filter `init_plugin_suite_live_search_filter_lang` is provided for custom logi
 - UI: input clear button, dropdown polish  
 - Refactored codebase, namespacing  
 
-### = 1.2 – May 20, 2025 =
+= 1.2 – May 20, 2025 =
 - Voice input (SpeechRecognition API)  
 - New settings: fallback toggle, CSS toggle, dark mode  
 - Developer filters added for full control  
 
-### = 1.1 – May 18, 2025 =
+= 1.1 – May 18, 2025 =
 - Trimmed + bigram fallback logic  
 - Remembers last search via `sessionStorage`  
 - Enforces 100-char input limit  
 - Caching, UTM, dark/light theme options  
 
-### = 1.0 – May 17, 2025 =
+= 1.0 – May 17, 2025 =
 - First stable release  
 - Modal-based search via REST API  
 - Fully keyboard accessible  

@@ -1289,12 +1289,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
             showLoading();
 
-            const cacheKey = `ils-cache-tax-${cmd}-${arg}`;
+            // Normalize và mapping taxonomy
+            const taxonomy = cmd === 'tag' ? 'post_tag' : cmd;
+            const normalizedArg = arg.trim().replace(/\s+/g, '+'); // "ads email" → "ads+email"
+            const cacheKey = `ils-cache-tax-${taxonomy}-${normalizedArg}`;
+
+            // Check cache
             if (InitPluginSuiteLiveSearch.use_cache) {
                 const cached = localStorage.getItem(cacheKey);
                 if (cached) {
                     try {
-                        setCommand('tax', 'taxonomy', cmd, { term: arg });
+                        setCommand('tax', 'taxonomy', taxonomy, { term: normalizedArg });
                         renderResults(JSON.parse(cached));
                         return true;
                     } catch (e) {
@@ -1303,7 +1308,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            const endpoint = `${InitPluginSuiteLiveSearch.api.replace('/search', '/tax')}?taxonomy=${encodeURIComponent(cmd)}&term=${encodeURIComponent(arg)}`;
+            // Gọi API
+            const endpoint = `${InitPluginSuiteLiveSearch.api.replace('/search', '/tax')}?taxonomy=${encodeURIComponent(taxonomy)}&term=${encodeURIComponent(normalizedArg)}`;
 
             fetch(endpoint)
                 .then(res => {
@@ -1329,7 +1335,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         localStorage.setItem(cacheKey, JSON.stringify(data));
                     }
 
-                    setCommand('tax', 'taxonomy', cmd, { term: arg });
+                    setCommand('tax', 'taxonomy', taxonomy, { term: normalizedArg });
                     renderResults(data);
                 })
                 .catch(() => {

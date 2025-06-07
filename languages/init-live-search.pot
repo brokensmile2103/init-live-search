@@ -234,6 +234,9 @@ msgstr ""
 msgid "Quick search"
 msgstr ""
 
+msgid "Find posts related to the current page"
+msgstr ""
+
 msgid "Show your favorited posts"
 msgstr ""
 

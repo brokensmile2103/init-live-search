@@ -203,9 +203,11 @@ function init_plugin_suite_live_search_date($request) {
 
 // Return posts filtered by taxonomy term (e.g., category, tag).
 function init_plugin_suite_live_search_tax_query($request) {
-    $taxonomy   = sanitize_key($request->get_param('taxonomy'));
-    $term_input = sanitize_text_field($request->get_param('term'));
+    $taxonomy = sanitize_key($request->get_param('taxonomy'));
+    $term_raw = sanitize_text_field($request->get_param('term'));
+    $term_input = strtolower(str_replace('+', ' ', $term_raw));
 
+    // Chuẩn hóa taxonomy 'tag' → 'post_tag'
     if ($taxonomy === 'tag') {
         $taxonomy = 'post_tag';
     }
@@ -214,13 +216,23 @@ function init_plugin_suite_live_search_tax_query($request) {
         return rest_ensure_response([]);
     }
 
-    $term_obj = get_term_by(is_numeric($term_input) ? 'id' : 'slug', $term_input, $taxonomy);
-    if (!$term_obj || is_wp_error($term_obj)) {
+    // Parse slug thành mảng
+    $slugs = preg_split('/[\s,]+/', $term_input, -1, PREG_SPLIT_NO_EMPTY);
+    if (empty($slugs)) {
         return rest_ensure_response([]);
     }
 
-    $term_id = $term_obj->term_id;
+    // Lấy term_id từ slug
+    $term_ids = array_filter(array_map(function ($slug) use ($taxonomy) {
+        $term = get_term_by(is_numeric($slug) ? 'id' : 'slug', $slug, $taxonomy);
+        return ($term && !is_wp_error($term)) ? (int) $term->term_id : null;
+    }, $slugs));
 
+    if (empty($term_ids)) {
+        return rest_ensure_response([]);
+    }
+
+    // Lấy cấu hình
     $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
     $post_types = !empty($options['post_types']) && is_array($options['post_types'])
         ? array_map('sanitize_key', $options['post_types'])
@@ -232,12 +244,14 @@ function init_plugin_suite_live_search_tax_query($request) {
 
     $paged = max(1, (int) $request->get_param('page'));
 
-    $cache_key = 'ils_tax_' . $taxonomy . '_p' . $paged . '_' . md5($term_id . serialize($post_types) . $per_page);
+    // Cache
+    $cache_key = 'ils_tax_' . $taxonomy . '_p' . $paged . '_' . md5(serialize($term_ids) . serialize($post_types) . $per_page);
     $results = wp_cache_get($cache_key, 'init_plugin_suite_live_search');
     if ($results !== false) {
         return rest_ensure_response($results);
     }
 
+    // tax_query AND
     $args = [
         'post_type'           => $post_types,
         'posts_per_page'      => $per_page,
@@ -249,20 +263,18 @@ function init_plugin_suite_live_search_tax_query($request) {
         'tax_query'           => [[
             'taxonomy' => $taxonomy,
             'field'    => 'term_id',
-            'terms'    => $term_id,
+            'terms'    => $term_ids,
+            'operator' => 'AND',
         ]],
     ];
 
     $args = apply_filters('init_plugin_suite_live_search_query_args', $args, 'tax', $request);
-
     $query = new WP_Query($args);
 
     $default_thumb = apply_filters(
         'init_plugin_suite_live_search_default_thumb',
         INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'img/thumbnail.svg'
     );
-
-    $results = [];
 
     $results = init_plugin_suite_live_search_build_result_list(
         $query->posts,

@@ -53,14 +53,12 @@ if (isset($_GET['ils_export_csv'])) {
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename=ils-analytics.csv');
     $fh = fopen('php://output', 'w'); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
-    fputcsv($fh, ['Time', 'Query', 'Results', 'User ID', 'Source']);
+    fputcsv($fh, ['Time', 'Query', 'Results']);
     foreach ($all_logs as $row) {
         fputcsv($fh, [
             $row['time'],
             $row['query'],
             $row['results'],
-            $row['user_id'],
-            $row['source'] ?? '',
         ]);
     }
     fclose($fh); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
@@ -78,8 +76,6 @@ if (isset($_GET['ils_export_csv'])) {
                     <th><?php esc_html_e('Time', 'init-live-search'); ?></th>
                     <th><?php esc_html_e('Query', 'init-live-search'); ?></th>
                     <th><?php esc_html_e('Results', 'init-live-search'); ?></th>
-                    <th><?php esc_html_e('User ID', 'init-live-search'); ?></th>
-                    <th><?php esc_html_e('Source', 'init-live-search'); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -88,8 +84,6 @@ if (isset($_GET['ils_export_csv'])) {
                         <td><?php echo esc_html($row['time']); ?></td>
                         <td><code><?php echo esc_html($row['query']); ?></code></td>
                         <td><?php echo (int) $row['results']; ?></td>
-                        <td><?php echo (int) $row['user_id']; ?></td>
-                        <td><?php echo esc_html($row['source'] ?? ''); ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -117,16 +111,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 const query = cells[1]?.textContent.trim().toLowerCase().replace(/\s+/g, ' ') || '';
                 const time = cells[0]?.textContent || '';
                 const results = parseInt(cells[2]?.textContent || '0');
-                const userId = cells[3]?.textContent || '';
-                const source = cells[4]?.textContent || '';
 
                 if (!grouped[query]) {
                     grouped[query] = {
                         count: 1,
                         latest: time,
-                        results,
-                        userId,
-                        source
+                        results
                     };
                 } else {
                     grouped[query].count++;
@@ -142,8 +132,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td>${data.latest}</td>
                     <td><code>${query}</code> <span style="color: #666;">×${data.count}</span></td>
                     <td>${data.results}</td>
-                    <td>${data.userId}</td>
-                    <td>${data.source}</td>
                 `;
                 tableBody.appendChild(row);
             });
