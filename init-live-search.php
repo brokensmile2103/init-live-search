@@ -3,7 +3,7 @@
  * Plugin Name: Init Live Search
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
  * Description: A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API.
- * Version: 1.6.8
+ * Version: 1.6.9
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-live-search
@@ -18,9 +18,12 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.6.8');
+define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.6.9');
 define('INIT_PLUGIN_SUITE_LS_SLUG',           'init-live-search');
+define('INIT_PLUGIN_SUITE_LS_GROUP_GENERAL',  'init_live_search_group_general');
 define('INIT_PLUGIN_SUITE_LS_OPTION',         'init_plugin_suite_live_search_settings');
+define('INIT_PLUGIN_SUITE_LS_GROUP_SYNONYMS', 'init_live_search_group_synonyms');
+define('INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION', 'init_plugin_suite_live_search_custom_synonyms');
 define('INIT_PLUGIN_SUITE_LS_NAMESPACE',      'initlise/v1');
 
 define('INIT_PLUGIN_SUITE_LS_URL',            plugin_dir_url(__FILE__));
@@ -178,6 +181,8 @@ add_action('wp_enqueue_scripts', function () {
             $default_command = '/related';
         } elseif ($raw_default_command === 'popular') {
             $default_command = '/popular';
+        } elseif ($raw_default_command === 'trending') {
+            $default_command = '/trending';
         } elseif ($raw_default_command === 'read') {
             $default_command = '/read';
         } elseif ($raw_default_command === 'auto') {

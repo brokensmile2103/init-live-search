@@ -91,6 +91,36 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
         $wpdb, $term, $like, $post_types, $placeholders, $search_mode, $internal_limit
     );
 
+    // Expand search with synonyms if result count is low
+    $enable_synonym = !isset($options['enable_synonym']) || $options['enable_synonym'];
+    if ($enable_synonym && count($post_ids) < floor($limit / 2)) {
+        $expanded_terms = init_plugin_suite_live_search_expand_with_synonyms($term);
+
+        $synonym_ids_list = [];
+        $synonym_weights = [];
+
+        foreach ($expanded_terms as $expanded_term) {
+            if ($expanded_term === $term) continue;
+
+            $like_syn = '%' . $wpdb->esc_like($expanded_term) . '%';
+            $synonym_ids = init_plugin_suite_live_search_get_post_ids_by_mode(
+                $wpdb, $expanded_term, $like_syn, $post_types, $placeholders, $search_mode, $internal_limit
+            );
+
+            if (!empty($synonym_ids)) {
+                $synonym_ids_list[] = $synonym_ids;
+                $synonym_weights[] = 1; // Lower weight than primary term
+            }
+        }
+
+        if (!empty($synonym_ids_list)) {
+            $post_ids = init_plugin_suite_live_search_ranked_merge_weighted(
+                array_merge([ $post_ids ], $synonym_ids_list),
+                array_merge([ 2 ], $synonym_weights)
+            );
+        }
+    }
+
     $enable_fallback = isset($args['enable_fallback'])
         ? (bool) $args['enable_fallback']
         : (!isset($options['enable_fallback']) || $options['enable_fallback']);
@@ -363,4 +393,33 @@ function init_plugin_suite_live_search_get_seo_ids_by_word($wpdb, $word, $post_t
         ",
         ...array_merge($keys, [$escaped, ...$post_types, $limit])
     ));
+}
+
+// Expand a search term by including its synonyms.
+function init_plugin_suite_live_search_expand_with_synonyms($term) {
+    $term = trim(mb_strtolower($term));
+    if ($term === '') return [$term];
+
+    $user_map = [];
+
+    $raw = get_option(INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION, '{}');
+    $decoded = is_string($raw) ? json_decode($raw, true) : (is_array($raw) ? $raw : []);
+
+    if (is_array($decoded)) {
+        foreach ($decoded as $key => $syns) {
+            $key = trim(mb_strtolower($key));
+            if (!is_array($syns)) continue;
+            $user_map[$key] = array_values(array_filter(array_map('trim', $syns)));
+        }
+    }
+
+    $synonym_map = apply_filters('init_plugin_suite_live_search_synonym_map', $user_map);
+
+    $expanded = [$term];
+
+    if (!empty($synonym_map[$term])) {
+        $expanded = array_merge($expanded, $synonym_map[$term]);
+    }
+
+    return array_unique($expanded);
 }

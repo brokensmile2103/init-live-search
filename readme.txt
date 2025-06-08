@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.6.8  
+Stable tag: 1.6.9  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -38,10 +38,11 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 - **Search Analytics (New Tab)**: track search queries, view counts, export CSV, and group results by frequency  
 - **Contextual 1-Line Excerpts**: auto-highlight and display a short snippet from content or excerpt in all search results  
 - **Weighted Search Ranking**: smarter scoring system prioritizes title > excerpt > content in relevance-based modes  
+- **Synonym Expansion System**: define custom keyword mappings to enhance search coverage with domain-specific vocabulary  
 - **Smart Slash Commands**: `/trending`, `/day`, `/week`, `/month`, `/history`, `/fav`, and more — with deep plugin integration  
 - **SEO Metadata Matching**: fallback logic includes SEO Titles and Descriptions from popular plugins  
 - **Voice Search & UI Presets**: improved voice input, dark mode toggle, and new UI layout options  
-- **Extensible Developer API**: register custom slash commands, filters, and JS event hooks like `ils:result-clicked`  
+- **Extensible Developer API**: register custom slash commands, filters, and JS event hooks like `ils:result-clicked`   
 
 == Features ==
 
@@ -55,6 +56,7 @@ Packed with everything a modern live search needs — and more:
 - Slash command system (`/recent`, `/popular`, `/tag`, `/id`, `/fav`, etc.)
 - WooCommerce support: search by product, sale status, stock, SKU, or price range
 - Contextual excerpts: auto-generate 1-line snippet containing the keyword, improving scan-ability
+- Custom Synonym Mapping: define site-specific keyword → synonym relationships to enhance search flexibility  
 - Favorites support: manage with slash commands or heart icon in results
 - Quick Search tooltip: select text to trigger instant search
 - Voice input support using built-in SpeechRecognition
@@ -97,6 +99,7 @@ Options: `dark`, `light`, `auto`
 - Enable Search in SEO Metadata (Yoast, Rank Math, etc.)  
 - Toggle excerpt display below each result (1-line contextual snippet)  
 - Toggle fallback logic (bigram/trim)  
+- Enable synonym expansion and manage synonym mappings (JSON editor)  
 - Enable Search Analytics to log queries (no personal data stored)  
 - Set max words for tooltip search  
 - Enable voice input (SpeechRecognition API)  
@@ -122,91 +125,81 @@ Options: `dark`, `light`, `auto`
 
 This plugin includes multiple filters to help developers customize behavior and output at various stages of the search flow.
 
-**`init_plugin_suite_live_search_enable_fallback`**
-
+**`init_plugin_suite_live_search_enable_fallback`**  
 Enable or disable fallback logic (trimming or bigram) when few results are found.  
 **Applies to:** search  
 **Params:** `bool $enabled`, `string $term`, `array $args`
 
-**`init_plugin_suite_live_search_post_ids`**
-
+**`init_plugin_suite_live_search_post_ids`**  
 Customize the array of post IDs returned from the search query.  
 **Applies to:** search  
 **Params:** `array $post_ids`, `string $term`, `array $args`
 
-**`init_plugin_suite_live_search_result_item`**
-
+**`init_plugin_suite_live_search_result_item`**  
 Modify each result item before it's sent in the response.  
 **Applies to:** search  
 **Params:** `array $item`, `int $post_id`, `string $term`, `array $args`
 
-**`init_plugin_suite_live_search_results`**
-
+**`init_plugin_suite_live_search_results`**  
 Filter the final array of results before being returned.  
 **Applies to:** search  
 **Params:** `array $results`, `array $post_ids`, `string $term`, `array $args`
 
-**`init_plugin_suite_live_search_category`**
+**`init_plugin_suite_live_search_synonym_map`**  
+Inject or override the list of keyword → synonym mappings used in synonym expansion logic.  
+**Applies to:** search  
+**Params:** `array $map`
 
+**`init_plugin_suite_live_search_category`**  
 Customize the category label shown in search results.  
 **Applies to:** all endpoints  
 **Params:** `string $category_name`, `int $post_id`
 
-**`init_plugin_suite_live_search_default_thumb`**
-
+**`init_plugin_suite_live_search_default_thumb`**  
 Override the default thumbnail if the post lacks a featured image.  
 **Applies to:** all endpoints  
 **Params:** `string $thumb_url`
 
-**`init_plugin_suite_live_search_query_args`**
-
+**`init_plugin_suite_live_search_query_args`**  
 Modify WP_Query arguments for recent, date, taxonomy-based, or product-based commands.  
 **Applies to:** `recent`, `date`, `tax`, `product`, `random`  
 **Params:** `array $args`, `string $type`, `WP_REST_Request $request`
 
-**`init_plugin_suite_live_search_stop_single_words`**
-
+**`init_plugin_suite_live_search_stop_single_words`**  
 Customize the list of single-word stopwords removed before generating bigram.  
 **Applies to:** keyword suggestion  
 **Params:** `array $stop_words`, `string $locale`
 
-**`init_plugin_suite_live_search_stop_words`**
-
+**`init_plugin_suite_live_search_stop_words`**  
 Customize the stop-word list used when auto-generating suggested keywords.  
 **Params:** `array $stop_words`, `string $locale`
 
-**`init_plugin_suite_live_search_taxonomy_cache_ttl`**
-
+**`init_plugin_suite_live_search_taxonomy_cache_ttl`**  
 Customize the cache duration (in seconds) for the `/taxonomies` endpoint. Return `0` to disable caching.  
 **Applies to:** `taxonomies`  
 **Params:** `int $ttl`, `string $taxonomy`, `int $limit`
 
-**`init_plugin_suite_live_search_filter_lang`**
-
+**`init_plugin_suite_live_search_filter_lang`**  
 Filter the list of post IDs by the current language. Supports Polylang and WPML.  
 **Applies to:** search, related, read, and other multilingual-aware endpoints  
 **Params:** `array $post_ids`, `string $term`, `array $args`
 
-**`init_plugin_suite_live_search_category_taxonomy`**
-
+**`init_plugin_suite_live_search_category_taxonomy`**  
 Override the taxonomy used to fetch and display category labels in results.  
 **Applies to:** all endpoints  
 **Params:** `string $taxonomy`, `int $post_id`
 
-**`init_plugin_suite_live_search_seo_meta_keys`**
-
+**`init_plugin_suite_live_search_seo_meta_keys`**  
 Customize the list of meta keys used for matching SEO Titles and Meta Descriptions.  
 **Applies to:** search (when Search in SEO Metadata is enabled)  
 **Params:** `array $meta_keys`
 
-**`init_plugin_suite_live_search_weights`**
-
+**`init_plugin_suite_live_search_weights`**  
 Customize the weighting array used to merge and sort post IDs from multiple sources (title, SEO, tag, etc.).  
 **Applies to:** search (search modes: `title`, `title_tag`, `title_excerpt`)  
 **Params:** `array $weights`, `string $search_mode`
 
 **`init_plugin_suite_live_search_commands`**  
-
 Allow registration of custom slash commands to be displayed in the command list and handled via custom logic.  
 **Applies to:** slash command system (`/` prefix input)  
 **Params:** `array $commands`, `array $options`
@@ -258,14 +251,15 @@ All endpoints are under namespace: `initlise/v1`
 == Screenshots ==
 
 1. Admin settings with search behavior options  
-2. Search Analytics tab: view and export recent query logs  
-3. Clean modal interface with keyword suggestions  
-4. Search results with filter pills and post types  
-5. Fully supports dark mode (auto or manual)  
-6. Slash command dropdown helper with real-time suggestions  
-7. WooCommerce product search via `/product` slash command with price, sale, and out-of-stock indicators  
-8. Fullscreen search interface using the `style-full.css` preset  
-9. Top bar search layout using the `style-topbar.css` preset
+2. Synonym Configuration tab: define keyword mappings and auto-expand search terms  
+3. Search Analytics tab: view and export recent query logs  
+4. Clean modal interface with keyword suggestions  
+5. Search results with filter pills and post types  
+6. Fully supports dark mode (auto or manual)  
+7. Slash command dropdown helper with real-time suggestions  
+8. WooCommerce product search via `/product` slash command with price, sale, and out-of-stock indicators  
+9. Fullscreen search interface using the `style-full.css` preset  
+10. Top bar search layout using the `style-topbar.css` preset  
 
 == Frequently Asked Questions ==
 
@@ -307,6 +301,10 @@ You can disable slash commands entirely in the plugin settings. Developers can r
 
 = What is the Quick Search tooltip? =  
 When users select 1–8 words, a floating tooltip appears to trigger an instant search. You can configure or disable it in settings.
+
+= Does it support synonyms or alternate keywords? =  
+Yes. You can define custom keyword → synonym mappings via the **Synonyms** tab in settings.  
+When enabled, the plugin will auto-expand search terms using these synonyms if few results are found.
 
 = What is Smart Tag-Aware Search? =  
 A search mode that matches keywords in both titles and post tags. Includes fallback logic like trimming and bigrams for broader coverage.
@@ -378,6 +376,20 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.6.9 – June 8, 2025 =
+- Added Synonym Expansion system for smarter search matching  
+  - New “Synonyms” tab in settings with live JSON editor and helper UI  
+  - Define site-specific vocabulary mappings like `{"reaction": ["tương tác", "phản hồi"]}`  
+  - Auto-inject or update keyword-synonym pairs via UI button or Enter key  
+  - Full JSON validation with inline error messages and form guard
+- Enhanced search logic with intelligent synonym fallback  
+  - When no or few results are found, synonyms are auto-expanded and re-queried  
+  - Synonym results are scored lower than direct matches but included for better coverage  
+  - Works seamlessly with all search modes (title, tag, excerpt, ACF, SEO, etc.)
+- New toggle setting: "Enable Synonym Expansion?"  
+  - Allows enabling/disabling the synonym logic without affecting mappings  
+  - Disabled by default for performance-conscious setups
 
 = 1.6.8 – June 7, 2025 =
 - Added support for multi-term filtering in `/tag` and `/category` slash commands (AND logic)

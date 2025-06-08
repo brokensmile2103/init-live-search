@@ -375,6 +375,9 @@ msgstr "Tự động nhận diện (theo trang hiện tại)"
 msgid "Popular Posts (use /popular)"
 msgstr "Bài viết phổ biến (dùng /popular)"
 
+msgid "Trending Posts (use /trending)"
+msgstr "Bài viết xu hướng (dùng /trending)"
+
 msgid "Continue Reading (use /read)"
 msgstr "Đọc tiếp (dùng /read)"
 
@@ -384,8 +387,8 @@ msgstr "Chọn slash command mặc định để tự động chạy khi hộp t
 msgid "“Smart Detection” automatically detects based on current page: /related for posts, /product for shop pages, taxonomy-based commands, etc."
 msgstr "“Tự động nhận diện” sẽ chọn lệnh phù hợp theo trang hiện tại: /related cho bài viết, /product cho trang cửa hàng, hoặc các lệnh dựa trên chuyên mục, thẻ, v.v."
 
-msgid "“Popular” and “Read” options are only available if their respective plugins are active."
-msgstr "Tuỳ chọn “Popular” và “Read” chỉ hiển thị nếu các plugin tương ứng đang hoạt động."
+msgid "“Popular”, “Trending” and “Read” options are only available if their respective plugins are active."
+msgstr "Tuỳ chọn “Popular”, “Trending” và “Read” chỉ hiển thị nếu các plugin tương ứng đang hoạt động."
 
 msgid "Show past search keywords"
 msgstr "Hiển thị từ khóa đã tìm trước đó"
@@ -407,3 +410,42 @@ msgstr "Hiển thị đoạn trích của bài viết bên dưới mỗi kết q
 
 msgid "If disabled, excerpt will be omitted from results to simplify the UI."
 msgstr "Nếu tắt, đoạn trích sẽ bị loại bỏ khỏi kết quả để làm giao diện gọn hơn."
+
+msgid "Enable Synonym Expansion?"
+msgstr "Bật chức năng mở rộng từ đồng nghĩa?"
+
+msgid "Allow search terms to be expanded using built-in or custom-defined synonyms."
+msgstr "Cho phép mở rộng cụm từ tìm kiếm bằng cách sử dụng từ đồng nghĩa có sẵn hoặc do bạn tự định nghĩa."
+
+msgid "Enable this only after defining useful synonym mappings. Otherwise, it will have no effect."
+msgstr "Chỉ nên bật khi bạn đã khai báo các từ đồng nghĩa phù hợp. Nếu không, tính năng này sẽ không tạo ra hiệu quả."
+
+msgid "Synonyms"
+msgstr "Từ đồng nghĩa"
+
+msgid "Synonym Configuration"
+msgstr "Cấu hình từ đồng nghĩa"
+
+msgid "You can define custom synonyms here. This will allow search terms to be expanded using your specific site vocabulary."
+msgstr "Bạn có thể định nghĩa từ đồng nghĩa tùy chỉnh tại đây. Điều này giúp mở rộng truy vấn tìm kiếm bằng từ vựng riêng của trang web."
+
+msgid "Custom Synonym Map (JSON)"
+msgstr "Bản đồ từ đồng nghĩa tùy chỉnh (JSON)"
+
+msgid "Enter a JSON object where each key maps to an array of synonyms. Example:"
+msgstr "Nhập một đối tượng JSON, mỗi khóa là một từ khóa và giá trị là mảng từ đồng nghĩa. Ví dụ:"
+
+msgid "Add or Update Synonym"
+msgstr "Thêm hoặc cập nhật từ đồng nghĩa"
+
+msgid "Keyword (e.g. reaction)"
+msgstr "Từ khóa (ví dụ: reaction)"
+
+msgid "Synonym (e.g. tương tác)"
+msgstr "Từ đồng nghĩa (ví dụ: tương tác)"
+
+msgid "Add / Update"
+msgstr "Thêm / Cập nhật"
+
+msgid "Click to insert or update a keyword → synonym pair into the JSON above."
+msgstr "Nhấn để chèn hoặc cập nhật một cặp từ khóa → từ đồng nghĩa vào JSON ở trên."

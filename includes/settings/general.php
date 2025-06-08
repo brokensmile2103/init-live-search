@@ -7,7 +7,7 @@ unset($post_types['attachment']);
 ?>
 
 <form method="post" action="options.php">
-    <?php settings_fields('init_plugin_suite_live_search_settings_group'); ?>
+    <?php settings_fields(INIT_PLUGIN_SUITE_LS_GROUP_GENERAL); ?>
 
     <table class="form-table" role="presentation">
         <tr>
@@ -70,7 +70,8 @@ unset($post_types['attachment']);
                     ];
 
                     if (defined('INIT_PLUGIN_SUITE_VIEW_COUNT_VERSION')) {
-                        $default_command_options['popular'] = __('Popular Posts (use /popular)', 'init-live-search');
+                        $default_command_options['popular']  = __('Popular Posts (use /popular)', 'init-live-search');
+                        $default_command_options['trending'] = __('Trending Posts (use /trending)', 'init-live-search');
                     }
 
                     if (defined('INIT_PLUGIN_SUITE_RP_VERSION')) {
@@ -89,7 +90,7 @@ unset($post_types['attachment']);
                 <p class="description">
                     <?php esc_html_e('Choose a default slash command to run automatically when the search modal opens.', 'init-live-search'); ?><br>
                     <?php esc_html_e('“Smart Detection” automatically detects based on current page: /related for posts, /product for shop pages, taxonomy-based commands, etc.', 'init-live-search'); ?><br>
-                    <?php esc_html_e('“Popular” and “Read” options are only available if their respective plugins are active.', 'init-live-search'); ?>
+                    <?php esc_html_e('“Popular”, “Trending” and “Read” options are only available if their respective plugins are active.', 'init-live-search'); ?>
                 </p>
             </td>
         </tr>
@@ -140,6 +141,18 @@ unset($post_types['attachment']);
                     <?php esc_html_e('Include SEO Title and Meta Description (Yoast, Rank Math, TSF, etc.) in search matching.', 'init-live-search'); ?>
                 </label>
                 <p class="description"><?php esc_html_e('Enable this to improve accuracy by searching within SEO-optimized content written by the author.', 'init-live-search'); ?></p>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row"><?php esc_html_e('Enable Synonym Expansion?', 'init-live-search'); ?></th>
+            <td>
+                <label>
+                    <input type="checkbox" name="init_plugin_suite_live_search_settings[enable_synonym]" value="1" <?php checked(!empty($options['enable_synonym'])); ?>>
+                    <?php esc_html_e('Allow search terms to be expanded using built-in or custom-defined synonyms.', 'init-live-search'); ?>
+                </label>
+                <p class="description">
+                    <?php esc_html_e('Enable this only after defining useful synonym mappings. Otherwise, it will have no effect.', 'init-live-search'); ?>
+                </p>
             </td>
         </tr>
         <tr>

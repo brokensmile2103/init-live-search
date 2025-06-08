@@ -1,13 +1,28 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if (!defined('ABSPATH')) exit;
 
-// Handle current tab outside the render function to avoid linter warnings
+// Xác định tab đang chọn
 $current_tab = 'general';
 if (isset($_GET['tab'])) {
-    $tab_raw = wp_unslash($_GET['tab']);
-    $current_tab = sanitize_key($tab_raw);
+    $current_tab = sanitize_key(wp_unslash($_GET['tab']));
 }
 
+// Register các setting group riêng biệt
+add_action('admin_init', function () {
+    register_setting(
+        INIT_PLUGIN_SUITE_LS_GROUP_GENERAL,
+        INIT_PLUGIN_SUITE_LS_OPTION,
+        'init_plugin_suite_live_search_sanitize_settings'
+    );
+
+    register_setting(
+        INIT_PLUGIN_SUITE_LS_GROUP_SYNONYMS,
+        INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION,
+        'init_plugin_suite_live_search_sanitize_synonyms'
+    );
+});
+
+// Tạo menu trong admin
 add_action('admin_menu', function () {
     add_options_page(
         __('Init Live Search Settings', 'init-live-search'),
@@ -18,19 +33,13 @@ add_action('admin_menu', function () {
     );
 });
 
-add_action('admin_init', function () {
-    register_setting(
-        'init_plugin_suite_live_search_settings_group',
-        INIT_PLUGIN_SUITE_LS_OPTION,
-        'init_plugin_suite_live_search_sanitize_settings'
-    );
-});
-
+// Render trang settings
 function init_plugin_suite_live_search_render_settings_page() {
     global $current_tab;
 
     $tabs = [
         'general'   => __('General Settings', 'init-live-search'),
+        'synonyms'  => __('Synonyms', 'init-live-search'),
         'analytics' => __('Analytics', 'init-live-search'),
     ];
 
@@ -59,23 +68,25 @@ function init_plugin_suite_live_search_render_settings_page() {
     echo '</div>';
 }
 
+// Sanitize: GENERAL settings
 function init_plugin_suite_live_search_sanitize_settings($input) {
     $output = [];
+
     $output['post_types'] = array_map('sanitize_key', $input['post_types'] ?? ['post']);
     if (empty($output['post_types'])) {
         $output['post_types'] = ['post'];
     }
+
     $output['debounce'] = max(100, min(3000, absint($input['debounce'] ?? 500)));
     $output['trigger_triple_click'] = !empty($input['trigger_triple_click']) ? '1' : '0';
     $output['trigger_ctrl_slash'] = !empty($input['trigger_ctrl_slash']) ? '1' : '0';
     $output['trigger_input_focus'] = !empty($input['trigger_input_focus']) ? '1' : '0';
 
     $allowed_default_commands = ['none', 'default', 'related', 'auto'];
-
     if (defined('INIT_PLUGIN_SUITE_VIEW_COUNT_VERSION')) {
         $allowed_default_commands[] = 'popular';
+        $allowed_default_commands[] = 'trending';
     }
-
     if (defined('INIT_PLUGIN_SUITE_RP_VERSION')) {
         $allowed_default_commands[] = 'read';
     }
@@ -86,13 +97,14 @@ function init_plugin_suite_live_search_sanitize_settings($input) {
 
     $output['enable_slash'] = !empty($input['enable_slash']) ? '1' : '0';
     $output['max_results'] = min(100, max(1, absint($input['max_results'] ?? 10)));
-    
+
     $allowed_modes = ['title', 'title_excerpt', 'title_content', 'title_tag'];
     $output['search_mode'] = in_array($input['search_mode'], $allowed_modes, true) ? $input['search_mode'] : 'title';
-    
+
     $output['acf_search_fields'] = sanitize_text_field($input['acf_search_fields'] ?? '');
     $output['seo_search_fields_enabled'] = !empty($input['seo_search_fields_enabled']) ? '1' : '0';
     $output['show_excerpt'] = !empty($input['show_excerpt']) ? '1' : '0';
+    $output['enable_synonym'] = !empty($input['enable_synonym']) ? '1' : '0';
     $output['enable_fallback'] = !empty($input['enable_fallback']) ? '1' : '0';
     $output['enable_analytics'] = !empty($input['enable_analytics']) ? '1' : '0';
 
@@ -105,9 +117,20 @@ function init_plugin_suite_live_search_sanitize_settings($input) {
     $output['max_select_word'] = max(0, min(20, absint($input['max_select_word'] ?? 8)));
     $output['default_utm'] = esc_url_raw($input['default_utm'] ?? '');
     $output['suggested_keywords'] = sanitize_text_field($input['suggested_keywords'] ?? '');
+
     return $output;
 }
 
+// Sanitize: SYNONYMS
+function init_plugin_suite_live_search_sanitize_synonyms($raw) {
+    $clean = trim($raw);
+    if ($clean === '') return '{}';
+
+    json_decode($clean);
+    return (json_last_error() === JSON_ERROR_NONE) ? $clean : '{}';
+}
+
+// Enqueue scripts
 add_action('admin_enqueue_scripts', function ($hook_suffix) {
     if ($hook_suffix !== 'settings_page_init-live-search-settings') return;
     wp_enqueue_script(

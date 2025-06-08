@@ -372,6 +372,9 @@ msgstr ""
 msgid "Popular Posts (use /popular)"
 msgstr ""
 
+msgid "Trending Posts (use /trending)"
+msgstr ""
+
 msgid "Continue Reading (use /read)"
 msgstr ""
 
@@ -381,7 +384,7 @@ msgstr ""
 msgid "“Smart Detection” automatically detects based on current page: /related for posts, /product for shop pages, taxonomy-based commands, etc."
 msgstr ""
 
-msgid "“Popular” and “Read” options are only available if their respective plugins are active."
+msgid "“Popular”, “Trending” and “Read” options are only available if their respective plugins are active."
 msgstr ""
 
 msgid "Show past search keywords"
@@ -403,4 +406,43 @@ msgid "Display the post excerpt below each result item in the modal."
 msgstr ""
 
 msgid "If disabled, excerpt will be omitted from results to simplify the UI."
+msgstr ""
+
+msgid "Enable Synonym Expansion?"
+msgstr ""
+
+msgid "Allow search terms to be expanded using built-in or custom-defined synonyms."
+msgstr ""
+
+msgid "Enable this only after defining useful synonym mappings. Otherwise, it will have no effect."
+msgstr ""
+
+msgid "Synonyms"
+msgstr ""
+
+msgid "Synonym Configuration"
+msgstr ""
+
+msgid "You can define custom synonyms here. This will allow search terms to be expanded using your specific site vocabulary."
+msgstr ""
+
+msgid "Custom Synonym Map (JSON)"
+msgstr ""
+
+msgid "Enter a JSON object where each key maps to an array of synonyms. Example:"
+msgstr ""
+
+msgid "Add or Update Synonym"
+msgstr ""
+
+msgid "Keyword (e.g. reaction)"
+msgstr ""
+
+msgid "Synonym (e.g. tương tác)"
+msgstr ""
+
+msgid "Add / Update"
+msgstr ""
+
+msgid "Click to insert or update a keyword → synonym pair into the JSON above."
 msgstr ""
