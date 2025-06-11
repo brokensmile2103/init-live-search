@@ -20,7 +20,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 
 - **Cross-site Search**: fetch & merge results from other Init Live Search-powered sites
 - **No CORS or Auth Setup**: just enter `Site Name|https://example.com` — it works instantly
-- **Auto Labeling**: results from external sources are tagged (e.g. "From Init Docs")
+- **Auto Labeling**: results from external sources are tagged (e.g. "Init Docs")
 - **Same API, Same Speed**: all via REST, no iframe, no extra requests
 
 ## Features
