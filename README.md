@@ -4,7 +4,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.6.9-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.7.0-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -16,27 +16,12 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 
 ![Demo of Init Live Search](https://inithtml.com/wp-content/uploads/2025/05/Init-Live-Search-Demo.gif)
 
-## What's New in v1.6.x
+## What's New in v1.7.x
 
-- **Synonym Expansion System**: define keyword → synonym mappings and automatically expand search terms when results are low  
-- **Live Synonym Config UI**: JSON editor with real-time validation, add/update tools, and settings toggle  
-- **Smart Excerpts with Highlight**: 1-line contextual snippets extracted from excerpt or content, with keyword highlighting  
-- **Single Word Fallback**: automatically splits search terms into individual words if no results found  
-- **SEO Metadata Matching**: checks SEO Titles and Meta Descriptions for matches during fallback  
-- **Weighted Scoring Improvements**: `title_excerpt` and `title_content` modes now rank results using title > excerpt > content logic  
-- **New Slash Commands**: `/day`, `/week`, `/month`, `/trending` show most viewed posts by time range (requires Init View Count)  
-- **Search History Commands**: recall recent queries with `/history` and clear them with `/history_clear`  
-- **Result Click Tracking**: new JS event `ils:result-clicked` to track user interactions with search results  
-- **Custom Slash Command Filter**: use `init_plugin_suite_live_search_commands` to define your own commands (plus JS event handling)  
-- **Default Slash Command**: preload `/recent`, `/related`, `/popular`, or `/read` on modal open  
-- **Smart Detection Mode**: auto-select slash command based on current page (post, category, tag, shop, etc.)  
-- **UI Style Presets**: choose between `style-full.css` (fullscreen) and `style-topbar.css` (admin-bar style)  
-- **Theme CSS Override**: drop a `style.css` file into your theme’s `init-live-search/` folder to override styles  
-- **Full CSS Control**: disable all built-in CSS for complete customization  
-- **Search Analytics**: log keyword queries (term, source, timestamp), group by frequency, and export CSV — no personal data collected  
-- **Updated Settings UI**: choose styles, manage analytics, and tweak options from a polished, responsive panel  
-- **Scoped Style & File Refactor**: improved loading logic and renamed files (`analytics.php` → `tracking.php`) for clarity  
-- **Modular Result Engine**: the main `get_results()` logic is now cleanly separated into sub-functions for better performance and extensibility  
+- **Cross-site Search**: fetch & merge results from other Init Live Search-powered sites
+- **No CORS or Auth Setup**: just enter `Site Name|https://example.com` — it works instantly
+- **Auto Labeling**: results from external sources are tagged (e.g. "From Init Docs")
+- **Same API, Same Speed**: all via REST, no iframe, no extra requests
 
 ## Features
 
