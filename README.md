@@ -27,19 +27,20 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 
 - Clean modal search interface (`Ctrl + /`, triple-click, or `data-ils`)
 - Powered by WordPress REST API — no `admin-ajax`, no jQuery
-- **Search in SEO Metadata** — match keywords in SEO Titles and Meta Descriptions (Yoast, Rank Math, AIOSEO, TSF, SEOPress)
-- **Weighted Result Ranking** — control merging priority using custom filter (e.g. title > SEO > tags)
-- Smart **Slash Commands**: `/recent`, `/fav`, `/id`, `/tag`, `/product`, `/on-sale`, `/sku`, `/price`, etc.
-- **Quick Search Tooltip**: select up to 20 words to trigger instant search (configurable)
+- **Cross-site Search**: query multiple domains seamlessly
+- **Search in SEO Metadata** — support Yoast, Rank Math, AIOSEO, TSF, SEOPress
+- **Weighted Ranking** — control priority via filters (e.g. title > SEO > tags)
+- Smart **Slash Commands**: `/recent`, `/fav`, `/id`, `/tag`, `/product`, etc.
+- **Quick Search Tooltip**: select up to 20 words for instant search
 - LocalStorage-based **favorites** and **caching**
 - Voice input via native `SpeechRecognition` API
 - Full **keyboard navigation**: `↑ ↓ ← → Enter Esc`
 - Deep linking: prefill search via `?modal=search&term=...`
 - Dark mode support: `auto`, `dark`, or `light`
-- **WooCommerce integration**: show price, stock, sale badges, "Add to Cart"
-- **ACF support**: search custom fields with comma-separated keys
-- Developer-friendly: hooks, filters, events, modular JS, REST-first architecture
-- Built-in Analytics: track search queries (term, count, source) and export CSV (optional)
+- **WooCommerce**: price, stock, sale badge, SKU, Add to Cart
+- **ACF support**: search custom fields
+- Built-in **Analytics**: log search terms (no personal data)
+- Developer-ready: filters, JS events, REST-first architecture
 
 ## Slash Command Examples
 
