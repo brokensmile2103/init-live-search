@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.6.9  
+Stable tag: 1.7.0  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -29,20 +29,16 @@ You get:
 
 Perfect for content-heavy blogs, WooCommerce stores, or even headless sites. Every interaction is fast, fluid, and designed to work across devices.
 
-This plugin is part of the [Init Plugin Suite](https://inithtml.com/init-plugin-suite-bo-plugin-wordpress-toi-gian-manh-me-mien-phi/) — a collection of minimalist, fast, and developer-focused tools for WordPress.
+This plugin is part of the [Init Plugin Suite](https://en.inithtml.com/init-plugin-suite-minimalist-powerful-and-free-wordpress-plugins/) — a collection of minimalist, fast, and developer-focused tools for WordPress.
 
 GitHub repository: [https://github.com/brokensmile2103/init-live-search](https://github.com/brokensmile2103/init-live-search)
 
-== What's New in Version 1.6.x ==
+== What's New in Version 1.7.x ==
 
-- **Search Analytics (New Tab)**: track search queries, view counts, export CSV, and group results by frequency  
-- **Contextual 1-Line Excerpts**: auto-highlight and display a short snippet from content or excerpt in all search results  
-- **Weighted Search Ranking**: smarter scoring system prioritizes title > excerpt > content in relevance-based modes  
-- **Synonym Expansion System**: define custom keyword mappings to enhance search coverage with domain-specific vocabulary  
-- **Smart Slash Commands**: `/trending`, `/day`, `/week`, `/month`, `/history`, `/fav`, and more — with deep plugin integration  
-- **SEO Metadata Matching**: fallback logic includes SEO Titles and Descriptions from popular plugins  
-- **Voice Search & UI Presets**: improved voice input, dark mode toggle, and new UI layout options  
-- **Extensible Developer API**: register custom slash commands, filters, and JS event hooks like `ils:result-clicked`   
+- **Cross-site Search**: merge results from multiple Init Live Search-enabled sites  
+- **Easy Setup**: just enter `Site Name|https://example.com/` — no auth or CORS needed  
+- **Auto Labeling**: each external result is tagged (e.g. “Init Docs”) for clarity  
+- **Fully REST-Powered**: blazing-fast, no iframe, no extra dependencies  
 
 == Features ==
 
@@ -250,16 +246,19 @@ All endpoints are under namespace: `initlise/v1`
 
 == Screenshots ==
 
-1. Admin settings with search behavior options  
-2. Synonym Configuration tab: define keyword mappings and auto-expand search terms  
-3. Search Analytics tab: view and export recent query logs  
-4. Clean modal interface with keyword suggestions  
-5. Search results with filter pills and post types  
-6. Fully supports dark mode (auto or manual)  
-7. Slash command dropdown helper with real-time suggestions  
-8. WooCommerce product search via `/product` slash command with price, sale, and out-of-stock indicators  
-9. Fullscreen search interface using the `style-full.css` preset  
-10. Top bar search layout using the `style-topbar.css` preset  
+1. Search Triggers: input focus, Ctrl + /, triple click, `data-ils` attribute  
+2. Search Behavior: post types, slash commands, fallback, SEO fields  
+3. Performance & UX: debounce, max results, caching, analytics, voice input  
+4. Styling & Suggestions: UI style, custom CSS, suggestions, UTM tracking  
+5. Synonym Configuration: define and auto-expand keyword mappings  
+6. Search Analytics: view logs, result count, export CSV  
+7. Modal UI: clean interface with suggestions and instant results  
+8. Results View: filter pills, post types, contextual excerpts  
+9. Dark Mode: automatic or manual toggle for night-friendly UI  
+10. Slash Command Helper: real-time dropdown with command list  
+11. WooCommerce Search: product results with price, stock, sale badge  
+12. Fullscreen Style: overlay modal using `style-full.css` preset  
+13. Topbar Style: fixed top bar layout using `style-topbar.css` preset  
 
 == Frequently Asked Questions ==
 
@@ -306,10 +305,10 @@ When users select 1–8 words, a floating tooltip appears to trigger an instant 
 Yes. You can define custom keyword → synonym mappings via the **Synonyms** tab in settings.  
 When enabled, the plugin will auto-expand search terms using these synonyms if few results are found.
 
-= What is Smart Tag-Aware Search? =  
+= What is Init Smart Tag-Aware Search? =  
 A search mode that matches keywords in both titles and post tags. Includes fallback logic like trimming and bigrams for broader coverage.
 
-= What is “Search in SEO Metadata”? =  
+= What is Search in SEO Metadata? =  
 Search terms are matched against SEO Titles and Meta Descriptions from plugins like:  
 - Yoast SEO  
 - Rank Math  
@@ -376,6 +375,13 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.7.0 – June 11, 2025 =
+- Added Cross-site Search  
+  - New setting: enter multiple domains (`Site Name|https://example.com/`)  
+  - Fetches & merges results from other Init Live Search sites  
+  - Results are labeled (e.g. “Init Docs”) for clarity  
+  - No auth or CORS setup needed – just works  
 
 = 1.6.9 – June 8, 2025 =
 - Added Synonym Expansion system for smarter search matching  
@@ -476,7 +482,7 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 - Renamed tracking file: `analytics.php` → `tracking.php`  
 - Better nonce protection and UX polish  
 
-= 1.6 – May 27, 2025 =
+= 1.6.0 – May 27, 2025 =
 - Added frontend UI presets:  
   - `style-full.css`: fullscreen overlay  
   - `style-topbar.css`: fixed top bar (like Spotlight)  
@@ -516,7 +522,7 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 - Infinite scroll and smart SKU/price filtering  
 - Enhanced keyboard nav in result list  
 
-= 1.5 – May 25, 2025 =
+= 1.5.0 – May 25, 2025 =
 - Quick Search tooltip (2–8 words selection)  
 - Support for `data-ils` attribute to trigger modal  
 - Favorite management via `/fav`, `/fav_clear` commands  
@@ -545,7 +551,7 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 - Fully internationalized commands  
 - Refactored JS modules  
 
-= 1.4 – May 23, 2025 =
+= 1.4.0 – May 23, 2025 =
 - Introduced full slash command system  
   - `/recent`, `/popular`, `/tag`, `/category`, `/date`, `/id`  
   - Smart `/date` parsing  
@@ -553,7 +559,7 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 - Modal trigger options: Ctrl + /, triple-click, focus  
 - Unified query parser  
 
-= 1.3 – May 22, 2025 =
+= 1.3.0 – May 22, 2025 =
 - Added modal triggers:  
   - Ctrl + /, triple-click  
 - Client-side category filter  
@@ -561,18 +567,18 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 - UI: input clear button, dropdown polish  
 - Refactored codebase, namespacing  
 
-= 1.2 – May 20, 2025 =
+= 1.2.0 – May 20, 2025 =
 - Voice input (SpeechRecognition API)  
 - New settings: fallback toggle, CSS toggle, dark mode  
 - Developer filters added for full control  
 
-= 1.1 – May 18, 2025 =
+= 1.1.0 – May 18, 2025 =
 - Trimmed + bigram fallback logic  
 - Remembers last search via `sessionStorage`  
 - Enforces 100-char input limit  
 - Caching, UTM, dark/light theme options  
 
-= 1.0 – May 17, 2025 =
+= 1.0.0 – May 17, 2025 =
 - First stable release  
 - Modal-based search via REST API  
 - Fully keyboard accessible  

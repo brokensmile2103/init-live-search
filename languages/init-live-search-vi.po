@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init Live Search 1.6\n"
+"Project-Id-Version: Init Live Search 1.7.0\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -449,3 +449,15 @@ msgstr "Thêm / Cập nhật"
 
 msgid "Click to insert or update a keyword → synonym pair into the JSON above."
 msgstr "Nhấn để chèn hoặc cập nhật một cặp từ khóa → từ đồng nghĩa vào JSON ở trên."
+
+msgid "Cross-site Search Domains"
+msgstr "Tên miền tìm kiếm liên site"
+
+msgid "Enter one site per line in the format: Site Name|https://example.com/"
+msgstr "Nhập mỗi dòng một site theo định dạng: Tên site|https://example.com/"
+
+msgid "When filled, your search will fetch results from these additional domains and merge them into one list."
+msgstr "Khi có dữ liệu, hệ thống sẽ lấy kết quả từ các domain này và gộp chung vào một danh sách."
+
+msgid "Each external site must also have the Init Live Search plugin installed and active."
+msgstr "Mỗi site bên ngoài cũng phải cài và kích hoạt plugin Init Live Search."

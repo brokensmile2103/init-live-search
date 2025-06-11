@@ -3,7 +3,7 @@
  * Plugin Name: Init Live Search
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
  * Description: A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API.
- * Version: 1.6.9
+ * Version: 1.7.0
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-live-search
@@ -18,7 +18,7 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.6.9');
+define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.7.0');
 define('INIT_PLUGIN_SUITE_LS_SLUG',           'init-live-search');
 define('INIT_PLUGIN_SUITE_LS_GROUP_GENERAL',  'init_live_search_group_general');
 define('INIT_PLUGIN_SUITE_LS_OPTION',         'init_plugin_suite_live_search_settings');
@@ -207,6 +207,24 @@ add_action('wp_enqueue_scripts', function () {
     $use_cache = !isset($options['use_cache']) || $options['use_cache'];
     $enable_voice = !isset($options['enable_voice']) || $options['enable_voice'];
 
+    $cross_sites = [];
+    if (!empty($options['cross_sites'])) {
+        foreach (explode("\n", $options['cross_sites']) as $line) {
+            $line = trim($line);
+            if (strpos($line, '|') !== false) {
+                [$label, $url] = explode('|', $line, 2);
+                $label = sanitize_text_field($label);
+                $url = esc_url_raw(trim($url));
+                if ($label && $url) {
+                    $cross_sites[] = [
+                        'label' => $label,
+                        'url'   => rtrim($url, '/'),
+                    ];
+                }
+            }
+        }
+    }
+
     // Final localization
     wp_localize_script('init-plugin-suite-live-search-script', 'InitPluginSuiteLiveSearch', [
         'api'                => esc_url_raw(rest_url(INIT_PLUGIN_SUITE_LS_NAMESPACE . '/search')),
@@ -240,8 +258,9 @@ add_action('wp_enqueue_scripts', function () {
             'no_history'            => __('You haven\'t searched for anything yet.', 'init-live-search'),
             'history_cleared'       => __('Past search keywords have been cleared.', 'init-live-search'),
         ],
-        'commands' => $commands,
-        'default_command' => $enable_slash ? $default_command : '',
+        'commands'          => $commands,
+        'default_command'   => $enable_slash ? $default_command : '',
+        'cross_sites'       => $cross_sites,
     ]);
 });
 

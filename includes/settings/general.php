@@ -57,6 +57,17 @@ unset($post_types['attachment']);
             </td>
         </tr>
         <tr>
+            <th scope="row"><?php esc_html_e('Cross-site Search Domains', 'init-live-search'); ?></th>
+            <td>
+                <textarea name="init_plugin_suite_live_search_settings[cross_sites]" rows="5" class="large-text code"><?php echo esc_textarea($options['cross_sites'] ?? ''); ?></textarea>
+                <p class="description">
+                    <?php esc_html_e('Enter one site per line in the format: Site Name|https://example.com/', 'init-live-search'); ?><br>
+                    <?php esc_html_e('When filled, your search will fetch results from these additional domains and merge them into one list.', 'init-live-search'); ?><br>
+                    <?php esc_html_e('Each external site must also have the Init Live Search plugin installed and active.', 'init-live-search'); ?>
+                </p>
+            </td>
+        </tr>
+        <tr>
             <th scope="row"><?php esc_html_e('Default Slash Command on Modal Open', 'init-live-search'); ?></th>
             <td>
                 <?php

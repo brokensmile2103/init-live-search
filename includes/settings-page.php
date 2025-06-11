@@ -118,6 +118,21 @@ function init_plugin_suite_live_search_sanitize_settings($input) {
     $output['default_utm'] = esc_url_raw($input['default_utm'] ?? '');
     $output['suggested_keywords'] = sanitize_text_field($input['suggested_keywords'] ?? '');
 
+    $clean_sites = [];
+    $raw_lines = explode("\n", $input['cross_sites'] ?? '');
+    foreach ($raw_lines as $line) {
+        $line = trim($line);
+        if (strpos($line, '|') !== false) {
+            [$label, $url] = explode('|', $line, 2);
+            $label = sanitize_text_field($label);
+            $url = esc_url_raw(trim($url));
+            if ($label && $url) {
+                $clean_sites[] = $label . '|' . $url;
+            }
+        }
+    }
+    $output['cross_sites'] = implode("\n", $clean_sites);
+
     return $output;
 }
 

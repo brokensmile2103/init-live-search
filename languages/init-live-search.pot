@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init Live Search 1.6\n"
+"Project-Id-Version: Init Live Search 1.7.0\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -445,4 +445,16 @@ msgid "Add / Update"
 msgstr ""
 
 msgid "Click to insert or update a keyword → synonym pair into the JSON above."
+msgstr ""
+
+msgid "Cross-site Search Domains"
+msgstr ""
+
+msgid "Enter one site per line in the format: Site Name|https://example.com/"
+msgstr ""
+
+msgid "When filled, your search will fetch results from these additional domains and merge them into one list."
+msgstr ""
+
+msgid "Each external site must also have the Init Live Search plugin installed and active."
 msgstr ""

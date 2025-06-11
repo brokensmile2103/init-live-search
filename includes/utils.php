@@ -182,7 +182,7 @@ function init_plugin_suite_live_search_build_result_item($post_id, $term = '', $
         'type'      => $post_type_name,
         'post_type' => $post_type_slug,
         'thumb'     => $thumb_url,
-        'date'      => get_the_date('d/m/Y', $post_id),
+        'date'      => get_the_date('', $post_id),
         'category'  => apply_filters('init_plugin_suite_live_search_category', $category_name, $post_id),
     ];
 

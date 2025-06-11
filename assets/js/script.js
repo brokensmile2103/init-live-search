@@ -1554,7 +1554,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             ${item.trending_position}
                         </span>`;
                 }
-                infoHtml = [item.date, viewCount, item.type, trendingBadge].filter(Boolean).join(' &middot; ');
+                const originLabel = item._origin
+                    ? `<span class="ils-origin-label">${item._origin}</span>`
+                    : '';
+                infoHtml = [originLabel, item.date, viewCount, item.type, trendingBadge].filter(Boolean).join(' &middot; ');
             }
 
             let excerpt = (item.excerpt || '').trim();
@@ -1729,27 +1732,34 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        fetch(`${InitPluginSuiteLiveSearch.api}?term=${encodeURIComponent(term)}`)
+        const primaryFetch = fetch(`${InitPluginSuiteLiveSearch.api}?term=${encodeURIComponent(term)}`)
             .then(res => res.json())
-            .then(data => {
-                if (!Array.isArray(data) || data.length === 0) {
-                    hasMoreResults = false;
-                    resultsContainer.innerHTML = `<p class="ils-empty">${InitPluginSuiteLiveSearch.i18n.no_results}</p>`;
-                    return;
-                }
+            .catch(() => []);
 
-                if (InitPluginSuiteLiveSearch.use_cache) {
-                    localStorage.setItem(cacheKey, JSON.stringify(data));
-                }
+        const extraFetches = (InitPluginSuiteLiveSearch.cross_sites || []).map(site => {
+            return fetch(`${site.url}/wp-json/initlise/v1/search?term=${encodeURIComponent(term)}`)
+                .then(res => res.json())
+                .then(data => data.map(item => ({ ...item, _origin: site.label, _origin_url: site.url })))
+                .catch(() => []);
+        });
 
-                setCommand('search', 'term', term);
-                saveSearchTerm(term);
-                renderResults(data);
-            })
-            .catch(() => {
+        Promise.all([primaryFetch, ...extraFetches]).then(results => {
+            const merged = results.flat();
+
+            if (!merged.length) {
                 hasMoreResults = false;
-                resultsContainer.innerHTML = `<p class="ils-error">${InitPluginSuiteLiveSearch.i18n.error}</p>`;
-            });
+                resultsContainer.innerHTML = `<p class="ils-empty">${InitPluginSuiteLiveSearch.i18n.no_results}</p>`;
+                return;
+            }
+
+            if (InitPluginSuiteLiveSearch.use_cache) {
+                localStorage.setItem(cacheKey, JSON.stringify(merged));
+            }
+
+            setCommand('search', 'term', term);
+            saveSearchTerm(term);
+            renderResults(merged);
+        });
     }
 
     function debounce(fn, delay) {
