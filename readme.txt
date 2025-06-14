@@ -16,17 +16,6 @@ Deliver an ultra-responsive search experience to your visitors — no page reloa
 
 It replaces the default `<input name="s">` with a clean, intuitive search modal powered entirely by the WordPress REST API. Everything loads in real-time — with zero disruption to browsing flow.
 
-You get:
-- Beautiful preset styles (fullscreen, topbar, or default)  
-- Fully keyboard accessible (`↑ ↓ ← → Enter Esc`)  
-- Slash commands (`/recent`, `/tag`, `/id`, etc.) for power users  
-- Quick Search tooltip triggered by selecting text  
-- Voice input via browser SpeechRecognition  
-- SEO-aware matching from popular plugins (Yoast, Rank Math, AIOSEO, etc.)  
-- ACF field support for advanced content types  
-- Local result caching and fallback logic  
-- Theme override support or option to disable all plugin CSS
-
 Perfect for content-heavy blogs, WooCommerce stores, or even headless sites. Every interaction is fast, fluid, and designed to work across devices.
 
 This plugin is part of the [Init Plugin Suite](https://en.inithtml.com/init-plugin-suite-minimalist-powerful-and-free-wordpress-plugins/) — a collection of minimalist, fast, and developer-focused tools for WordPress.
@@ -36,40 +25,39 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 == What's New in Version 1.7.x ==
 
 - **Cross-site Search**: merge results from multiple Init Live Search-enabled sites  
-- **Easy Setup**: just enter `Site Name|https://example.com/` — no auth or CORS needed  
-- **Auto Labeling**: each external result is tagged (e.g. “Init Docs”) for clarity  
-- **Fully REST-Powered**: blazing-fast, no iframe, no extra dependencies  
-- **WooCommerce Slash Commands**: now includes `/brand`, `/attribute`, `/variation`, and `/price ... sort` — fully extendable on top of existing `/product`, `/sku`, `/on-sale`, and more  
-- **New Shortcode**: insert search input or icon anywhere via `[init_live_search]`
+  - Just enter `Site Name|https://example.com/` — no auth or CORS needed  
+  - Automatically tags results by site (e.g. “Init Docs”)  
+  - Now disables single-word fallback on both local and remote sites for cleaner relevance  
+- **WooCommerce Slash Commands**: major expansion for store owners  
+  - New: `/brand`, `/attribute`, `/variation`, and `/coupon`  
+  - `/coupon` shows active coupons with usage and expiration info  
+  - Improved `/price` with optional `sort` / `rsort`  
+  - Fully supports custom taxonomies and `pa_...` attributes  
+- **New Shortcode**: `[init_live_search]`  
+  - Insert a search input or icon anywhere  
+  - Supports dark mode and custom classes
 
 == Features ==
 
 Packed with everything a modern live search needs — and more:
 
-- Live search powered by WordPress REST API (no admin-ajax)
-- Smart tag-aware search mode: match keywords in both titles and post tags
-- Search in SEO Metadata: match keywords in SEO Titles and Meta Descriptions from popular SEO plugins (Yoast, Rank Math, AIOSEO, TSF, SEOPress)
-- Clean modal interface that works with any theme — no template override required
-- Fully keyboard accessible (Arrow keys, Enter, Escape)
-- Slash command system (`/recent`, `/popular`, `/tag`, `/id`, `/fav`, etc.)
-- WooCommerce support: search by product, sale status, stock, SKU, or price range
-- Contextual excerpts: auto-generate 1-line snippet containing the keyword, improving scan-ability
-- Custom Synonym Mapping: define site-specific keyword → synonym relationships to enhance search flexibility  
-- Favorites support: manage with slash commands or heart icon in results
-- Quick Search tooltip: select text to trigger instant search
-- Voice input support using built-in SpeechRecognition
-- Smart category filter (client-side, no extra API calls)
-- Infinite scroll for long result lists (search and slash commands)
-- Deep linking: open modal and prefill terms from URL (`?modal=search&term=...`)
-- Custom triggers: Ctrl + /, triple-click, or `data-ils` attribute
-- Local caching with `localStorage` to improve performance
-- Optional keyword suggestions (manual or auto-generated)
-- UI style presets: choose between default, fullscreen (`style-full.css`), or topbar (`style-topbar.css`) layouts
-- Theme override support: add `init-live-search/style.css` to fully customize design
-- Option to disable all built-in CSS and style from scratch
-- Search analytics: track queries, group results, export CSV — all without storing personal data
-- Developer-friendly with filters and custom REST API endpoints
-- Built with pure JavaScript — no jQuery required
+- Live search via REST API (no admin-ajax, no jQuery)
+- Smart tag-aware search mode (title + tag match)
+- SEO metadata support: Yoast, Rank Math, AIOSEO, SEOPress, TSF
+- ACF field matching and customizable filters
+- Synonym expansion with fallback scoring logic
+- Slash commands: `/recent`, `/popular`, `/tag`, `/id`, `/sku`, `/price`, `/coupon`, etc.
+- WooCommerce support: search by product, SKU, brand, attribute, variation, coupon
+- Clean modal UI with keyboard navigation (`↑ ↓ Enter Esc`)
+- Optional voice input (SpeechRecognition)
+- Tooltip Quick Search (select text to trigger)
+- Favorites system via heart icon or `/fav` commands
+- Infinite scroll and smart category filter (no extra API)
+- Deep linking: `?modal=search&term=...`
+- New `[init_live_search]` shortcode: insert input or icon anywhere
+- UI presets: default, fullscreen, topbar — with full CSS override
+- Local caching + analytics (CSV export, no personal data)
+- Developer-ready: custom slash commands, REST filters, JS hooks
 
 == Dark Mode Support ==
 
@@ -121,7 +109,7 @@ Options: `dark`, `light`, `auto`
 
 == Shortcodes ==
 
-=== `[init_live_search]` ===  
+**`[init_live_search]`**
 Display a search icon or input anywhere that opens the Init Live Search modal.
 
 **Attributes:**
@@ -256,8 +244,14 @@ All endpoints are under namespace: `initlise/v1`
     - `on_sale`: `1` to filter products on sale  
     - `in_stock`: `1` to filter products in stock  
     - `min_price` / `max_price`: Numeric range filter  
+    - `price_order`: `sort` or `rsort` to sort by price  
+    - `brand`, `attribute`, `variation`, `value`: For taxonomy filtering  
     - `page`: For pagination  
   Returns basic product info (title, URL, price, category, thumbnail), sale and stock status, and `add_to_cart_url`. Caching is applied per query.
+
+- `/coupon`  
+  Fetch valid WooCommerce coupons (non-expired and under usage limit).  
+  Returns: code, description, remaining uses, expiration date, copy-to-clipboard support.
 
 == Screenshots ==
 
@@ -279,6 +273,9 @@ All endpoints are under namespace: `initlise/v1`
 
 = Does this plugin use jQuery? =  
 No. It's built entirely with modern Vanilla JavaScript — no jQuery, no external dependencies.
+
+= Can I insert the search box anywhere on the page? =  
+Yes. Use the `[init_live_search]` shortcode to insert a search input or icon anywhere. You can also add custom classes or enable dark mode.
 
 = How is the search triggered? =  
 By default, it binds to any `<input name="s">`. You can also trigger it via:  
@@ -305,7 +302,7 @@ Slash commands are typed commands starting with `/`, such as:
 - `/history`, `/history_clear` — manage recent search history  
 
 **If WooCommerce is active:**  
-- `/product`, `/sku`, `/price`, `/stock`, `/on-sale`  
+- `/product`, `/sku`, `/price`, `/stock`, `/on-sale`, `/coupon`  
 
 **If other Init plugins are active:**  
 - `/popular`, `/trending`, `/day`, `/week`, `/month` — via **Init View Count**  
@@ -320,18 +317,9 @@ When users select 1–8 words, a floating tooltip appears to trigger an instant 
 Yes. You can define custom keyword → synonym mappings via the **Synonyms** tab in settings.  
 When enabled, the plugin will auto-expand search terms using these synonyms if few results are found.
 
-= What is Init Smart Tag-Aware Search? =  
-A search mode that matches keywords in both titles and post tags. Includes fallback logic like trimming and bigrams for broader coverage.
-
-= What is Search in SEO Metadata? =  
-Search terms are matched against SEO Titles and Meta Descriptions from plugins like:  
-- Yoast SEO  
-- Rank Math  
-- AIOSEO  
-- The SEO Framework  
-- SEOPress  
-
-This can be enabled via settings and customized using filters.
+= Can it search in SEO fields and tags? =  
+Yes. The plugin supports a special “Smart Tag-Aware” mode that matches both post titles and tags.  
+It can also search inside SEO Titles and Meta Descriptions from plugins like Yoast SEO, Rank Math, AIOSEO, The SEO Framework, and SEOPress.
 
 = Does it support WooCommerce? =  
 Yes. You can search for products by:  
@@ -340,6 +328,7 @@ Yes. You can search for products by:
 - Price range (`/price`)  
 - Stock status (`/stock`)  
 - Sale status (`/on-sale`)  
+- Brand, attribute, variation, and coupons (`/coupon`)
 
 Results include title, price, stock status, and Add to Cart links.
 
@@ -362,7 +351,7 @@ Yes. It uses `localStorage` to cache search results and reduce repeat queries.
 Only if **Search Analytics** is enabled. It logs:  
 - Search term  
 - Timestamp  
-- Result count   
+- Result count  
 No personal information (IP, user agent, etc.) is stored.
 
 = What happens if I press Enter without selecting a result? =  
