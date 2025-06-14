@@ -4,7 +4,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.7.0-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.7.1-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -18,10 +18,13 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 
 ## What's New in v1.7.x
 
-- **Cross-site Search**: fetch & merge results from other Init Live Search-powered sites
-- **No CORS or Auth Setup**: just enter `Site Name|https://example.com` — it works instantly
-- **Auto Labeling**: results from external sources are tagged (e.g. "Init Docs")
-- **Same API, Same Speed**: all via REST, no iframe, no extra requests
+- **Cross-site Search**: fetch & merge results from other Init Live Search-powered sites  
+- **No CORS or Auth Setup**: just enter `Site Name|https://example.com` — it works instantly  
+- **Auto Labeling**: results from external sources are tagged (e.g. "Init Docs")  
+- **WooCommerce Slash Expansion**: added support for `/brand`, `/attribute`, `/variation`, `/coupon`  
+- **Improved `/price` Command**: now supports `sort` and `rsort` modifiers  
+- **Cleaner Cross-site Results**: disables single-word fallback for external queries  
+- **New Shortcode**: `[init_live_search]` to render a search icon or input anywhere  
 
 ## Features
 
@@ -36,8 +39,8 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - Voice input via native `SpeechRecognition` API
 - Full **keyboard navigation**: `↑ ↓ ← → Enter Esc`
 - Deep linking: prefill search via `?modal=search&term=...`
-- Dark mode support: `auto`, `dark`, or `light`
-- **WooCommerce**: price, stock, sale badge, SKU, Add to Cart
+- Dark mode support: `auto`, `dark`, or `light` — or add `.dark` class manually
+- **WooCommerce**: price, stock, sale badge, SKU, Add to Cart, coupon detection
 - **ACF support**: search custom fields
 - Built-in **Analytics**: log search terms (no personal data)
 - Developer-ready: filters, JS events, REST-first architecture
@@ -61,10 +64,24 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 | `/stock`          | In-stock products only                       |
 | `/sku ABC123`     | Lookup product by SKU                        |
 | `/price 100 500`  | Show products in a specific price range      |
+| `/coupon`         | Show active and usable coupons               |
 | `/fav`            | Show favorite posts                          |
 | `/fav_clear`      | Clear all favorites                          |
 | `/history`        | Show recent search queries                   |
 | `/random`         | Open a random published post instantly       |
+
+## Shortcodes
+
+### `[init_live_search]`  
+Display a search icon or input anywhere that opens the Init Live Search modal.
+
+**Attributes:**
+- `type`: `icon` (default) or `input` – choose between a clickable icon or a search box  
+- `placeholder`: (optional) text inside the input if `type="input"`  
+- `label`: (optional) adds a label next to the icon if `type="icon"`  
+- `class`: (optional) add custom classes like `dark`, `my-style`, etc.  
+- `stroke_width`: (optional) change SVG stroke width (default: `1`)  
+- `radius`: (optional) override border-radius (default: handled via class)
 
 ## Developer Docs
 
