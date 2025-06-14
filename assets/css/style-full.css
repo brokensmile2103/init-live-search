@@ -701,3 +701,35 @@
 .ils-input-launch.dark button svg {
     fill: #eee;
 }
+
+/* Coupon – Dark Mode Support */
+#ils-modal.dark .ils-coupon-item {
+    background: #2a2a2a;
+    box-shadow: 0 1px 2px rgba(255, 255, 255, 0.05);
+}
+#ils-modal.dark .ils-coupon-item:hover {
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+#ils-modal.dark .ils-coupon-code {
+    color: #eee;
+}
+#ils-modal.dark .ils-coupon-code code {
+    background: #444;
+    color: #fff;
+}
+#ils-modal.dark .ils-copy-btn {
+    background: #3b82f6;
+    color: #fff;
+}
+#ils-modal.dark .ils-copy-btn:hover {
+    background: #2563eb;
+}
+#ils-modal.dark .ils-coupon-desc {
+    color: #ccc;
+}
+#ils-modal.dark .ils-coupon-meta {
+    color: #aaa;
+}
+#ils-modal.dark .ils-coupon-meta li::before {
+    color: #60a5fa; /* màu xanh nhạt hơn để nổi bật */
+}
