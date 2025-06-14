@@ -152,7 +152,17 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
             $post_ids = array_unique($post_ids);
         }
 
-        if (count($post_ids) < $limit && in_array($search_mode, ['title', 'title_tag'], true)) {
+        $should_apply_single_word_fallback = true;
+
+        if (!empty($args['no_fallback'])) {
+            $should_apply_single_word_fallback = false;
+        }
+
+        if (!empty($options['cross_sites'])) {
+            $should_apply_single_word_fallback = false;
+        }
+
+        if (count($post_ids) < $limit && in_array($search_mode, ['title', 'title_tag'], true) && $should_apply_single_word_fallback) {
             $words = array_filter(preg_split('/\s+/', $term));
             $word_count = count($words);
 

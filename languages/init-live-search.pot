@@ -282,7 +282,16 @@ msgstr ""
 msgid "Search product by SKU"
 msgstr ""
 
+msgid "Filter products by brand slug"
+msgstr ""
+
 msgid "Filter products by price range"
+msgstr ""
+
+msgid "Filter products by attribute (e.g. color)"
+msgstr ""
+
+msgid "Filter products by variation value"
 msgstr ""
 
 msgid "Init Smart Tag-Aware Search"
@@ -457,4 +466,25 @@ msgid "When filled, your search will fetch results from these additional domains
 msgstr ""
 
 msgid "Each external site must also have the Init Live Search plugin installed and active."
+msgstr ""
+
+msgid "Save %s%%"
+msgstr ""
+
+msgid "Save %s"
+msgstr ""
+
+msgid "Remaining: %d uses"
+msgstr ""
+
+msgid "Unlimited uses"
+msgstr ""
+
+msgid "Expires on: %s"
+msgstr ""
+
+msgid "No expiration"
+msgstr ""
+
+msgid "Show all available coupons"
 msgstr ""

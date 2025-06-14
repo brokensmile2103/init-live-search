@@ -63,14 +63,21 @@ add_action('rest_api_init', function () {
         'callback'            => 'init_plugin_suite_live_search_products',
         'permission_callback' => '__return_true',
     ]);
+
+    register_rest_route($ns, '/coupon', [
+        'methods'             => 'GET',
+        'callback'            => 'init_plugin_suite_live_search_coupon',
+        'permission_callback' => '__return_true',
+    ]);
 });
 
 // Handle the main search REST endpoint, applies fallback, bigram, SEO, and ACF logic.
 function init_plugin_suite_live_search_search($request) {
     $term = $request->get_param('term');
     $args = [
-        'force_mode' => $request->get_param('force_mode'),
-        'exclude'    => $request->get_param('exclude'),
+        'force_mode'  => $request->get_param('force_mode'),
+        'exclude'     => $request->get_param('exclude'),
+        'no_fallback' => $request->get_param('no_fallback') ? true : false,
     ];
     return rest_ensure_response(init_plugin_suite_live_search_get_results($term, $args));
 }
@@ -428,13 +435,24 @@ function init_plugin_suite_live_search_products($request) {
         ? (int) $options['max_results']
         : 10;
 
-    $paged     = max(1, (int) $request->get_param('page'));
-    $term      = sanitize_text_field($request->get_param('term'));
-    $on_sale   = (bool) $request->get_param('on_sale');
-    $in_stock  = (bool) $request->get_param('in_stock');
-    $sku       = sanitize_text_field($request->get_param('sku'));
-    $min_price = is_numeric($request->get_param('min_price')) ? floatval($request->get_param('min_price')) : null;
-    $max_price = is_numeric($request->get_param('max_price')) ? floatval($request->get_param('max_price')) : null;
+    $paged        = max(1, (int) $request->get_param('page'));
+    $term         = sanitize_text_field($request->get_param('term'));
+    $on_sale      = (bool) $request->get_param('on_sale');
+    $in_stock     = (bool) $request->get_param('in_stock');
+    $sku          = sanitize_text_field($request->get_param('sku'));
+    $min_price    = is_numeric($request->get_param('min_price')) ? floatval($request->get_param('min_price')) : null;
+    $max_price    = is_numeric($request->get_param('max_price')) ? floatval($request->get_param('max_price')) : null;
+    $price_order  = strtolower($request->get_param('price_order'));
+    $brand        = sanitize_text_field($request->get_param('brand'));
+    $attribute    = sanitize_text_field($request->get_param('attribute'));
+    $variation    = sanitize_text_field($request->get_param('variation'));
+    $value        = sanitize_title($request->get_param('value'));
+
+    if ($price_order === 'sort') {
+        $price_order = 'asc';
+    } elseif ($price_order === 'rsort') {
+        $price_order = 'desc';
+    }
 
     $cache_key = 'ils_product_' . md5(json_encode([
         'term' => $term,
@@ -443,12 +461,16 @@ function init_plugin_suite_live_search_products($request) {
         'in_stock' => $in_stock,
         'min' => $min_price,
         'max' => $max_price,
+        'price_order' => $price_order,
+        'brand' => $brand,
         'paged' => $paged,
-        'per_page' => $per_page
+        'per_page' => $per_page,
+        'attribute' => $attribute,
+        'variation' => $variation,
+        'value'     => $value,
     ]));
 
     $results = wp_cache_get($cache_key, 'init_plugin_suite_live_search');
-
     if ($results !== false) {
         return rest_ensure_response($results);
     }
@@ -521,6 +543,36 @@ function init_plugin_suite_live_search_products($request) {
         ];
     }
 
+    if ($price_order === 'asc' || $price_order === 'desc') {
+        $args['orderby'] = 'meta_value_num';
+        $args['meta_key'] = '_price';
+        $args['order'] = strtoupper($price_order);
+    }
+
+    if (!empty($brand)) {
+        $args['tax_query'][] = [
+            'taxonomy' => 'product_brand',
+            'field'    => 'slug',
+            'terms'    => $brand,
+        ];
+    }
+
+    if (!empty($attribute) && !empty($value)) {
+        $args['tax_query'][] = [
+            'taxonomy' => 'pa_' . sanitize_title($attribute),
+            'field'    => 'slug',
+            'terms'    => $value,
+        ];
+    }
+
+    if (!empty($variation) && !empty($value)) {
+        $args['tax_query'][] = [
+            'taxonomy' => 'pa_' . sanitize_title($variation),
+            'field'    => 'slug',
+            'terms'    => $value,
+        ];
+    }
+
     if ($on_sale) {
         $product_ids_on_sale = wc_get_product_ids_on_sale();
         $args['post__in'] = !empty($args['post__in'])
@@ -540,8 +592,6 @@ function init_plugin_suite_live_search_products($request) {
         INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'img/thumbnail.svg'
     );
 
-    $results = [];
-
     $results = init_plugin_suite_live_search_build_result_list(
         $query->posts,
         [],
@@ -551,6 +601,87 @@ function init_plugin_suite_live_search_products($request) {
     );
 
     wp_cache_set($cache_key, $results, 'init_plugin_suite_live_search', 300);
+    return rest_ensure_response($results);
+}
 
+// Fetch coupon
+function init_plugin_suite_live_search_coupon($request) {
+    if (!class_exists('WC_Coupon')) {
+        return rest_ensure_response([]);
+    }
+
+    $options   = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
+    $per_page  = (!empty($options['max_results']) && is_numeric($options['max_results']) && $options['max_results'] > 0)
+        ? (int) $options['max_results']
+        : 10;
+
+    $paged     = max(1, (int) $request->get_param('page'));
+    $cache_key = 'ils_coupon_p' . $paged . '_' . $per_page;
+    $results   = wp_cache_get($cache_key, 'init_plugin_suite_live_search');
+
+    if ($results !== false) {
+        return rest_ensure_response($results);
+    }
+
+    $posts = get_posts([
+        'post_type'     => 'shop_coupon',
+        'post_status'   => 'publish',
+        'numberposts'   => $per_page,
+        'paged'         => $paged,
+        'orderby'       => 'date',
+        'order'         => 'DESC',
+        'fields'        => 'ids',
+        'no_found_rows' => true,
+    ]);
+
+    $results = [];
+
+    foreach ($posts as $post_id) {
+        $coupon = new WC_Coupon($post_id);
+
+        $expiry = $coupon->get_date_expires();
+        if ($expiry && $expiry->getTimestamp() < time()) {
+            continue;
+        }
+
+        $limit = $coupon->get_usage_limit();
+        $used  = $coupon->get_usage_count();
+        if ($limit && $used >= $limit) {
+            continue;
+        }
+
+        $code = $coupon->get_code();
+        $desc = $coupon->get_description();
+        if (!$desc) {
+            $amount = wc_format_coupon_amount($coupon->get_amount());
+            $desc = $coupon->get_discount_type() === 'percent'
+                ? sprintf(__('Save %s%%', 'init-plugin-suite'), $amount)
+                : sprintf(__('Save %s', 'init-plugin-suite'), wc_price($amount));
+        }
+
+        $meta = [];
+
+        if ($limit) {
+            $meta[] = sprintf(__('Remaining: %d uses', 'init-plugin-suite'), $limit - $used);
+        } else {
+            $meta[] = __('Unlimited uses', 'init-plugin-suite');
+        }
+
+        if ($expiry) {
+            $meta[] = sprintf(__('Expires on: %s', 'init-plugin-suite'), $expiry->date_i18n(get_option('date_format')));
+        } else {
+            $meta[] = __('No expiration', 'init-plugin-suite');
+        }
+
+        $results[] = [
+            'type'  => 'coupon',
+            'title' => strtoupper($code),
+            'desc'  => $desc,
+            'meta'  => $meta,
+            'copy'  => $code,
+        ];
+    }
+
+    wp_cache_set($cache_key, $results, 'init_plugin_suite_live_search', 300);
     return rest_ensure_response($results);
 }

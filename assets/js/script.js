@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            if (['popular', 'trending', 'day', 'week', 'month'].includes(cmd)) {
+            if (['popular', 'trending', 'day', 'week', 'month', 'coupon'].includes(cmd)) {
                 isLoadingMore = true;
                 currentPage++;
 
@@ -918,6 +918,43 @@ document.addEventListener('DOMContentLoaded', function () {
             return true;
         }
 
+        if (cmd === 'coupon') {
+            const cacheKey = `ils-cache-coupon`;
+
+            if (InitPluginSuiteLiveSearch.use_cache) {
+                const cached = localStorage.getItem(cacheKey);
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    setCommand('coupon');
+                    renderResults(data);
+                    return true;
+                }
+            }
+
+            showLoading();
+
+            fetch(`${InitPluginSuiteLiveSearch.api.replace('/search', '/coupon')}?page=1`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!Array.isArray(data) || data.length === 0) {
+                        showMessage(InitPluginSuiteLiveSearch.i18n.no_results);
+                        return;
+                    }
+
+                    if (InitPluginSuiteLiveSearch.use_cache) {
+                        localStorage.setItem(cacheKey, JSON.stringify(data));
+                    }
+
+                    setCommand('coupon');
+                    renderResults(data);
+                })
+                .catch(() => {
+                    showMessage(InitPluginSuiteLiveSearch.i18n.error);
+                });
+
+            return true;
+        }
+
         if (['popular', 'day', 'week', 'month', 'trending'].includes(cmd)) {
             const cacheKey = `ils-cache-${cmd}`;
 
@@ -1155,16 +1192,54 @@ document.addEventListener('DOMContentLoaded', function () {
             return true;
         }
 
+        // ----- /brand -----
+        if (cmd === 'brand' && arg) {
+            buildAndFetch({
+                query: `brand=${encodeURIComponent(arg)}`,
+                commandData: { brand: arg },
+            });
+            return true;
+        }
+
+        // ----- /attribute -----
+        if (cmd === 'attribute' && arg) {
+            const parts = arg.trim().split(/\s+/);
+            const attr = parts[0]?.toLowerCase();
+            const value = parts.slice(1).join('-').toLowerCase();
+
+            if (attr && value) {
+                buildAndFetch({
+                    query: `attribute=${encodeURIComponent(attr)}&value=${encodeURIComponent(value)}`,
+                    commandData: { attribute: attr, value },
+                });
+                return true;
+            }
+        }
+
+        // ----- /variation -----
+        if (cmd === 'variation' && arg) {
+            const parts = arg.trim().split(/\s+/);
+            const attr = parts[0]?.toLowerCase();
+            const value = parts.slice(1).join('-').toLowerCase();
+
+            if (attr && value) {
+                buildAndFetch({
+                    query: `variation=${encodeURIComponent(attr)}&value=${encodeURIComponent(value)}`,
+                    commandData: { variation: attr, value },
+                });
+                return true;
+            }
+        }
+
         // ----- /price -----
         if (cmd === 'price' && arg) {
-            const nums = arg.split(/\s+/)
+            const parts = arg.trim().split(/\s+/);
+            const nums = parts
                 .map(v => parseFloat(v))
                 .filter(v => !isNaN(v) && v >= 0);
 
-            if (nums.length === 0) {
-                showMessage(InitPluginSuiteLiveSearch.i18n.no_results);
-                return true;
-            }
+            const sortRaw = parts.find(p => p === 'sort' || p === 'rsort');
+            const sort = sortRaw === 'sort' ? 'sort' : sortRaw === 'rsort' ? 'rsort' : '';
 
             const min = nums[0] ?? '';
             const max = nums[1] ?? '';
@@ -1172,10 +1247,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const queryParts = [];
             if (min !== '') queryParts.push(`min_price=${min}`);
             if (max !== '') queryParts.push(`max_price=${max}`);
+            if (sort) queryParts.push(`price_order=${sort}`);
 
             buildAndFetch({
                 query: queryParts.join('&'),
-                commandData: { min, max },
+                commandData: { min, max, sort },
             });
             return true;
         }
@@ -1491,6 +1567,38 @@ document.addEventListener('DOMContentLoaded', function () {
         const fragment = document.createDocumentFragment();
 
         data.forEach(item => {
+            if (item.type === 'coupon') {
+                const el = document.createElement('div');
+                el.className = 'ils-item ils-coupon-item';
+                el.setAttribute('data-id', item.id || '');
+                el.setAttribute('data-title', stripHtml(item.title || ''));
+
+                const metaHtml = (item.meta || []).map(text => `<li>${text}</li>`).join('');
+                const desc = stripHtml(item.desc || '');
+                const code = stripHtml(item.title || '');
+
+                el.innerHTML = `
+                    <div class="ils-coupon-box">
+                        <div class="ils-coupon-code"><code>${code}</code></div>
+                        <div class="ils-coupon-desc">${desc}</div>
+                        <ul class="ils-coupon-meta">${metaHtml}</ul>
+                    </div>
+                `;
+
+                el.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navigator.clipboard.writeText(code).then(() => {
+                        el.classList.add('ils-copied');
+                        setTimeout(() => {
+                            el.classList.remove('ils-copied');
+                        }, 1000);
+                    });
+                });
+
+                fragment.appendChild(el);
+                return;
+            }
+
             const postId = item.id;
             const finalUrl = addUtm(item.url);
             const isProduct = item.post_type === 'product';
@@ -1732,12 +1840,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        const paramExtras = '&no_fallback=1';
+
         const primaryFetch = fetch(`${InitPluginSuiteLiveSearch.api}?term=${encodeURIComponent(term)}`)
             .then(res => res.json())
             .catch(() => []);
 
         const extraFetches = (InitPluginSuiteLiveSearch.cross_sites || []).map(site => {
-            return fetch(`${site.url}/wp-json/initlise/v1/search?term=${encodeURIComponent(term)}`)
+            return fetch(`${site.url}/wp-json/initlise/v1/search?term=${encodeURIComponent(term)}${paramExtras}`)
                 .then(res => res.json())
                 .then(data => data.map(item => ({ ...item, _origin: site.label, _origin_url: site.url })))
                 .catch(() => []);
@@ -1807,7 +1917,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (InitPluginSuiteLiveSearch?.trigger?.input_focus) {
         document.addEventListener('focusin', function (e) {
-            if (e.target.matches('input[name="s"]')) {
+            if (e.target.matches('input[name="s"]') || e.target.closest('.ils-input-launch')) {
                 e.preventDefault();
                 openModal();
             }

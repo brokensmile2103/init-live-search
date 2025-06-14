@@ -548,3 +548,167 @@ body.admin-bar #ils-modal .ils-content {
 .ils-meta .ils-info .screen-reader-text {
     display: none;
 }
+
+/* Coupon */
+.ils-coupon-item {
+    background: #fff;
+    border-left: 4px solid #3b82f6;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s;
+}
+.ils-coupon-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.ils-coupon-item.ils-copied {
+    border-left-color: #22c55e;
+}
+.ils-coupon-code {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 6px;
+    cursor: pointer;
+}
+.ils-coupon-code code {
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+.ils-copy-btn {
+    background: #3b82f6;
+    color: white;
+    font-size: 0.875rem;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.ils-copy-btn:hover {
+    background: #2563eb;
+}
+.ils-coupon-desc {
+    font-size: 0.95rem;
+    color: #4b5563;
+    margin-bottom: 6px;
+}
+.ils-coupon-meta {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.ils-coupon-meta li::before {
+    content: "• ";
+    color: #3b82f6;
+}
+
+/* ===== Init Live Search Shortcode ===== */
+
+/* ICON BUTTON */
+.ils-icon-launch {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    color: inherit;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    padding: 4px;
+    font: inherit;
+    transition: opacity 0.2s ease;
+}
+.ils-icon-launch:hover {
+    opacity: 0.7;
+}
+.ils-icon-launch svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+/* Optional label */
+.ils-icon-label {
+    font-size: 15px;
+    line-height: 1;
+}
+
+/* INPUT FORM */
+.ils-input-launch {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 9999px;
+    padding: 0 10px;
+    background: #fff;
+    max-width: 100%;
+    transition: border 0.2s;
+}
+.ils-input-launch:focus-within {
+    border-color: #999;
+}
+.ils-input-launch input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 15px;
+    padding: 10px 0;
+    font-family: inherit;
+    color: inherit;
+}
+.ils-input-launch button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+}
+.ils-input-launch button svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+/* ===== Shortcode Search - Dark mode hỗ trợ class trực tiếp ===== */
+
+/* ICON BUTTON */
+.ils-icon-launch.dark {
+    color: #eee;
+}
+.ils-icon-launch.dark:hover {
+    opacity: 0.8;
+}
+
+/* INPUT FORM */
+.ils-input-launch.dark {
+    background: #1e1e1e;
+    border-color: #444;
+    color: #eee;
+}
+.ils-input-launch.dark:focus-within {
+    border-color: #666;
+}
+.ils-input-launch.dark input {
+    color: #eee;
+}
+.ils-input-launch.dark button {
+    color: #eee;
+}
+.ils-input-launch.dark button svg {
+    fill: #eee;
+}

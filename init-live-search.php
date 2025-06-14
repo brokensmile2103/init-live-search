@@ -3,7 +3,7 @@
  * Plugin Name: Init Live Search
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
  * Description: A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API.
- * Version: 1.7.0
+ * Version: 1.7.1
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-live-search
@@ -18,7 +18,7 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.7.0');
+define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.7.1');
 define('INIT_PLUGIN_SUITE_LS_SLUG',           'init-live-search');
 define('INIT_PLUGIN_SUITE_LS_GROUP_GENERAL',  'init_live_search_group_general');
 define('INIT_PLUGIN_SUITE_LS_OPTION',         'init_plugin_suite_live_search_settings');
@@ -144,11 +144,15 @@ add_action('wp_enqueue_scripts', function () {
 
     if (!empty($options['post_types']) && in_array('product', $options['post_types'], true)) {
         $woo_commands = [
-            'product'  => __('Search all products', 'init-live-search'),
-            'on-sale'  => __('Show only products on sale', 'init-live-search'),
-            'stock'    => __('Show only in-stock products', 'init-live-search'),
-            'sku'      => __('Search product by SKU', 'init-live-search'),
-            'price'    => __('Filter products by price range', 'init-live-search'),
+            'product'   => __('Search all products', 'init-live-search'),
+            'on-sale'   => __('Show only products on sale', 'init-live-search'),
+            'stock'     => __('Show only in-stock products', 'init-live-search'),
+            'sku'       => __('Search product by SKU', 'init-live-search'),
+            'brand'     => __('Filter products by brand slug', 'init-live-search'),
+            'price'     => __('Filter products by price range', 'init-live-search'),
+            'attribute' => __('Filter products by attribute (e.g. color)', 'init-live-search'),
+            'variation' => __('Filter products by variation value', 'init-live-search'),
+            'coupon'    => __('Show all available coupons', 'init-live-search'),
         ];
         $commands += $woo_commands;
     }
@@ -275,7 +279,7 @@ function init_plugin_suite_live_search_add_settings_link($links) {
 // Includes
 if (is_dir(INIT_PLUGIN_SUITE_LS_INCLUDES_PATH)) {
     // Load internal modules (utils first, then main logic)
-    foreach (['search-core.php', 'utils.php', 'rest-api.php', 'settings-page.php', 'tracking.php'] as $file) {
+    foreach (['search-core.php', 'utils.php', 'rest-api.php', 'settings-page.php', 'tracking.php', 'shortcodes.php'] as $file) {
         $path = INIT_PLUGIN_SUITE_LS_INCLUDES_PATH . $file;
         if (file_exists($path)) {
             require_once $path;

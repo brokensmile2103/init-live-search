@@ -285,8 +285,17 @@ msgstr "Chỉ hiển thị sản phẩm còn hàng"
 msgid "Search product by SKU"
 msgstr "Tìm sản phẩm theo mã SKU"
 
+msgid "Filter products by brand slug"
+msgstr "Lọc sản phẩm theo thương hiệu (slug)"
+
 msgid "Filter products by price range"
 msgstr "Lọc sản phẩm theo phạm vi giá"
+
+msgid "Filter products by attribute (e.g. color)"
+msgstr "Lọc sản phẩm theo thuộc tính (ví dụ: màu sắc)"
+
+msgid "Filter products by variation value"
+msgstr "Lọc sản phẩm theo giá trị biến thể"
 
 msgid "Init Smart Tag-Aware Search"
 msgstr "Init Smart Tag-Aware Search"
@@ -461,3 +470,24 @@ msgstr "Khi có dữ liệu, hệ thống sẽ lấy kết quả từ các domai
 
 msgid "Each external site must also have the Init Live Search plugin installed and active."
 msgstr "Mỗi site bên ngoài cũng phải cài và kích hoạt plugin Init Live Search."
+
+msgid "Save %s%%"
+msgstr "Giảm %s%%"
+
+msgid "Save %s"
+msgstr "Giảm %s"
+
+msgid "Remaining: %d uses"
+msgstr "Còn lại: %d lượt"
+
+msgid "Unlimited uses"
+msgstr "Không giới hạn lượt"
+
+msgid "Expires on: %s"
+msgstr "Hết hạn: %s"
+
+msgid "No expiration"
+msgstr "Không giới hạn thời gian"
+
+msgid "Show all available coupons"
+msgstr "Hiển thị tất cả mã giảm giá đang có"

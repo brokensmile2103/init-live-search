@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.7.0  
+Stable tag: 1.7.1  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -39,6 +39,8 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 - **Easy Setup**: just enter `Site Name|https://example.com/` — no auth or CORS needed  
 - **Auto Labeling**: each external result is tagged (e.g. “Init Docs”) for clarity  
 - **Fully REST-Powered**: blazing-fast, no iframe, no extra dependencies  
+- **WooCommerce Slash Commands**: now includes `/brand`, `/attribute`, `/variation`, and `/price ... sort` — fully extendable on top of existing `/product`, `/sku`, `/on-sale`, and more  
+- **New Shortcode**: insert search input or icon anywhere via `[init_live_search]`
 
 == Features ==
 
@@ -115,7 +117,20 @@ Options: `dark`, `light`, `auto`
 - Escape — close modal and reset state
 - Slash (/) — start a command instantly (e.g., `/recent`, `/id 123`)
 
-== Developer Reference: Filters and Hooks ==
+== Developer Reference: Shortcodes, Filters, and Hooks ==
+
+== Shortcodes ==
+
+=== `[init_live_search]` ===  
+Display a search icon or input anywhere that opens the Init Live Search modal.
+
+**Attributes:**
+- `type`: `icon` (default) or `input` – choose between a clickable icon or a search box  
+- `placeholder`: (optional) text inside the input if `type="input"`  
+- `label`: (optional) adds a label next to the icon if `type="icon"`  
+- `class`: (optional) add custom classes like `dark`, `my-style`, etc.  
+- `stroke_width`: (optional) set the stroke width for the search icon (default: `1`)  
+- `radius`: (optional) override the border radius of the input form (default: `9999px` from CSS; only applied if value differs)
 
 == Filters for Developers ==
 
@@ -375,6 +390,19 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.7.1 – June 14, 2025 =
+- Massive WooCommerce slash command expansion  
+  - Added `/brand`, `/attribute`, `/variation`, and `/coupon` support  
+  - `/coupon` returns active, usable coupons with usage info and expiration  
+  - Fully compatible with custom taxonomies and `pa_...` attributes  
+- Improved `/price` slash command  
+  - Now supports optional `sort` / `rsort` keywords  
+  - Full backward compatibility  
+- Cross-site search refinement  
+  - Automatically disables single-word fallback on both source and remote sites for cleaner results  
+- New `[init_live_search]` shortcode  
+  - Allows inserting a search icon or input anywhere, with custom classes and optional dark mode
 
 = 1.7.0 – June 11, 2025 =
 - Added Cross-site Search  
