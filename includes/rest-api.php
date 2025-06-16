@@ -76,6 +76,7 @@ function init_plugin_suite_live_search_search($request) {
     $term = $request->get_param('term');
     $args = [
         'force_mode'  => $request->get_param('force_mode'),
+        // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
         'exclude'     => $request->get_param('exclude'),
         'no_fallback' => $request->get_param('no_fallback') ? true : false,
     ];
@@ -655,22 +656,26 @@ function init_plugin_suite_live_search_coupon($request) {
         if (!$desc) {
             $amount = wc_format_coupon_amount($coupon->get_amount());
             $desc = $coupon->get_discount_type() === 'percent'
-                ? sprintf(__('Save %s%%', 'init-plugin-suite'), $amount)
-                : sprintf(__('Save %s', 'init-plugin-suite'), wc_price($amount));
+                // translators: %s is the discount percentage (e.g. 20 for 20%)
+                ? sprintf(__('Save %s%%', 'init-live-search'), $amount)
+                // translators: %s is the monetary discount amount (e.g. $10)
+                : sprintf(__('Save %s', 'init-live-search'), wc_price($amount));
         }
 
         $meta = [];
 
         if ($limit) {
-            $meta[] = sprintf(__('Remaining: %d uses', 'init-plugin-suite'), $limit - $used);
+            // translators: %d is the number of remaining uses
+            $meta[] = sprintf(__('Remaining: %d uses', 'init-live-search'), $limit - $used);
         } else {
-            $meta[] = __('Unlimited uses', 'init-plugin-suite');
+            $meta[] = __('Unlimited uses', 'init-live-search');
         }
 
         if ($expiry) {
-            $meta[] = sprintf(__('Expires on: %s', 'init-plugin-suite'), $expiry->date_i18n(get_option('date_format')));
+            // translators: %s is the expiration date
+            $meta[] = sprintf(__('Expires on: %s', 'init-live-search'), $expiry->date_i18n(get_option('date_format')));
         } else {
-            $meta[] = __('No expiration', 'init-plugin-suite');
+            $meta[] = __('No expiration', 'init-live-search');
         }
 
         $results[] = [

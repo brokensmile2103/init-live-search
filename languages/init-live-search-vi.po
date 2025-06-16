@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init Live Search 1.7.0\n"
+"Project-Id-Version: Init Live Search 1.7.2\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -491,3 +491,39 @@ msgstr "Không giới hạn thời gian"
 
 msgid "Show all available coupons"
 msgstr "Hiển thị tất cả mã giảm giá đang có"
+
+msgid "Copy"
+msgstr "Sao chép"
+
+msgid "Copied!"
+msgstr "Đã sao chép!"
+
+msgid "Close"
+msgstr "Đóng"
+
+msgid "Shortcode Preview"
+msgstr "Xem trước Shortcode"
+
+msgid "Shortcode Builder"
+msgstr "Trình tạo Shortcode"
+
+msgid "Type"
+msgstr "Kiểu"
+
+msgid "Placeholder (input mode)"
+msgstr "Gợi ý nhập (chế độ ô nhập)"
+
+msgid "Search..."
+msgstr "Tìm kiếm..."
+
+msgid "Label (icon mode)"
+msgstr "Nhãn (chế độ icon)"
+
+msgid "Custom CSS class"
+msgstr "Lớp CSS tùy chỉnh"
+
+msgid "Stroke Width"
+msgstr "Độ dày nét vẽ"
+
+msgid "Border Radius (input mode)"
+msgstr "Bo góc (chế độ ô nhập)"

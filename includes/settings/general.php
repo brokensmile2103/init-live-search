@@ -291,4 +291,61 @@ unset($post_types['attachment']);
             </p>
         </li>
     </ol>
+    <div id="shortcode-builder-target"></div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const i18n = window.InitShortcodeBuilder?.i18n || {};
+    const t = (key, fallback) => i18n[key] || fallback;
+
+    const btn = renderShortcodeBuilderButton({
+        label: t('shortcode_builder', 'Shortcode Builder'),
+        dashicon: 'editor-code',
+        className: 'button-primary',
+        onClick: () => {
+            initShortcodeBuilder({
+                shortcode: 'init_live_search',
+                config: {
+                    label: t('init_live_search', 'Init Live Search'),
+                    attributes: {
+                        type: {
+                            label: t('type', 'Type'),
+                            type: 'select',
+                            options: ['icon', 'input'],
+                            default: 'icon'
+                        },
+                        placeholder: {
+                            label: t('placeholder', 'Placeholder (input mode)'),
+                            type: 'text',
+                            default: t('placeholder_default', 'Search...')
+                        },
+                        label: {
+                            label: t('label', 'Label (icon mode)'),
+                            type: 'text',
+                            default: ''
+                        },
+                        class: {
+                            label: t('custom_class', 'Custom CSS class'),
+                            type: 'text',
+                            default: ''
+                        },
+                        stroke_width: {
+                            label: t('stroke_width', 'Stroke Width'),
+                            type: 'number',
+                            default: 1
+                        },
+                        radius: {
+                            label: t('radius', 'Border Radius (input mode)'),
+                            type: 'text',
+                            default: '9999px'
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+    document.getElementById('shortcode-builder-target')?.appendChild(btn);
+});
+</script>

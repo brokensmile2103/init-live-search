@@ -3,6 +3,7 @@ if (!defined('ABSPATH')) exit;
 
 // Xác định tab đang chọn
 $current_tab = 'general';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only reading $_GET['tab'] to load admin UI tab, no action performed
 if (isset($_GET['tab'])) {
     $current_tab = sanitize_key(wp_unslash($_GET['tab']));
 }
@@ -152,7 +153,7 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
         'init_plugin_suite_live_search_admin',
         INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'js/admin.js',
         [],
-        '1.0',
+        INIT_PLUGIN_SUITE_LS_VERSION,
         true
     );
     wp_localize_script('init_plugin_suite_live_search_admin', 'init_plugin_suite_live_search_ajax', [

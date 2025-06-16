@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.7.1  
+Stable tag: 1.7.2  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -379,6 +379,13 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.7.2 – June 16, 2025 =
+- Added Shortcode Builder support  
+  - Visual builder now available for `[init_live_search]` shortcode  
+  - Accessible via admin UI with icon, input, label, and style configuration  
+  - Supports dynamic shortcode preview, one-click copy, and instant insert  
+  - Fully localized with customizable labels via `wp_localize_script()`  
 
 = 1.7.1 – June 14, 2025 =
 - Massive WooCommerce slash command expansion  

@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init Live Search 1.7.0\n"
+"Project-Id-Version: Init Live Search 1.7.2\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -487,4 +487,40 @@ msgid "No expiration"
 msgstr ""
 
 msgid "Show all available coupons"
+msgstr ""
+
+msgid "Copy"
+msgstr ""
+
+msgid "Copied!"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Shortcode Preview"
+msgstr ""
+
+msgid "Shortcode Builder"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Placeholder (input mode)"
+msgstr ""
+
+msgid "Search..."
+msgstr ""
+
+msgid "Label (icon mode)"
+msgstr ""
+
+msgid "Custom CSS class"
+msgstr ""
+
+msgid "Stroke Width"
+msgstr ""
+
+msgid "Border Radius (input mode)"
 msgstr ""
