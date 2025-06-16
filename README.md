@@ -4,7 +4,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.7.1-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.7.2-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -24,7 +24,8 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - **WooCommerce Slash Expansion**: added support for `/brand`, `/attribute`, `/variation`, `/coupon`  
 - **Improved `/price` Command**: now supports `sort` and `rsort` modifiers  
 - **Cleaner Cross-site Results**: disables single-word fallback for external queries  
-- **New Shortcode**: `[init_live_search]` to render a search icon or input anywhere  
+- **New Shortcode**: `[init_live_search]` to render a search icon or input anywhere
+- **Visual Shortcode Builder**: build `[init_live_search]` shortcode visually with live preview
 
 ## Features
 
@@ -71,6 +72,8 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 | `/random`         | Open a random published post instantly       |
 
 ## Shortcodes
+
+Easily generate shortcodes using the built-in **Shortcode Builder UI** under *Settings → Init Live Search*.  
 
 ### `[init_live_search]`  
 Display a search icon or input anywhere that opens the Init Live Search modal.
