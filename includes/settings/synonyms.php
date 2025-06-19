@@ -1,6 +1,6 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; ?>
-
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 $custom_synonyms = get_option(INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION, '{}');
 ?>
 

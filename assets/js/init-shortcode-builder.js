@@ -4,63 +4,134 @@
         const t = (key, fallback) => i18n[key] || fallback;
 
         let modal = document.getElementById('init-shortcode-modal');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'init-shortcode-modal';
-            modal.style = `
-                position:fixed;top:0;left:0;width:100%;height:100%;
-                background:rgba(0,0,0,0.5);z-index:10000;
-                display:flex;align-items:center;justify-content:center;
-            `;
-            modal.innerHTML = `
-                <div id="init-shortcode-content" style="background:#fff;padding:20px;border-radius:4px;max-width:600px;width:100%;position:relative;">
-                    <button id="init-shortcode-close-top" style="position:absolute;top:10px;right:10px;border:none;background:none;font-size:20px;cursor:pointer;"><svg width="20" height="20" viewBox="0 0 24 24"><path d="m21 21-9-9m0 0L3 3m9 9 9-9m-9 9-9 9" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
+        if (modal) modal.remove(); // always recreate to reset state
 
-        const closeModal = () => modal.remove();
+        modal = document.createElement('div');
+        modal.id = 'init-shortcode-modal';
+        modal.style = `
+            position:fixed;top:0;left:0;width:100%;height:100%;
+            background:rgba(0,0,0,0.5);z-index:10000;
+            display:flex;align-items:center;justify-content:center;
+        `;
 
-        modal.addEventListener('click', e => {
-            if (e.target === modal) closeModal();
-        });
+        const content = document.createElement('div');
+        content.id = 'init-shortcode-content';
+        content.style = `
+            background:#fff;padding:20px;border-radius:4px;
+            max-width:600px;width:100%;position:relative;
+        `;
 
-        const root = modal.querySelector('#init-shortcode-content');
-        let html = '';
-        html += `<h2 style="margin-top:0;">${config.label}</h2>`;
-        html += '<table class="form-table"><tbody>';
+        const closeBtn = document.createElement('button');
+        closeBtn.id = 'init-shortcode-close-top';
+        closeBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24"><path d="m21 21-9-9m0 0L3 3m9 9 9-9m-9 9-9 9" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        closeBtn.style = `
+            position:absolute;top:10px;right:10px;
+            border:none;background:none;font-size:20px;cursor:pointer;
+        `;
+        content.appendChild(closeBtn);
+
+        // Title
+        const heading = document.createElement('h2');
+        heading.textContent = config.label;
+        heading.style.marginTop = '0';
+        content.appendChild(heading);
+
+        // Form table
+        const table = document.createElement('table');
+        table.className = 'form-table';
+        const tbody = document.createElement('tbody');
 
         const state = {};
+
         for (const [key, attr] of Object.entries(config.attributes)) {
             state[key] = attr.default || '';
-            html += '<tr><th><label>' + attr.label + '</label></th><td>';
+
+            const tr = document.createElement('tr');
+            const th = document.createElement('th');
+            const td = document.createElement('td');
+
+            th.innerHTML = `<label>${attr.label}</label>`;
 
             if (attr.type === 'select') {
-                html += `<select data-key="${key}" class="regular-text">`;
+                const select = document.createElement('select');
+                select.className = 'regular-text';
+                select.setAttribute('data-key', key);
                 attr.options.forEach(opt => {
-                    const selected = opt === attr.default ? 'selected' : '';
-                    html += `<option value="${opt}" ${selected}>${opt}</option>`;
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    if (opt === attr.default) option.selected = true;
+                    select.appendChild(option);
                 });
-                html += '</select>';
+                td.appendChild(select);
             } else if (attr.type === 'checkbox') {
-                const checked = attr.default ? 'checked' : '';
-                html += `<label><input type="checkbox" data-key="${key}" ${checked}> ${attr.label}</label>`;
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.setAttribute('data-key', key);
+                if (attr.default) checkbox.checked = true;
+                td.appendChild(checkbox);
+                td.append(' ' + attr.label);
             } else {
-                html += `<input type="${attr.type}" value="${attr.default || ''}" data-key="${key}" class="regular-text">`;
+                const input = document.createElement('input');
+                input.type = attr.type;
+                input.className = 'regular-text';
+                input.value = attr.default || '';
+                input.setAttribute('data-key', key);
+                td.appendChild(input);
             }
 
-            html += '</td></tr>';
+            tr.appendChild(th);
+            tr.appendChild(td);
+            tbody.appendChild(tr);
         }
 
-        html += '</tbody></table>';
-        html += `<p><label><strong>${t('shortcode_preview', 'Shortcode Preview')}:</strong></label><br>`;
-        html += '<textarea id="shortcode-preview" readonly class="widefat" rows="3" style="margin-top:4px;"></textarea></p>';
-        html += `<p><button id="copy-shortcode" class="button button-primary">${t('copy', 'Copy')}</button>`;
-        html += ` <button id="close-shortcode" class="button">${t('close', 'Close')}</button></p>`;
+        table.appendChild(tbody);
+        content.appendChild(table);
 
-        root.innerHTML = root.innerHTML.replace('</button>', '</button>' + html);
+        // Preview textarea
+        const previewLabel = document.createElement('label');
+        previewLabel.innerHTML = `<strong>${t('shortcode_preview', 'Shortcode Preview')}:</strong>`;
+        const preview = document.createElement('textarea');
+        preview.id = 'shortcode-preview';
+        preview.className = 'widefat';
+        preview.rows = 3;
+        preview.readOnly = true;
+        preview.style.marginTop = '4px';
+        content.appendChild(previewLabel);
+        content.appendChild(document.createElement('br'));
+        content.appendChild(preview);
 
+        // Buttons
+        const actions = document.createElement('p');
+        const copyBtn = document.createElement('button');
+        copyBtn.id = 'copy-shortcode';
+        copyBtn.className = 'button button-primary';
+        copyBtn.textContent = t('copy', 'Copy');
+
+        const closeBottomBtn = document.createElement('button');
+        closeBottomBtn.id = 'close-shortcode';
+        closeBottomBtn.className = 'button';
+        closeBottomBtn.textContent = t('close', 'Close');
+
+        actions.appendChild(copyBtn);
+        actions.append(' ');
+        actions.appendChild(closeBottomBtn);
+        content.appendChild(actions);
+
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+
+        // Close modal logic
+        const closeModal = () => modal.remove();
+        setTimeout(() => {
+            modal.addEventListener('click', e => {
+                if (e.target === modal) closeModal();
+            });
+        }, 20);
+        closeBtn.addEventListener('click', closeModal);
+        closeBottomBtn.addEventListener('click', closeModal);
+
+        // Live preview
         const updatePreview = () => {
             const parts = [shortcode];
             for (const [key, val] of Object.entries(state)) {
@@ -70,47 +141,43 @@
                     parts.push(`${key}="${val}"`);
                 }
             }
-            document.getElementById('shortcode-preview').value = '[' + parts.join(' ') + ']';
+            preview.value = `[${parts.join(' ')}]`;
         };
 
-        const attachEvents = () => {
-            root.querySelectorAll('[data-key]').forEach(input => {
-                input.addEventListener('input', e => {
-                    const key = e.target.getAttribute('data-key');
-                    if (e.target.type === 'checkbox') {
-                        state[key] = e.target.checked;
-                    } else {
-                        state[key] = e.target.value;
-                    }
-                    updatePreview();
-                });
+        // Field listeners
+        content.querySelectorAll('[data-key]').forEach(el => {
+            el.addEventListener('input', e => {
+                const key = el.getAttribute('data-key');
+                if (el.type === 'checkbox') {
+                    state[key] = el.checked;
+                } else {
+                    state[key] = el.value;
+                }
+                updatePreview();
             });
+        });
 
-            document.getElementById('copy-shortcode').addEventListener('click', () => {
-                const textarea = document.getElementById('shortcode-preview');
-                navigator.clipboard.writeText(textarea.value).then(() => {
-                    const btn = document.getElementById('copy-shortcode');
-                    const original = t('copy', 'Copy');
-                    btn.textContent = t('copied', 'Copied!');
-                    setTimeout(() => btn.textContent = original, 2000);
-                });
+        // Copy to clipboard
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(preview.value).then(() => {
+                const original = t('copy', 'Copy');
+                copyBtn.textContent = t('copied', 'Copied!');
+                setTimeout(() => (copyBtn.textContent = original), 2000);
             });
-
-            document.getElementById('close-shortcode').addEventListener('click', closeModal);
-            document.getElementById('init-shortcode-close-top').addEventListener('click', closeModal);
-        };
+        });
 
         updatePreview();
-        attachEvents();
     }
 
     function renderShortcodeBuilderButton({ label, dashicon, onClick, className = '' }) {
         const btn = document.createElement('button');
         btn.className = `button ${className}`;
-        btn.style.margin = '10px 0';
+        btn.type = 'button';
         btn.style.display = 'inline-flex';
         btn.style.alignItems = 'center';
         btn.style.gap = '6px';
+        btn.style.marginRight = '10px';
+        btn.style.marginBottom = '10px';
         btn.addEventListener('click', onClick);
 
         if (dashicon) {
@@ -124,6 +191,35 @@
         return btn;
     }
 
+    function renderShortcodeBuilderPanel({ title, buttons }) {
+        const panel = document.createElement('div');
+        panel.style.margin = '16px 0';
+        panel.style.border = '1px solid #ccd0d4';
+        panel.style.padding = '12px 16px';
+        panel.style.borderRadius = '4px';
+        panel.style.background = '#f9f9f9';
+
+        const heading = document.createElement('h2');
+        heading.textContent = title;
+        heading.style.marginTop = '0';
+        heading.style.fontSize = '16px';
+        heading.style.marginBottom = '12px';
+        panel.appendChild(heading);
+
+        const btnGroup = document.createElement('div');
+        btnGroup.style.display = 'flex';
+        btnGroup.style.flexWrap = 'wrap';
+        btnGroup.style.gap = '10px';
+
+        buttons.forEach(btn => {
+            btnGroup.appendChild(renderShortcodeBuilderButton(btn));
+        });
+
+        panel.appendChild(btnGroup);
+        return panel;
+    }
+
     global.initShortcodeBuilder = initShortcodeBuilder;
     global.renderShortcodeBuilderButton = renderShortcodeBuilderButton;
+    global.renderShortcodeBuilderPanel = renderShortcodeBuilderPanel;
 })(window);

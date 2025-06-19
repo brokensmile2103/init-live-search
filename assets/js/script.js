@@ -1451,6 +1451,11 @@ document.addEventListener('DOMContentLoaded', function () {
         suggestionBox.style.display = 'block';
     }
 
+    function hideLoading() {
+        const loader = document.querySelector('.ils-loading-spinner');
+        if (loader) loader.remove();
+    }
+
     function setCommand(cmd, param = '', arg = '', extra = {}) {
         currentCommand = { cmd, param, arg, ...extra };
         currentPage = 1;
@@ -1556,7 +1561,9 @@ document.addEventListener('DOMContentLoaded', function () {
             resultsContainer.innerHTML = '';
         }
 
-        if (!data.length) {
+        hideLoading();
+
+        if (!data.length && !append) {
             resultsContainer.innerHTML = `<p class="ils-empty">${InitPluginSuiteLiveSearch.i18n.no_results}</p>`;
             return;
         }
@@ -1796,7 +1803,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // ===== Handle Slash Command Logic =====
+        // ===== Slash Command =====
         if (InitPluginSuiteLiveSearch.enable_slash && term.startsWith('/')) {
             const parts = term.slice(1).trim().split(/\s+/);
             const cmdOnly = parts[0]?.toLowerCase();
@@ -1841,34 +1848,65 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const paramExtras = '&no_fallback=1';
+        const allResults = [];
 
         const primaryFetch = fetch(`${InitPluginSuiteLiveSearch.api}?term=${encodeURIComponent(term)}`)
             .then(res => res.json())
             .catch(() => []);
 
-        const extraFetches = (InitPluginSuiteLiveSearch.cross_sites || []).map(site => {
+        const crossSites = InitPluginSuiteLiveSearch.cross_sites || [];
+        const extraFetches = crossSites.map(site => {
             return fetch(`${site.url}/wp-json/initlise/v1/search?term=${encodeURIComponent(term)}${paramExtras}`)
                 .then(res => res.json())
-                .then(data => data.map(item => ({ ...item, _origin: site.label, _origin_url: site.url })))
+                .then(data => data.map(item => ({
+                    ...item,
+                    _origin: site.label,
+                    _origin_url: site.url
+                })))
                 .catch(() => []);
         });
 
-        Promise.all([primaryFetch, ...extraFetches]).then(results => {
-            const merged = results.flat();
+        primaryFetch.then(primaryData => {
+            if (primaryData.length) {
+                allResults.push(...primaryData);
+                setCommand('search', 'term', term);
+                saveSearchTerm(term);
+                renderResults(primaryData);
 
-            if (!merged.length) {
+                if (InitPluginSuiteLiveSearch.use_cache) {
+                    localStorage.setItem(cacheKey, JSON.stringify(primaryData));
+                }
+            }
+
+            let resolvedSites = 0;
+
+            if (!extraFetches.length && !primaryData.length) {
                 hasMoreResults = false;
                 resultsContainer.innerHTML = `<p class="ils-empty">${InitPluginSuiteLiveSearch.i18n.no_results}</p>`;
                 return;
             }
 
-            if (InitPluginSuiteLiveSearch.use_cache) {
-                localStorage.setItem(cacheKey, JSON.stringify(merged));
-            }
+            extraFetches.forEach(promise => {
+                promise.then(extraData => {
+                    resolvedSites++;
 
-            setCommand('search', 'term', term);
-            saveSearchTerm(term);
-            renderResults(merged);
+                    if (extraData.length) {
+                        allResults.push(...extraData);
+                        renderResults(extraData, true);
+
+                        if (InitPluginSuiteLiveSearch.use_cache) {
+                            const existing = JSON.parse(localStorage.getItem(cacheKey) || '[]');
+                            const updated = existing.concat(extraData);
+                            localStorage.setItem(cacheKey, JSON.stringify(updated));
+                        }
+                    }
+
+                    if (resolvedSites === extraFetches.length && allResults.length === 0) {
+                        hasMoreResults = false;
+                        resultsContainer.innerHTML = `<p class="ils-empty">${InitPluginSuiteLiveSearch.i18n.no_results}</p>`;
+                    }
+                });
+            });
         });
     }
 

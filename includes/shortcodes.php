@@ -1,7 +1,5 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 add_shortcode( 'init_live_search', 'init_live_search_shortcode' );
 function init_live_search_shortcode( $atts ) {

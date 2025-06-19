@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.7.2  
+Stable tag: 1.7.3  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -379,6 +379,12 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.7.3 – June 19, 2025 =
+- Refactored to true async search rendering (no more blocking)
+- Primary results render instantly, cross-site results stream in later
+- Fixed: loader now hides even when only remote results are shown
+- Fixed: "no result" only appears when all sources are empty
 
 = 1.7.2 – June 16, 2025 =
 - Added Shortcode Builder support  
