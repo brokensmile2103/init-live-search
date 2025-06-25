@@ -4,7 +4,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.7.3-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.7.4-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -25,6 +25,8 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - **Improved `/price` Command**: now supports `sort` and `rsort` modifiers  
 - **Cleaner Cross-site Results**: disables single-word fallback for external queries  
 - **New Shortcode**: `[init_live_search]` to render a search icon or input anywhere
+- **New Shortcode**: `[init_live_search_related_posts]` to render static, themeable related posts  
+- **Search Operators**: support for `+musthave` and `-mustnot` terms in queries  
 - **Visual Shortcode Builder**: build `[init_live_search]` shortcode visually with live preview
 
 ## Features
