@@ -27,7 +27,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - **New Shortcode**: `[init_live_search]` to render a search icon or input anywhere
 - **New Shortcode**: `[init_live_search_related_posts]` to render static, themeable related posts  
 - **Search Operators**: support for `+musthave` and `-mustnot` terms in queries  
-- **Visual Shortcode Builder**: build `[init_live_search]` shortcode visually with live preview
+- **Visual Shortcode Builder**: build `[init_live_search]` and `[init_live_search_related_posts]` shortcode visually with live preview
 
 ## Features
 
