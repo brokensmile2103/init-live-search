@@ -57,6 +57,16 @@ unset($post_types['attachment']);
             </td>
         </tr>
         <tr>
+            <th scope="row"><?php esc_html_e('Enable + / - Search Operators?', 'init-live-search'); ?></th>
+            <td>
+                <label>
+                    <input type="checkbox" name="init_plugin_suite_live_search_settings[enable_search_operators]" value="1" <?php checked(!empty($options['enable_search_operators']) && $options['enable_search_operators']); ?>>
+                    <?php esc_html_e('Allow using +word to force match, -word to exclude.', 'init-live-search'); ?>
+                </label>
+                <p class="description"><?php esc_html_e('Enable this if you want to support advanced users using must-have (+) and must-not-have (-) keyword operators.', 'init-live-search'); ?></p>
+            </td>
+        </tr>
+        <tr>
             <th scope="row"><?php esc_html_e('Cross-site Search Domains', 'init-live-search'); ?></th>
             <td>
                 <textarea name="init_plugin_suite_live_search_settings[cross_sites]" rows="5" class="large-text code"><?php echo esc_textarea($options['cross_sites'] ?? ''); ?></textarea>
@@ -293,67 +303,3 @@ unset($post_types['attachment']);
     </ol>
     <div id="shortcode-builder-target" data-plugin="init-live-search"></div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const i18n = window.InitShortcodeBuilder?.i18n || {};
-    const t = (key, fallback) => i18n[key] || fallback;
-
-    const target = document.querySelector('[data-plugin="init-live-search"]');
-    if (!target) return;
-
-    const panel = renderShortcodeBuilderPanel({
-        title: t('init_live_search', 'Init Live Search'),
-        buttons: [
-            {
-                label: t('shortcode_builder', 'Shortcode Builder'),
-                dashicon: 'editor-code',
-                className: 'button-default',
-                onClick: () => {
-                    initShortcodeBuilder({
-                        shortcode: 'init_live_search',
-                        config: {
-                            label: t('init_live_search', 'Init Live Search'),
-                            attributes: {
-                                type: {
-                                    label: t('type', 'Type'),
-                                    type: 'select',
-                                    options: ['icon', 'input'],
-                                    default: 'icon'
-                                },
-                                placeholder: {
-                                    label: t('placeholder', 'Placeholder (input mode)'),
-                                    type: 'text',
-                                    default: t('placeholder_default', 'Search...')
-                                },
-                                label: {
-                                    label: t('label', 'Label (icon mode)'),
-                                    type: 'text',
-                                    default: ''
-                                },
-                                class: {
-                                    label: t('custom_class', 'Custom CSS class'),
-                                    type: 'text',
-                                    default: ''
-                                },
-                                stroke_width: {
-                                    label: t('stroke_width', 'Stroke Width'),
-                                    type: 'number',
-                                    default: 1
-                                },
-                                radius: {
-                                    label: t('radius', 'Border Radius (input mode)'),
-                                    type: 'text',
-                                    default: '9999px'
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-        ]
-    });
-
-    target.appendChild(panel);
-});
-</script>

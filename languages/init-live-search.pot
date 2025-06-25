@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init Live Search 1.7.3\n"
+"Project-Id-Version: Init Live Search 1.7.4\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -523,4 +523,34 @@ msgid "Stroke Width"
 msgstr ""
 
 msgid "Border Radius (input mode)"
+msgstr ""
+
+msgid "Enable + / - Search Operators?"
+msgstr ""
+
+msgid "Allow using +word to force match, -word to exclude."
+msgstr ""
+
+msgid "Enable this if you want to support advanced users using must-have (+) and must-not-have (-) keyword operators."
+msgstr ""
+
+msgid "Image for: %s"
+msgstr ""
+
+msgid "Related Posts"
+msgstr ""
+
+msgid "Post ID (optional)"
+msgstr ""
+
+msgid "Number of Posts"
+msgstr ""
+
+msgid "Keyword (override)"
+msgstr ""
+
+msgid "Load CSS"
+msgstr ""
+
+msgid "Output Schema"
 msgstr ""

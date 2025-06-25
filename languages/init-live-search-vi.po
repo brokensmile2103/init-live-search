@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init Live Search 1.7.3\n"
+"Project-Id-Version: Init Live Search 1.7.4\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -527,3 +527,33 @@ msgstr "Độ dày nét vẽ"
 
 msgid "Border Radius (input mode)"
 msgstr "Bo góc (chế độ ô nhập)"
+
+msgid "Enable + / - Search Operators?"
+msgstr "Bật toán tử tìm kiếm + / -?"
+
+msgid "Allow using +word to force match, -word to exclude."
+msgstr "Cho phép dùng +từ để bắt buộc, -từ để loại trừ."
+
+msgid "Enable this if you want to support advanced users using must-have (+) and must-not-have (-) keyword operators."
+msgstr "Bật tuỳ chọn này nếu bạn muốn hỗ trợ người dùng nâng cao với toán tử bắt buộc (+) và loại trừ (-)."
+
+msgid "Image for: %s"
+msgstr "Ảnh minh họa cho: %s"
+
+msgid "Related Posts"
+msgstr "Bài Viết Liên Quan"
+
+msgid "Post ID (optional)"
+msgstr "ID bài viết (tùy chọn)"
+
+msgid "Number of Posts"
+msgstr "Số lượng bài viết"
+
+msgid "Keyword (override)"
+msgstr "Từ khóa (ghi đè)"
+
+msgid "Load CSS"
+msgstr "Tải CSS mặc định"
+
+msgid "Output Schema"
+msgstr "Xuất schema dữ liệu"

@@ -299,3 +299,34 @@ function init_plugin_suite_live_search_resolve_limit($options, $args) {
     }
     return 10;
 }
+
+// Generate smart and clean alt text for a post thumbnail.
+function init_plugin_suite_live_search_get_smart_post_thumbnail_alt( $post_id = null ) {
+    $post_id = $post_id ?: get_the_ID();
+    $thumb_id = get_post_thumbnail_id( $post_id );
+
+    // 1. Try alt from media library
+    $alt = get_post_meta( $thumb_id, '_wp_attachment_image_alt', true );
+    if ( ! empty( $alt ) ) {
+        return esc_attr( $alt );
+    }
+
+    // 2. Fallback to trimmed title
+    $title = get_the_title( $post_id );
+    $title = wp_strip_all_tags( $title );
+    $title = preg_replace( '/[^\p{L}\p{N}\s]+/u', '', $title ); // remove symbols
+    $title = trim( $title );
+    $short_title = wp_trim_words( $title, 6, '' );
+
+    // 3. Add generic prefix
+    // translators: %s is the post title used as fallback alt text
+    $alt = sprintf( __( 'Image for: %s', 'init-live-search' ), $short_title );
+
+    /**
+     * Filter the auto-generated image alt text.
+     *
+     * @param string $alt
+     * @param int    $post_id
+     */
+    return apply_filters( 'init_plugin_suite_live_search_get_smart_post_thumbnail_alt', esc_attr( $alt ), $post_id );
+}

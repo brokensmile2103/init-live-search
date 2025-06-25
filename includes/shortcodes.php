@@ -1,8 +1,8 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-add_shortcode( 'init_live_search', 'init_live_search_shortcode' );
-function init_live_search_shortcode( $atts ) {
+add_shortcode( 'init_live_search', 'init_plugin_suite_live_search_shortcode' );
+function init_plugin_suite_live_search_shortcode( $atts ) {
     $atts = shortcode_atts(
         [
             'type'          => 'icon', // icon | input
@@ -57,6 +57,62 @@ function init_live_search_shortcode( $atts ) {
     return ob_get_clean();
 }
 
+add_shortcode( 'init_live_search_related_posts', 'init_plugin_suite_live_search_related_posts_shortcode' );
+function init_plugin_suite_live_search_related_posts_shortcode( $atts ) {
+    $atts = shortcode_atts(
+        [
+            'id'      => get_the_ID(),
+            'count'   => 5,
+            'keyword' => '',
+            'css'     => '1',
+            'schema' => '1',
+        ],
+        $atts,
+        'init_live_search_related_posts'
+    );
+
+    $post_id = intval( $atts['id'] );
+    if ( ! $post_id || get_post_status( $post_id ) !== 'publish' ) {
+        return ''; // Không có post hợp lệ
+    }
+
+    $keyword = trim( $atts['keyword'] );
+    if ( $keyword === '' ) {
+        $keyword = get_the_title( $post_id );
+    }
+
+    // Load logic tìm bài liên quan – tạm gọi hàm chưa viết
+    $related_ids = init_plugin_suite_live_search_find_related_ids( $keyword, $post_id, intval( $atts['count'] ) );
+
+    if ( empty( $related_ids ) ) {
+        return '';
+    }
+
+    $wrapper_class = count( $related_ids ) >= 10 ? 'ils-related-list ils-related--columns' : 'ils-related-list';
+
+    // Enqueue CSS chỉ khi có shortcode và được bật (mặc định bật)
+    if ( $atts['css'] !== '0' ) {
+        wp_enqueue_style(
+            'init-live-search-related-posts',
+            INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'css/related-posts.css',
+            [],
+            INIT_PLUGIN_SUITE_LS_VERSION
+        );
+    }
+
+    ob_start();
+
+    // Template override
+    $template_path = locate_template( 'init-live-search/related-posts.php' );
+    if ( ! $template_path ) {
+        $template_path = INIT_PLUGIN_SUITE_LS_TEMPLATES_PATH . 'related-posts.php';
+    }
+
+    include $template_path;
+
+    return ob_get_clean();
+}
+
 add_action( 'admin_enqueue_scripts', function () {
     if ( ! current_user_can( 'manage_options' ) ) {
         return;
@@ -88,7 +144,21 @@ add_action( 'admin_enqueue_scripts', function () {
                 'custom_class'        => __( 'Custom CSS class', 'init-live-search' ),
                 'stroke_width'        => __( 'Stroke Width', 'init-live-search' ),
                 'radius'              => __( 'Border Radius (input mode)', 'init-live-search' ),
+                'related_posts'       => __( 'Related Posts', 'init-live-search' ),
+                'post_id'             => __( 'Post ID (optional)', 'init-live-search' ),
+                'post_count'          => __( 'Number of Posts', 'init-live-search' ),
+                'keyword_override'    => __( 'Keyword (override)', 'init-live-search' ),
+                'load_css'            => __( 'Load CSS', 'init-live-search' ),
+                'output_schema'       => __( 'Output Schema', 'init-live-search' ),
             ],
         ]
+    );
+
+    wp_enqueue_script(
+        'init-shortcode-panels',
+        INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'js/shortcodes.js',
+        [ 'init-shortcode-builder' ],
+        INIT_PLUGIN_SUITE_LS_VERSION,
+        true
     );
 } );

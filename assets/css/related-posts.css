@@ -1,0 +1,66 @@
+.ils-related-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin: 24px 0;
+}
+
+.ils-related-grid--columns {
+    grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 768px) {
+    .ils-related-grid--columns {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ils-related-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.ils-related-thumb-wrap {
+    flex-shrink: 0;
+    width: 85px;
+    height: 85px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #f5f5f5;
+}
+
+.ils-related-thumb-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}
+
+.ils-related-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.ils-related-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.ils-related-title a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.ils-related-title a:hover {
+    text-decoration: underline;
+}
+
+.ils-related-date {
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-top: 4px;
+}

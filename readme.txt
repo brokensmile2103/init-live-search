@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.7.3  
+Stable tag: 1.7.4  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -36,6 +36,15 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 - **New Shortcode**: `[init_live_search]`  
   - Insert a search input or icon anywhere  
   - Supports dark mode and custom classes
+- **Keyword Operators**: precision search using `+` and `-`  
+  - Use `+` to require keywords (e.g. `+nginx +ubuntu`)  
+  - Use `-` to exclude terms (`-centos` will filter out CentOS-related posts)  
+  - Works across all post types and supports synonym and fallback logic  
+- **Related Posts Shortcode**: `[init_live_search_related_posts]`  
+  - Display related posts using smart title-based matching  
+  - SEO-friendly: no REST call, renders full HTML  
+  - Includes template override support and optional schema markup  
+  - Auto layout: 2 columns on desktop if result count ≥ 10  
 
 == Features ==
 
@@ -78,6 +87,7 @@ Options: `dark`, `light`, `auto`
 - Choose post types to include in search  
 - Configure modal triggers (input focus, triple click, Ctrl+/)  
 - Enable slash commands (e.g. /recent, /tag, /id)  
+- Enable support for `+` and `-` keyword operators (must-have, must-not-have)  
 - Set default slash command to run on modal open (only if slash is enabled)   
 - Set debounce time and max results  
 - Choose search mode (title-only, tag-aware, full content)  
@@ -119,6 +129,16 @@ Display a search icon or input anywhere that opens the Init Live Search modal.
 - `class`: (optional) add custom classes like `dark`, `my-style`, etc.  
 - `stroke_width`: (optional) set the stroke width for the search icon (default: `1`)  
 - `radius`: (optional) override the border radius of the input form (default: `9999px` from CSS; only applied if value differs)
+
+**`[init_live_search_related_posts]`**  
+Display a list of related posts (static HTML) based on post title or keyword, optimized for SEO and fully themable.
+
+**Attributes:**
+- `id`: (optional) the post ID to find related posts for (defaults to current post)  
+- `count`: (optional) number of posts to display (default: `5`)  
+- `keyword`: (optional) override the keyword used for finding related posts  
+- `css`: `1` (default) or `0` – disable default CSS if you want to fully style it yourself  
+- `schema`: `1` (default) or `0` – disable JSON-LD `ItemList` output for SEO schema  
 
 == Filters for Developers ==
 
@@ -202,6 +222,11 @@ Customize the weighting array used to merge and sort post IDs from multiple sour
 Allow registration of custom slash commands to be displayed in the command list and handled via custom logic.  
 **Applies to:** slash command system (`/` prefix input)  
 **Params:** `array $commands`, `array $options`
+
+**`init_plugin_suite_live_search_get_smart_post_thumbnail_alt`**  
+Allow overriding the generated `alt` text for post thumbnails used in related post templates or result items.  
+**Applies to:** image accessibility / SEO rendering (`alt` attribute)  
+**Params:** `string $alt`, `int $post_id`
 
 == REST API Endpoints ==
 
@@ -379,6 +404,18 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.7.4 – June 25, 2025 =
+- Added optional support for `+` and `-` search operators  
+  - `+keyword`: must include  
+  - `-keyword`: must exclude  
+- Added new shortcode: `[init_live_search_related_posts]`  
+  - Display SEO-friendly related posts with static HTML  
+  - Auto-detect post title or use `keyword` param  
+  - Uses internal search logic (no REST or JS)  
+  - Fully themable via `init-live-search/related-posts.php`  
+  - Optional `css="0"` param to disable default styles  
+  - Optional `schema="0"` to disable JSON-LD ItemList output  
 
 = 1.7.3 – June 19, 2025 =
 - Refactored to true async search rendering (no more blocking)

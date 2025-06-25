@@ -97,6 +97,7 @@ function init_plugin_suite_live_search_sanitize_settings($input) {
         : 'none';
 
     $output['enable_slash'] = !empty($input['enable_slash']) ? '1' : '0';
+    $output['enable_search_operators'] = !empty($input['enable_search_operators']) ? 1 : 0;
     $output['max_results'] = min(100, max(1, absint($input['max_results'] ?? 10)));
 
     $allowed_modes = ['title', 'title_excerpt', 'title_content', 'title_tag'];

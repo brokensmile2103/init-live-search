@@ -40,6 +40,11 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
 
     if (empty($post_ids)) return [];
 
+    if ( ! empty( $args['exclude'] ) ) {
+        $exclude = array_map( 'absint', (array) $args['exclude'] );
+        $post_ids = array_values( array_diff( $post_ids, $exclude ) );
+    }
+
     [$keywords, $default_thumb] = init_plugin_suite_live_search_prepare_keywords_and_thumb($term);
 
     return apply_filters(
@@ -86,6 +91,46 @@ function init_plugin_suite_live_search_fallback_single_words($wpdb, $term, $post
 function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_types, $placeholders, $search_mode, $limit, $paged, $options, $args) {
     global $wpdb;
     $internal_limit = min($limit * 3, 300);
+
+    // Apply + / - operator logic only if enabled
+    $enable_ops = !empty($options['enable_search_operators']);
+    if ( $enable_ops ) {
+        // Parse + / - operators into must_include / must_exclude
+        $words = preg_split('/\s+/', trim($term));
+        
+        $must_have = [];
+        $must_not_have = [];
+        $normal = [];
+
+        foreach ($words as $w) {
+            if (strpos($w, '+') === 0) {
+                $word = substr($w, 1);
+                if (strlen($word) >= 2) {
+                    $must_have[] = $word;
+                }
+            } elseif (strpos($w, '-') === 0) {
+                $word = substr($w, 1);
+                if (strlen($word) >= 2) {
+                    $must_not_have[] = $word;
+                }
+            } else {
+                if (strlen($w) >= 2) {
+                    $normal[] = $w;
+                }
+            }
+        }
+
+        $must_have = array_slice($must_have, 0, 5);
+        $must_not_have = array_slice($must_not_have, 0, 5);
+
+        // Rebuild sanitized term for normal search
+        $term = implode(' ', array_merge($must_have, $normal));
+        $like = '%' . $wpdb->esc_like($term) . '%';
+
+        // Store operator filters in $args for later filtering (if needed)
+        $args['operator_must'] = $must_have;
+        $args['operator_must_not'] = $must_not_have;
+    }
 
     $post_ids = init_plugin_suite_live_search_get_post_ids_by_mode(
         $wpdb, $term, $like, $post_types, $placeholders, $search_mode, $internal_limit
@@ -198,6 +243,17 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
             ));
             $post_ids = array_unique(array_merge($post_ids, array_map('intval', $acf_ids)));
         }
+    }
+
+    // Filter out must-not-have posts if applicable
+    if ( $enable_ops && !empty($args['operator_must_not']) ) {
+        $post_ids = array_filter($post_ids, function($post_id) use ($args) {
+            $content = get_post_field('post_title', $post_id);
+            foreach ($args['operator_must_not'] as $bad) {
+                if (stripos($content, $bad) !== false) return false;
+            }
+            return true;
+        });
     }
 
     $post_ids = apply_filters('init_plugin_suite_live_search_post_ids', $post_ids, $term, $args);
@@ -432,4 +488,34 @@ function init_plugin_suite_live_search_expand_with_synonyms($term) {
     }
 
     return array_unique($expanded);
+}
+
+// Find related post IDs based on a keyword and exclude a specific post.
+function init_plugin_suite_live_search_find_related_ids( $keyword, $exclude_id, $limit = 5 ) {
+    global $wpdb;
+
+    // Làm sạch y chang REST
+    $keyword = sanitize_text_field( $keyword );
+    if ( strlen( $keyword ) < 3 ) return [];
+
+    $keyword = wp_strip_all_tags( $keyword );
+    $keyword = html_entity_decode( $keyword, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+    $keyword = preg_replace( '/\s*[-|–|—]\s*[^|–—-]+$/u', '', $keyword );
+    $keyword = trim( preg_replace( '/[^\p{L}\p{N}\s]+/u', '', $keyword ) );
+    if ( strlen( $keyword ) < 3 ) return [];
+
+    $args = [
+        'exclude' => $exclude_id,
+        'paged'   => 1,
+        'lang'    => init_plugin_suite_live_search_detect_lang(),
+    ];
+
+    $raw_results = init_plugin_suite_live_search_get_results( $keyword, $args );
+
+    if ( empty( $raw_results ) || ! is_array( $raw_results ) ) {
+        return [];
+    }
+
+    $post_ids = array_column( $raw_results, 'id' );
+    return array_slice( $post_ids, 0, $limit );
 }
