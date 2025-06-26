@@ -4,7 +4,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.7.4-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.7.5-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -28,6 +28,10 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - **New Shortcode**: `[init_live_search_related_posts]` to render static, themeable related posts  
 - **Search Operators**: support for `+musthave` and `-mustnot` terms in queries  
 - **Visual Shortcode Builder**: build `[init_live_search]` and `[init_live_search_related_posts]` shortcode visually with live preview
+- **Auto Insert Related Posts**: no shortcode needed — insert after content or comments automatically  
+- **Template-based Layouts**: use `template="..."` to switch between `grid`, `classic`, `compact`, `thumbright`  
+- **Theme Override Ready**: copy any layout to your theme via `init-live-search/related-posts-{template}.php`  
+- **Filter-Driven Logic**: fully extensible via `*_auto_insert_enabled` and `*_default_related_shortcode` hooks
 
 ## Features
 
@@ -42,6 +46,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - Voice input via native `SpeechRecognition` API
 - Full **keyboard navigation**: `↑ ↓ ← → Enter Esc`
 - Deep linking: prefill search via `?modal=search&term=...`
+- Template-driven related post rendering with optional auto-insert
 - Dark mode support: `auto`, `dark`, or `light` — or add `.dark` class manually
 - **WooCommerce**: price, stock, sale badge, SKU, Add to Cart, coupon detection
 - **ACF support**: search custom fields
@@ -87,6 +92,17 @@ Display a search icon or input anywhere that opens the Init Live Search modal.
 - `class`: (optional) add custom classes like `dark`, `my-style`, etc.  
 - `stroke_width`: (optional) change SVG stroke width (default: `1`)  
 - `radius`: (optional) override border-radius (default: handled via class)
+
+### `[init_live_search_related_posts]`  
+Display a list of related posts based on the current post title (or a custom keyword). Static HTML output, SEO-friendly, and fully themable.
+
+**Attributes:**
+- `id`: (optional) Post ID to fetch related posts for (defaults to current post)  
+- `count`: (optional) Number of posts to display (default: `5`)  
+- `keyword`: (optional) Override the keyword for matching  
+- `template`: (optional) Layout style — `default`, `grid`, `classic`, `compact`, `thumbright`  
+- `css`: `1` (default) or `0` — disable default CSS if styling manually  
+- `schema`: `1` (default) or `0` — disable JSON-LD schema output  
 
 ## Developer Docs
 
