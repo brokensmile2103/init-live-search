@@ -61,11 +61,12 @@ add_shortcode( 'init_live_search_related_posts', 'init_plugin_suite_live_search_
 function init_plugin_suite_live_search_related_posts_shortcode( $atts ) {
     $atts = shortcode_atts(
         [
-            'id'      => get_the_ID(),
-            'count'   => 5,
-            'keyword' => '',
-            'css'     => '1',
-            'schema' => '1',
+            'id'       => get_the_ID(),
+            'count'    => 5,
+            'keyword'  => '',
+            'css'      => '1',
+            'schema'   => '1',
+            'template' => 'default',
         ],
         $atts,
         'init_live_search_related_posts'
@@ -73,24 +74,24 @@ function init_plugin_suite_live_search_related_posts_shortcode( $atts ) {
 
     $post_id = intval( $atts['id'] );
     if ( ! $post_id || get_post_status( $post_id ) !== 'publish' ) {
-        return ''; // Không có post hợp lệ
+        return '';
     }
 
     $keyword = trim( $atts['keyword'] );
     if ( $keyword === '' ) {
-        $keyword = get_the_title( $post_id );
+        $raw_title = get_the_title( $post_id );
+        $decoded   = html_entity_decode( $raw_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+        $clean     = wp_strip_all_tags( $decoded );
+        $keyword   = trim( preg_replace( '/[^\p{L}\p{N}\s]+/u', '', $clean ) );
     }
 
-    // Load logic tìm bài liên quan – tạm gọi hàm chưa viết
     $related_ids = init_plugin_suite_live_search_find_related_ids( $keyword, $post_id, intval( $atts['count'] ) );
-
     if ( empty( $related_ids ) ) {
         return '';
     }
 
     $wrapper_class = count( $related_ids ) >= 10 ? 'ils-related-list ils-related--columns' : 'ils-related-list';
 
-    // Enqueue CSS chỉ khi có shortcode và được bật (mặc định bật)
     if ( $atts['css'] !== '0' ) {
         wp_enqueue_style(
             'init-live-search-related-posts',
@@ -100,16 +101,17 @@ function init_plugin_suite_live_search_related_posts_shortcode( $atts ) {
         );
     }
 
-    ob_start();
-
-    // Template override
-    $template_path = locate_template( 'init-live-search/related-posts.php' );
+    $template_slug = sanitize_key( $atts['template'] );
+    $template_path = locate_template( "init-live-search/related-posts-{$template_slug}.php" );
     if ( ! $template_path ) {
-        $template_path = INIT_PLUGIN_SUITE_LS_TEMPLATES_PATH . 'related-posts.php';
+        $template_path = INIT_PLUGIN_SUITE_LS_TEMPLATES_PATH . "related-posts-{$template_slug}.php";
+        if ( ! file_exists( $template_path ) ) {
+            $template_path = INIT_PLUGIN_SUITE_LS_TEMPLATES_PATH . 'related-posts-default.php';
+        }
     }
 
+    ob_start();
     include $template_path;
-
     return ob_get_clean();
 }
 
@@ -148,6 +150,7 @@ add_action( 'admin_enqueue_scripts', function () {
                 'post_id'             => __( 'Post ID (optional)', 'init-live-search' ),
                 'post_count'          => __( 'Number of Posts', 'init-live-search' ),
                 'keyword_override'    => __( 'Keyword (override)', 'init-live-search' ),
+                'template'            => __( 'Template', 'init-live-search' ),
                 'load_css'            => __( 'Load CSS', 'init-live-search' ),
                 'output_schema'       => __( 'Output Schema', 'init-live-search' ),
             ],

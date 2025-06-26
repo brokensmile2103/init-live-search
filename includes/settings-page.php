@@ -110,6 +110,11 @@ function init_plugin_suite_live_search_sanitize_settings($input) {
     $output['enable_fallback'] = !empty($input['enable_fallback']) ? '1' : '0';
     $output['enable_analytics'] = !empty($input['enable_analytics']) ? '1' : '0';
 
+    $allowed_insert_positions = ['none', 'after_content', 'before_comment', 'after_comment'];
+    $output['related_auto_insert'] = in_array($input['related_auto_insert'] ?? 'none', $allowed_insert_positions, true)
+        ? $input['related_auto_insert']
+        : 'none';
+
     $output['css_style'] = in_array($input['css_style'], ['default', 'full', 'topbar', 'none'], true)
         ? $input['css_style']
         : 'default';

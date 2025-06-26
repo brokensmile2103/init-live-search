@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.7.4  
+Stable tag: 1.7.5  
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -45,6 +45,17 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
   - SEO-friendly: no REST call, renders full HTML  
   - Includes template override support and optional schema markup  
   - Auto layout: 2 columns on desktop if result count ≥ 10  
+- **Auto Insert Related Posts**: display related posts without needing a shortcode  
+  - Options: after content, before/after comment form  
+  - Enabled via settings → "Auto Insert Related Posts?"  
+  - Respects selected post types and includes filter for conditional logic  
+  - Uses `[init_live_search_related_posts template="grid" count="6"]` by default
+
+- **Related Posts Templates**: switch layouts easily using `template` attribute  
+  - Built-in: `default`, `grid`, `classic`, `compact`, `thumbright`  
+  - All templates fully overrideable via `init-live-search/related-posts-{template}.php`  
+  - Smart fallback to `default` if missing  
+  - Includes alt text filter and optional schema output
 
 == Features ==
 
@@ -102,6 +113,7 @@ Options: `dark`, `light`, `auto`
 - Enable result caching (localStorage)  
 - Choose frontend UI style (default, fullscreen, or topbar)  
 - Allow theme override via `init-live-search/style.css`  
+- Automatically insert related posts after content or comments (optional)
 - Option to disable all built-in CSS completely  
 - Add default UTM parameter to result links  
 - Define or auto-generate keyword suggestions   
@@ -137,6 +149,7 @@ Display a list of related posts (static HTML) based on post title or keyword, op
 - `id`: (optional) the post ID to find related posts for (defaults to current post)  
 - `count`: (optional) number of posts to display (default: `5`)  
 - `keyword`: (optional) override the keyword used for finding related posts  
+- `template`: (optional) layout template to use — `default`, `grid`, `classic`, `compact`, `thumbright`  
 - `css`: `1` (default) or `0` – disable default CSS if you want to fully style it yourself  
 - `schema`: `1` (default) or `0` – disable JSON-LD `ItemList` output for SEO schema  
 
@@ -223,10 +236,20 @@ Allow registration of custom slash commands to be displayed in the command list 
 **Applies to:** slash command system (`/` prefix input)  
 **Params:** `array $commands`, `array $options`
 
-**`init_plugin_suite_live_search_get_smart_post_thumbnail_alt`**  
+**`init_plugin_suite_live_search_smart_post_thumbnail_alt`**  
 Allow overriding the generated `alt` text for post thumbnails used in related post templates or result items.  
 **Applies to:** image accessibility / SEO rendering (`alt` attribute)  
 **Params:** `string $alt`, `int $post_id`
+
+**`init_plugin_suite_live_search_auto_insert_enabled`**  
+Allow conditionally enabling or disabling auto-insertion of related posts based on the current position or post type.  
+**Applies to:** automatic shortcode injection via `the_content`, `comment_form_before`, `comment_form_after`  
+**Params:** `bool $enabled`, `string $position`, `string $post_type`
+
+**`init_plugin_suite_live_search_default_related_shortcode`**  
+Customize the shortcode string used when auto-inserting related posts into post content or comment areas.  
+**Applies to:** automatic related post output  
+**Params:** `string $shortcode`
 
 == REST API Endpoints ==
 
@@ -360,6 +383,11 @@ Results include title, price, stock status, and Add to Cart links.
 = Does it support excerpts in search results? =  
 Yes. It generates a 1-line contextual excerpt with the keyword highlighted for better scan-ability.
 
+= Can this plugin automatically display related posts without using a shortcode? =  
+Yes. In the plugin settings, you can choose to automatically insert related posts after the content or around the comment section.  
+It uses the `[init_live_search_related_posts]` shortcode internally with a default layout.  
+You can still use the shortcode manually for full control.
+
 = Can I override or disable the plugin’s CSS? =  
 Yes. You can:  
 - Drop `init-live-search/style.css` in your theme  
@@ -404,6 +432,24 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.7.5 – June 26, 2025 =
+- Enhanced `[init_live_search_related_posts]` shortcode
+  - Added `template` parameter to switch between multiple layouts:
+    - `default`: Row layout with thumbnail on the left (existing)
+    - `grid`: Responsive grid with large image and title
+    - `classic`: Headline with excerpt (blog style)
+    - `compact`: Plain text list
+    - `thumbright`: Title and date with thumbnail on the right
+  - All templates fully overrideable via theme using:
+    - `init-live-search/related-posts-{template}.php`
+  - Auto-fallback to `default` if template not found
+- Improved internal keyword cleaning logic:
+  - Removes all non-letter/number characters (including emoji, punctuation, Unicode dashes like `–`)
+  - Ensures clean and reliable matching for related post detection
+- Added auto-insert option for related posts (after content, before/after comments)
+  - Can be enabled via plugin settings
+  - Uses default shortcode `[init_live_search_related_posts count="10"]`
 
 = 1.7.4 – June 25, 2025 =
 - Added optional support for `+` and `-` search operators  

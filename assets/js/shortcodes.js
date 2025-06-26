@@ -63,6 +63,12 @@
                         type: 'text',
                         default: ''
                     },
+                    template: {
+                        label: t('template', 'Template'),
+                        type: 'select',
+                        options: ['default', 'grid', 'classic', 'compact', 'thumbright'],
+                        default: 'default'
+                    },
                     css: {
                         label: t('load_css', 'Load CSS'),
                         type: 'select',

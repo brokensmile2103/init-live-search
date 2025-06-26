@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init Live Search 1.7.4\n"
+"Project-Id-Version: Init Live Search 1.7.5\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -553,4 +553,28 @@ msgid "Load CSS"
 msgstr ""
 
 msgid "Output Schema"
+msgstr ""
+
+msgid "Template"
+msgstr ""
+
+msgid "Auto Insert Related Posts?"
+msgstr ""
+
+msgid "No (manual shortcode only)"
+msgstr ""
+
+msgid "After post content"
+msgstr ""
+
+msgid "Before comment form"
+msgstr ""
+
+msgid "After comment form"
+msgstr ""
+
+msgid "Automatically display related posts using the default shortcode layout at a predefined position in single post pages."
+msgstr ""
+
+msgid "Use \"No\" if you prefer inserting shortcode manually."
 msgstr ""

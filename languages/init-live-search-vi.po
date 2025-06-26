@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init Live Search 1.7.4\n"
+"Project-Id-Version: Init Live Search 1.7.5\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -557,3 +557,27 @@ msgstr "Tải CSS mặc định"
 
 msgid "Output Schema"
 msgstr "Xuất schema dữ liệu"
+
+msgid "Template"
+msgstr "Mẫu"
+
+msgid "Auto Insert Related Posts?"
+msgstr "Tự động chèn bài viết liên quan?"
+
+msgid "No (manual shortcode only)"
+msgstr "Không (chỉ dùng shortcode thủ công)"
+
+msgid "After post content"
+msgstr "Sau nội dung bài viết"
+
+msgid "Before comment form"
+msgstr "Trước form bình luận"
+
+msgid "After comment form"
+msgstr "Sau form bình luận"
+
+msgid "Automatically display related posts using the default shortcode layout at a predefined position in single post pages."
+msgstr "Tự động hiển thị bài viết liên quan bằng giao diện shortcode mặc định tại một vị trí cố định trên trang bài viết."
+
+msgid "Use \"No\" if you prefer inserting shortcode manually."
+msgstr "Chọn “Không” nếu bạn muốn tự chèn shortcode theo cách thủ công."

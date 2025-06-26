@@ -328,5 +328,5 @@ function init_plugin_suite_live_search_get_smart_post_thumbnail_alt( $post_id = 
      * @param string $alt
      * @param int    $post_id
      */
-    return apply_filters( 'init_plugin_suite_live_search_get_smart_post_thumbnail_alt', esc_attr( $alt ), $post_id );
+    return apply_filters( 'init_plugin_suite_live_search_smart_post_thumbnail_alt', esc_attr( $alt ), $post_id );
 }

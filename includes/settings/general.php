@@ -266,6 +266,33 @@ unset($post_types['attachment']);
             </td>
         </tr>
         <tr>
+            <th scope="row"><?php esc_html_e( 'Auto Insert Related Posts?', 'init-live-search' ); ?></th>
+            <td>
+                <fieldset>
+                    <label>
+                        <input type="radio" name="init_plugin_suite_live_search_settings[related_auto_insert]" value="none" <?php checked( ( $options['related_auto_insert'] ?? 'none' ) === 'none' ); ?>>
+                        <?php esc_html_e( 'No (manual shortcode only)', 'init-live-search' ); ?>
+                    </label><br>
+                    <label>
+                        <input type="radio" name="init_plugin_suite_live_search_settings[related_auto_insert]" value="after_content" <?php checked( ( $options['related_auto_insert'] ?? 'none' ) === 'after_content' ); ?>>
+                        <?php esc_html_e( 'After post content', 'init-live-search' ); ?>
+                    </label><br>
+                    <label>
+                        <input type="radio" name="init_plugin_suite_live_search_settings[related_auto_insert]" value="before_comment" <?php checked( ( $options['related_auto_insert'] ?? 'none' ) === 'before_comment' ); ?>>
+                        <?php esc_html_e( 'Before comment form', 'init-live-search' ); ?>
+                    </label><br>
+                    <label>
+                        <input type="radio" name="init_plugin_suite_live_search_settings[related_auto_insert]" value="after_comment" <?php checked( ( $options['related_auto_insert'] ?? 'none' ) === 'after_comment' ); ?>>
+                        <?php esc_html_e( 'After comment form', 'init-live-search' ); ?>
+                    </label>
+                </fieldset>
+                <p class="description">
+                    <?php esc_html_e( 'Automatically display related posts using the default shortcode layout at a predefined position in single post pages.', 'init-live-search' ); ?><br>
+                    <?php esc_html_e( 'Use "No" if you prefer inserting shortcode manually.', 'init-live-search' ); ?>
+                </p>
+            </td>
+        </tr>
+        <tr>
             <th scope="row"><?php esc_html_e('Default UTM Parameter', 'init-live-search'); ?></th>
             <td>
                 <input type="text" name="init_plugin_suite_live_search_settings[default_utm]" value="<?php echo esc_attr($options['default_utm'] ?? ''); ?>" class="regular-text">
