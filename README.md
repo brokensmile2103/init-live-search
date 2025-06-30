@@ -102,7 +102,8 @@ Display a list of related posts based on the current post title (or a custom key
 - `keyword`: (optional) Override the keyword for matching  
 - `template`: (optional) Layout style — `default`, `grid`, `classic`, `compact`, `thumbright`  
 - `css`: `1` (default) or `0` — disable default CSS if styling manually  
-- `schema`: `1` (default) or `0` — disable JSON-LD schema output  
+- `schema`: `1` (default) or `0` — disable JSON-LD schema output
+- `post_type`: (optional) Filter by one or more post types (e.g. `post`, `post,page`)  
 
 ## Developer Docs
 
