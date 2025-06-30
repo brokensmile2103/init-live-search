@@ -581,3 +581,6 @@ msgstr "Tự động hiển thị bài viết liên quan bằng giao diện shor
 
 msgid "Use \"No\" if you prefer inserting shortcode manually."
 msgstr "Chọn “Không” nếu bạn muốn tự chèn shortcode theo cách thủ công."
+
+msgid "Post Type(s)"
+msgstr "Loại bài viết"

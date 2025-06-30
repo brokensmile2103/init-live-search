@@ -63,6 +63,11 @@
                         type: 'text',
                         default: ''
                     },
+                    post_type: {
+                        label: t('post_type', 'Post Type(s)'),
+                        type: 'text',
+                        default: ''
+                    },
                     template: {
                         label: t('template', 'Template'),
                         type: 'select',

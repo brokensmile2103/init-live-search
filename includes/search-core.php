@@ -491,7 +491,7 @@ function init_plugin_suite_live_search_expand_with_synonyms($term) {
 }
 
 // Find related post IDs based on a keyword and exclude a specific post.
-function init_plugin_suite_live_search_find_related_ids( $keyword, $exclude_id, $limit = 5 ) {
+function init_plugin_suite_live_search_find_related_ids( $keyword, $exclude_id, $limit = 5, $post_type = '' ) {
     global $wpdb;
 
     // Làm sạch y chang REST
@@ -505,9 +505,10 @@ function init_plugin_suite_live_search_find_related_ids( $keyword, $exclude_id, 
     if ( strlen( $keyword ) < 3 ) return [];
 
     $args = [
-        'exclude' => $exclude_id,
-        'paged'   => 1,
-        'lang'    => init_plugin_suite_live_search_detect_lang(),
+        'exclude'    => $exclude_id,
+        'paged'      => 1,
+        'lang'       => init_plugin_suite_live_search_detect_lang(),
+        'post_type'  => $post_type,
     ];
 
     $raw_results = init_plugin_suite_live_search_get_results( $keyword, $args );

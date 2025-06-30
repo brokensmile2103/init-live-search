@@ -578,3 +578,6 @@ msgstr ""
 
 msgid "Use \"No\" if you prefer inserting shortcode manually."
 msgstr ""
+
+msgid "Post Type(s)"
+msgstr ""

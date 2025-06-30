@@ -433,6 +433,16 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 
 == Changelog ==
 
+= 1.7.6 – June 30, 2025 =
+- Improved `[init_live_search_related_posts]` shortcode:
+  - Added `post_type` parameter to filter related results by one or more post types
+  - Accepts single value (`post_type="post"`) or multiple values (`post_type="post,page,product"`)
+  - Supports any registered post type (e.g. `post`, `product`, `manga`, etc.)
+  - Fully compatible with all templates (`template="..."`) and theme overrides
+- Enhanced internal search logic:
+  - `post_type` now resolved from both `post_type` (string or comma-separated) and `post_types` (array) in `$args`
+  - Ensures accurate filtering for related content across multiple content types
+
 = 1.7.5 – June 26, 2025 =
 - Enhanced `[init_live_search_related_posts]` shortcode
   - Added `template` parameter to switch between multiple layouts:

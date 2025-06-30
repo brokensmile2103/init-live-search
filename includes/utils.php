@@ -284,6 +284,12 @@ function init_plugin_suite_live_search_resolve_post_types($options, $args) {
     if (!empty($args['post_types']) && is_array($args['post_types'])) {
         return array_map('sanitize_key', $args['post_types']);
     }
+
+    if (!empty($args['post_type']) && is_string($args['post_type'])) {
+        $types = explode(',', $args['post_type']);
+        return array_map('sanitize_key', array_filter(array_map('trim', $types)));
+    }
+
     return !empty($options['post_types']) && is_array($options['post_types'])
         ? array_map('sanitize_key', $options['post_types'])
         : ['post'];

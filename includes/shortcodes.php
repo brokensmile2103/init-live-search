@@ -61,12 +61,13 @@ add_shortcode( 'init_live_search_related_posts', 'init_plugin_suite_live_search_
 function init_plugin_suite_live_search_related_posts_shortcode( $atts ) {
     $atts = shortcode_atts(
         [
-            'id'       => get_the_ID(),
-            'count'    => 5,
-            'keyword'  => '',
-            'css'      => '1',
-            'schema'   => '1',
-            'template' => 'default',
+            'id'        => get_the_ID(),
+            'count'     => 5,
+            'keyword'   => '',
+            'css'       => '1',
+            'schema'    => '1',
+            'template'  => 'default',
+            'post_type' => 'post',
         ],
         $atts,
         'init_live_search_related_posts'
@@ -85,7 +86,13 @@ function init_plugin_suite_live_search_related_posts_shortcode( $atts ) {
         $keyword   = trim( preg_replace( '/[^\p{L}\p{N}\s]+/u', '', $clean ) );
     }
 
-    $related_ids = init_plugin_suite_live_search_find_related_ids( $keyword, $post_id, intval( $atts['count'] ) );
+    $related_ids = init_plugin_suite_live_search_find_related_ids(
+        $keyword,
+        $post_id,
+        intval( $atts['count'] ),
+        sanitize_key( $atts['post_type'] )
+    );
+
     if ( empty( $related_ids ) ) {
         return '';
     }
@@ -149,6 +156,7 @@ add_action( 'admin_enqueue_scripts', function () {
                 'related_posts'       => __( 'Related Posts', 'init-live-search' ),
                 'post_id'             => __( 'Post ID (optional)', 'init-live-search' ),
                 'post_count'          => __( 'Number of Posts', 'init-live-search' ),
+                'post_type'           => __( 'Post Type(s)', 'init-live-search' ),
                 'keyword_override'    => __( 'Keyword (override)', 'init-live-search' ),
                 'template'            => __( 'Template', 'init-live-search' ),
                 'load_css'            => __( 'Load CSS', 'init-live-search' ),

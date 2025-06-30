@@ -16,29 +16,33 @@ unset($post_types['attachment']);
         <tr>
             <th scope="row"><?php esc_html_e('Post Types to Include', 'init-live-search'); ?></th>
             <td>
-                <?php foreach ($post_types as $post_type): ?>
-                    <label>
-                        <input type="checkbox" name="init_plugin_suite_live_search_settings[post_types][]" value="<?php echo esc_attr($post_type->name); ?>" <?php checked(in_array($post_type->name, $options['post_types'] ?? ['post'])); ?>>
-                        <?php echo esc_html($post_type->label); ?>
-                    </label><br>
-                <?php endforeach; ?>
+                <fieldset>
+                    <?php foreach ($post_types as $post_type): ?>
+                        <label>
+                            <input type="checkbox" name="init_plugin_suite_live_search_settings[post_types][]" value="<?php echo esc_attr($post_type->name); ?>" <?php checked(in_array($post_type->name, $options['post_types'] ?? ['post'])); ?>>
+                            <?php echo esc_html($post_type->label); ?>
+                        </label><br>
+                    <?php endforeach; ?>
+                </fieldset>
             </td>
         </tr>
         <tr>
             <th scope="row"><?php esc_html_e('Trigger methods to open modal', 'init-live-search'); ?></th>
             <td>
-                <label>
-                    <input type="checkbox" name="init_plugin_suite_live_search_settings[trigger_input_focus]" value="1" <?php checked(!isset($options['trigger_input_focus']) || $options['trigger_input_focus']); ?>>
-                    <?php esc_html_e('Attach event to input[name="s"]', 'init-live-search'); ?>
-                </label><br>
-                <label>
-                    <input type="checkbox" name="init_plugin_suite_live_search_settings[trigger_triple_click]" value="1" <?php checked(!isset($options['trigger_triple_click']) || $options['trigger_triple_click']); ?>>
-                    <?php esc_html_e('Triple click anywhere on the page', 'init-live-search'); ?>
-                </label><br>
-                <label>
-                    <input type="checkbox" name="init_plugin_suite_live_search_settings[trigger_ctrl_slash]" value="1" <?php checked(!isset($options['trigger_ctrl_slash']) || $options['trigger_ctrl_slash']); ?>>
-                    <?php esc_html_e('Press Ctrl + / (or Cmd + / on Mac)', 'init-live-search'); ?>
-                </label>
+                <fieldset>
+                    <label>
+                        <input type="checkbox" name="init_plugin_suite_live_search_settings[trigger_input_focus]" value="1" <?php checked(!isset($options['trigger_input_focus']) || $options['trigger_input_focus']); ?>>
+                        <?php esc_html_e('Attach event to input[name="s"]', 'init-live-search'); ?>
+                    </label><br>
+                    <label>
+                        <input type="checkbox" name="init_plugin_suite_live_search_settings[trigger_triple_click]" value="1" <?php checked(!isset($options['trigger_triple_click']) || $options['trigger_triple_click']); ?>>
+                        <?php esc_html_e('Triple click anywhere on the page', 'init-live-search'); ?>
+                    </label><br>
+                    <label>
+                        <input type="checkbox" name="init_plugin_suite_live_search_settings[trigger_ctrl_slash]" value="1" <?php checked(!isset($options['trigger_ctrl_slash']) || $options['trigger_ctrl_slash']); ?>>
+                        <?php esc_html_e('Press Ctrl + / (or Cmd + / on Mac)', 'init-live-search'); ?>
+                    </label>
+                </fieldset>
                 <p class="description">
                     <?php esc_html_e('Select one or more methods to trigger the search modal.', 'init-live-search'); ?>
                     </p>
@@ -80,33 +84,35 @@ unset($post_types['attachment']);
         <tr>
             <th scope="row"><?php esc_html_e('Default Slash Command on Modal Open', 'init-live-search'); ?></th>
             <td>
-                <?php
-                    $raw_default_command = $options['default_command'] ?? 'none';
+                <fieldset>
+                    <?php
+                        $raw_default_command = $options['default_command'] ?? 'none';
 
-                    $default_command_options = [
-                        'none'    => __('None (do not preload anything)', 'init-live-search'),
-                        'default' => __('Default (/recent)', 'init-live-search'),
-                        'related' => __('Related Posts (use /related)', 'init-live-search'),
-                        'auto'    => __('Smart Detection (based on current page)', 'init-live-search'),
-                    ];
+                        $default_command_options = [
+                            'none'    => __('None (do not preload anything)', 'init-live-search'),
+                            'default' => __('Default (/recent)', 'init-live-search'),
+                            'related' => __('Related Posts (use /related)', 'init-live-search'),
+                            'auto'    => __('Smart Detection (based on current page)', 'init-live-search'),
+                        ];
 
-                    if (defined('INIT_PLUGIN_SUITE_VIEW_COUNT_VERSION')) {
-                        $default_command_options['popular']  = __('Popular Posts (use /popular)', 'init-live-search');
-                        $default_command_options['trending'] = __('Trending Posts (use /trending)', 'init-live-search');
-                    }
+                        if (defined('INIT_PLUGIN_SUITE_VIEW_COUNT_VERSION')) {
+                            $default_command_options['popular']  = __('Popular Posts (use /popular)', 'init-live-search');
+                            $default_command_options['trending'] = __('Trending Posts (use /trending)', 'init-live-search');
+                        }
 
-                    if (defined('INIT_PLUGIN_SUITE_RP_VERSION')) {
-                        $default_command_options['read'] = __('Continue Reading (use /read)', 'init-live-search');
-                    }
+                        if (defined('INIT_PLUGIN_SUITE_RP_VERSION')) {
+                            $default_command_options['read'] = __('Continue Reading (use /read)', 'init-live-search');
+                        }
 
-                    foreach ($default_command_options as $value => $label) :
-                        ?>
-                        <label>
-                            <input type="radio" name="init_plugin_suite_live_search_settings[default_command]" value="<?php echo esc_attr($value); ?>"
-                                <?php checked($raw_default_command === $value); ?>>
-                            <?php echo esc_html($label); ?>
-                        </label><br>
-                    <?php endforeach; ?>
+                        foreach ($default_command_options as $value => $label) :
+                            ?>
+                            <label>
+                                <input type="radio" name="init_plugin_suite_live_search_settings[default_command]" value="<?php echo esc_attr($value); ?>"
+                                    <?php checked($raw_default_command === $value); ?>>
+                                <?php echo esc_html($label); ?>
+                            </label><br>
+                        <?php endforeach; ?>
+                </fieldset>
 
                 <p class="description">
                     <?php esc_html_e('Choose a default slash command to run automatically when the search modal opens.', 'init-live-search'); ?><br>
@@ -118,23 +124,25 @@ unset($post_types['attachment']);
         <tr>
             <th scope="row"><?php esc_html_e('Search Mode', 'init-live-search'); ?></th>
             <td>
-                <label>
-                    <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title" <?php checked(($options['search_mode'] ?? 'title') === 'title'); ?>>
-                    <?php esc_html_e('Title Only', 'init-live-search'); ?>
-                </label><br>
-                <label>
-                    <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title_tag" <?php checked(($options['search_mode'] ?? 'title') === 'title_tag'); ?>>
-                    <?php esc_html_e('Init Smart Tag-Aware Search', 'init-live-search'); ?>
-                </label>
-                <small><span class="dashicons dashicons-editor-help" title="<?php esc_attr_e('This mode matches against post title and tag names. Ideal for content with rich tagging.', 'init-live-search'); ?>"></span></small><br>
-                <label>
-                    <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title_excerpt" <?php checked(($options['search_mode'] ?? 'title') === 'title_excerpt'); ?>>
-                    <?php esc_html_e('Title and Excerpt', 'init-live-search'); ?>
-                </label><br>
-                <label>
-                    <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title_content" <?php checked(($options['search_mode'] ?? 'title') === 'title_content'); ?>>
-                    <?php esc_html_e('Title, Excerpt and Content', 'init-live-search'); ?>
-                </label>
+                <fieldset>
+                    <label>
+                        <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title" <?php checked(($options['search_mode'] ?? 'title') === 'title'); ?>>
+                        <?php esc_html_e('Title Only', 'init-live-search'); ?>
+                    </label><br>
+                    <label>
+                        <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title_tag" <?php checked(($options['search_mode'] ?? 'title') === 'title_tag'); ?>>
+                        <?php esc_html_e('Init Smart Tag-Aware Search', 'init-live-search'); ?>
+                    </label>
+                    <small><span class="dashicons dashicons-editor-help" title="<?php esc_attr_e('This mode matches against post title and tag names. Ideal for content with rich tagging.', 'init-live-search'); ?>"></span></small><br>
+                    <label>
+                        <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title_excerpt" <?php checked(($options['search_mode'] ?? 'title') === 'title_excerpt'); ?>>
+                        <?php esc_html_e('Title and Excerpt', 'init-live-search'); ?>
+                    </label><br>
+                    <label>
+                        <input type="radio" name="init_plugin_suite_live_search_settings[search_mode]" value="title_content" <?php checked(($options['search_mode'] ?? 'title') === 'title_content'); ?>>
+                        <?php esc_html_e('Title, Excerpt and Content', 'init-live-search'); ?>
+                    </label>
+                </fieldset>
             </td>
         </tr>
         <tr>
