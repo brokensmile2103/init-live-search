@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.7.6  
+Stable tag: 1.7.7
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -432,6 +432,17 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.7.7 – July 16, 2025 =
+- Fixed critical admin conflict with WooCommerce Payment Settings:
+  - Resolved fatal error `WC_Settings_Payment_Gateways::standardize_section_name()` expecting string, null given
+  - Eliminated global `$current_tab` variable that was interfering with WooCommerce's tab handling
+  - Improved tab parameter processing to be context-aware and only active within plugin settings page
+  - Added proper validation to prevent null/empty tab values from being processed
+- Enhanced admin settings stability:
+  - Tab switching now isolated to plugin scope, preventing cross-plugin conflicts
+  - Improved error handling for invalid tab parameters
+  - Better compatibility with other admin interfaces that use similar tab systems
 
 = 1.7.6 – June 30, 2025 =
 - Improved `[init_live_search_related_posts]` shortcode:

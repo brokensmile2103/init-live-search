@@ -1,13 +1,6 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-// Xác định tab đang chọn
-$current_tab = 'general';
-// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only reading $_GET['tab'] to load admin UI tab, no action performed
-if (isset($_GET['tab'])) {
-    $current_tab = sanitize_key(wp_unslash($_GET['tab']));
-}
-
 // Register các setting group riêng biệt
 add_action('admin_init', function () {
     register_setting(
@@ -36,7 +29,17 @@ add_action('admin_menu', function () {
 
 // Render trang settings
 function init_plugin_suite_live_search_render_settings_page() {
-    global $current_tab;
+    // Xử lý tab locally thay vì dùng global
+    $current_tab = 'general';
+    
+    // Chỉ xử lý tab khi đang ở trang của plugin này
+    if (isset($_GET['page']) && $_GET['page'] === 'init-live-search-settings' && isset($_GET['tab'])) {
+        $tab_value = sanitize_key(wp_unslash($_GET['tab']));
+        // Đảm bảo $tab_value không phải null hoặc empty
+        if (!empty($tab_value)) {
+            $current_tab = $tab_value;
+        }
+    }
 
     $tabs = [
         'general'   => __('General Settings', 'init-live-search'),

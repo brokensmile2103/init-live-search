@@ -122,8 +122,12 @@ function init_plugin_suite_live_search_related_posts_shortcode( $atts ) {
     return ob_get_clean();
 }
 
-add_action( 'admin_enqueue_scripts', function () {
+add_action( 'admin_enqueue_scripts', function ( $hook ) {
     if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+
+    if ( $hook !== 'settings_page_init-live-search-settings' ) {
         return;
     }
 
