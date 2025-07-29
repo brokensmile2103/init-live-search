@@ -466,8 +466,8 @@ function init_plugin_suite_live_search_expand_with_synonyms($term) {
     $term = trim(mb_strtolower($term));
     if ($term === '') return [$term];
 
+    // Get custom synonyms from user input
     $user_map = [];
-
     $raw = get_option(INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION, '{}');
     $decoded = is_string($raw) ? json_decode($raw, true) : (is_array($raw) ? $raw : []);
 
@@ -479,12 +479,35 @@ function init_plugin_suite_live_search_expand_with_synonyms($term) {
         }
     }
 
-    $synonym_map = apply_filters('init_plugin_suite_live_search_synonym_map', $user_map);
+    // Get predefined dictionaries and merge with user synonyms
+    $predefined_map = init_plugin_suite_live_search_get_predefined_synonyms();
+    $synonym_map = array_merge_recursive($predefined_map, $user_map);
+
+    // Remove duplicates from merged arrays
+    foreach ($synonym_map as $key => $values) {
+        if (is_array($values)) {
+            $synonym_map[$key] = array_unique($values);
+        }
+    }
+
+    $synonym_map = apply_filters('init_plugin_suite_live_search_synonym_map', $synonym_map);
 
     $expanded = [$term];
 
+    // Direct lookup
     if (!empty($synonym_map[$term])) {
         $expanded = array_merge($expanded, $synonym_map[$term]);
+    }
+
+    // Multi-word term lookup (check each word)
+    $words = preg_split('/\s+/', $term);
+    if (count($words) > 1) {
+        foreach ($words as $word) {
+            $word = trim(mb_strtolower($word));
+            if (strlen($word) >= 3 && !empty($synonym_map[$word])) {
+                $expanded = array_merge($expanded, $synonym_map[$word]);
+            }
+        }
     }
 
     return array_unique($expanded);

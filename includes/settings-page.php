@@ -14,6 +14,13 @@ add_action('admin_init', function () {
         INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION,
         'init_plugin_suite_live_search_sanitize_synonyms'
     );
+
+    // Register predefined dictionaries setting
+    register_setting(
+        INIT_PLUGIN_SUITE_LS_GROUP_SYNONYMS,
+        INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION,
+        'init_plugin_suite_live_search_sanitize_predefined_dictionaries'
+    );
 });
 
 // Tạo menu trong admin
@@ -153,6 +160,38 @@ function init_plugin_suite_live_search_sanitize_synonyms($raw) {
 
     json_decode($clean);
     return (json_last_error() === JSON_ERROR_NONE) ? $clean : '{}';
+}
+
+// Sanitize: PREDEFINED DICTIONARIES
+function init_plugin_suite_live_search_sanitize_predefined_dictionaries($input) {
+    if (!is_array($input)) {
+        return [];
+    }
+
+    // Các dictionary được phép
+    $allowed_dictionaries = [
+        'ecommerce',
+        'technology', 
+        'business',
+        'health',
+        'travel',
+        'education',
+        'food',
+        'sports',
+        'fashion',
+        'entertainment'
+    ];
+
+    $sanitized = [];
+    foreach ($input as $dict) {
+        $dict = sanitize_key($dict);
+        if (in_array($dict, $allowed_dictionaries, true)) {
+            $sanitized[] = $dict;
+        }
+    }
+
+    // Loại bỏ duplicate và return
+    return array_unique($sanitized);
 }
 
 // Enqueue scripts

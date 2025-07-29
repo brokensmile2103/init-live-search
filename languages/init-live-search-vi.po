@@ -584,3 +584,48 @@ msgstr "Chọn “Không” nếu bạn muốn tự chèn shortcode theo cách t
 
 msgid "Post Type(s)"
 msgstr "Loại bài viết"
+
+msgid "Predefined Dictionaries"
+msgstr "Từ Điển Có Sẵn"
+
+msgid "Select predefined synonym dictionaries"
+msgstr "Chọn từ điển đồng nghĩa có sẵn"
+
+msgid "E-commerce & Shopping"
+msgstr "Thương Mại Điện Tử & Mua Sắm"
+
+msgid "Technology & IT"
+msgstr "Công Nghệ & CNTT"
+
+msgid "Business & Marketing"
+msgstr "Kinh Doanh & Tiếp Thị"
+
+msgid "Health & Wellness"
+msgstr "Sức Khỏe & Làm Đẹp"
+
+msgid "Travel & Tourism"
+msgstr "Du Lịch & Khách Sạn"
+
+msgid "Education & Learning"
+msgstr "Giáo Dục & Học Tập"
+
+msgid "Food & Cooking"
+msgstr "Ẩm Thực & Nấu Ăn"
+
+msgid "Sports & Fitness"
+msgstr "Thể Thao & Thể Dục"
+
+msgid "Fashion & Style"
+msgstr "Thời Trang & Phong Cách"
+
+msgid "Entertainment & Media"
+msgstr "Giải Trí & Truyền Thông"
+
+msgid "Select topic-specific synonym dictionaries to enhance search results. Each dictionary contains hundreds of related terms and synonyms."
+msgstr "Chọn từ điển đồng nghĩa theo chủ đề để cải thiện kết quả tìm kiếm. Mỗi từ điển chứa hàng trăm thuật ngữ và từ đồng nghĩa liên quan."
+
+msgid "Note:"
+msgstr "Lưu ý:"
+
+msgid "When at least one dictionary is selected, this feature will be automatically activated."
+msgstr "Khi chọn ít nhất một từ điển, tính năng này sẽ được kích hoạt tự động."

@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 $custom_synonyms = get_option(INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION, '{}');
+$predefined_dictionaries = get_option(INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION, []);
 ?>
 
 <h2><?php esc_html_e('Synonym Configuration', 'init-live-search'); ?></h2>
@@ -10,6 +11,117 @@ $custom_synonyms = get_option(INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION, '{}');
 <form method="post" action="options.php" id="synonym-config-form">
     <?php settings_fields(INIT_PLUGIN_SUITE_LS_GROUP_SYNONYMS); ?>
 
+    <!-- Predefined Dictionary Section -->
+    <table class="form-table" role="presentation">
+        <tr>
+            <th scope="row"><?php esc_html_e('Predefined Dictionaries', 'init-live-search'); ?></th>
+            <td>
+                <fieldset>
+                    <legend class="screen-reader-text">
+                        <span><?php esc_html_e('Select predefined synonym dictionaries', 'init-live-search'); ?></span>
+                    </legend>
+                    
+                    <label for="dict_ecommerce">
+                        <input name="<?php echo esc_attr(INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION); ?>[]" 
+                               type="checkbox" 
+                               id="dict_ecommerce" 
+                               value="ecommerce"
+                               <?php checked(in_array('ecommerce', $predefined_dictionaries)); ?>>
+                        <?php esc_html_e('E-commerce & Shopping', 'init-live-search'); ?>
+                    </label><br>
+                    
+                    <label for="dict_technology">
+                        <input name="<?php echo esc_attr(INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION); ?>[]" 
+                               type="checkbox" 
+                               id="dict_technology" 
+                               value="technology"
+                               <?php checked(in_array('technology', $predefined_dictionaries)); ?>>
+                        <?php esc_html_e('Technology & IT', 'init-live-search'); ?>
+                    </label><br>
+                    
+                    <label for="dict_business">
+                        <input name="<?php echo esc_attr(INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION); ?>[]" 
+                               type="checkbox" 
+                               id="dict_business" 
+                               value="business"
+                               <?php checked(in_array('business', $predefined_dictionaries)); ?>>
+                        <?php esc_html_e('Business & Marketing', 'init-live-search'); ?>
+                    </label><br>
+                    
+                    <label for="dict_health">
+                        <input name="<?php echo esc_attr(INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION); ?>[]" 
+                               type="checkbox" 
+                               id="dict_health" 
+                               value="health"
+                               <?php checked(in_array('health', $predefined_dictionaries)); ?>>
+                        <?php esc_html_e('Health & Wellness', 'init-live-search'); ?>
+                    </label><br>
+                    
+                    <label for="dict_travel">
+                        <input name="<?php echo esc_attr(INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION); ?>[]" 
+                               type="checkbox" 
+                               id="dict_travel" 
+                               value="travel"
+                               <?php checked(in_array('travel', $predefined_dictionaries)); ?>>
+                        <?php esc_html_e('Travel & Tourism', 'init-live-search'); ?>
+                    </label><br>
+                    
+                    <label for="dict_education">
+                        <input name="<?php echo esc_attr(INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION); ?>[]" 
+                               type="checkbox" 
+                               id="dict_education" 
+                               value="education"
+                               <?php checked(in_array('education', $predefined_dictionaries)); ?>>
+                        <?php esc_html_e('Education & Learning', 'init-live-search'); ?>
+                    </label><br>
+                    
+                    <label for="dict_food">
+                        <input name="<?php echo esc_attr(INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION); ?>[]" 
+                               type="checkbox" 
+                               id="dict_food" 
+                               value="food"
+                               <?php checked(in_array('food', $predefined_dictionaries)); ?>>
+                        <?php esc_html_e('Food & Cooking', 'init-live-search'); ?>
+                    </label><br>
+                    
+                    <label for="dict_sports">
+                        <input name="<?php echo esc_attr(INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION); ?>[]" 
+                               type="checkbox" 
+                               id="dict_sports" 
+                               value="sports"
+                               <?php checked(in_array('sports', $predefined_dictionaries)); ?>>
+                        <?php esc_html_e('Sports & Fitness', 'init-live-search'); ?>
+                    </label><br>
+                    
+                    <label for="dict_fashion">
+                        <input name="<?php echo esc_attr(INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION); ?>[]" 
+                               type="checkbox" 
+                               id="dict_fashion" 
+                               value="fashion"
+                               <?php checked(in_array('fashion', $predefined_dictionaries)); ?>>
+                        <?php esc_html_e('Fashion & Style', 'init-live-search'); ?>
+                    </label><br>
+                    
+                    <label for="dict_entertainment">
+                        <input name="<?php echo esc_attr(INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION); ?>[]" 
+                               type="checkbox" 
+                               id="dict_entertainment" 
+                               value="entertainment"
+                               <?php checked(in_array('entertainment', $predefined_dictionaries)); ?>>
+                        <?php esc_html_e('Entertainment & Media', 'init-live-search'); ?>
+                    </label>
+                    
+                    <p class="description">
+                        <?php esc_html_e('Select topic-specific synonym dictionaries to enhance search results. Each dictionary contains hundreds of related terms and synonyms.', 'init-live-search'); ?>
+                        <br><strong><?php esc_html_e('Note:', 'init-live-search'); ?></strong> 
+                        <?php esc_html_e('When at least one dictionary is selected, this feature will be automatically activated.', 'init-live-search'); ?>
+                    </p>
+                </fieldset>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Custom Synonyms Section -->
     <table class="form-table" role="presentation">
         <tr>
             <th scope="row"><?php esc_html_e('Custom Synonym Map (JSON)', 'init-live-search'); ?></th>

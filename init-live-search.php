@@ -279,7 +279,7 @@ function init_plugin_suite_live_search_add_settings_link($links) {
 // Includes
 if (is_dir(INIT_PLUGIN_SUITE_LS_INCLUDES_PATH)) {
     // Load internal modules (utils first, then main logic)
-    foreach (['search-core.php', 'utils.php', 'rest-api.php', 'settings-page.php', 'tracking.php', 'shortcodes.php', 'hooks.php'] as $file) {
+    foreach (['search-core.php', 'utils.php', 'predefined-dictionaries.php', 'rest-api.php', 'settings-page.php', 'tracking.php', 'shortcodes.php', 'hooks.php'] as $file) {
         $path = INIT_PLUGIN_SUITE_LS_INCLUDES_PATH . $file;
         if (file_exists($path)) {
             require_once $path;

@@ -50,7 +50,6 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
   - Enabled via settings → "Auto Insert Related Posts?"  
   - Respects selected post types and includes filter for conditional logic  
   - Uses `[init_live_search_related_posts template="grid" count="6"]` by default
-
 - **Related Posts Templates**: switch layouts easily using `template` attribute  
   - Built-in: `default`, `grid`, `classic`, `compact`, `thumbright`  
   - All templates fully overrideable via `init-live-search/related-posts-{template}.php`  
@@ -432,6 +431,21 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.7.8 – July 29, 2025 =
+- Added Predefined Dictionaries feature for enhanced synonym expansion:
+  - New "Predefined Dictionaries" section in Synonyms tab with 10 topic-specific vocabularies
+  - Available dictionaries: E-commerce & Shopping, Technology & IT, Business & Marketing, Health & Wellness, Travel & Tourism, Education & Learning, Food & Cooking, Sports & Fitness, Fashion & Style, Entertainment & Media
+  - Each dictionary contains 50-150+ bilingual terms (English + Vietnamese) optimized for Vietnamese market
+  - Automatic activation when at least one dictionary is selected
+  - Smart merging with custom synonyms (user synonyms take priority)
+- Enhanced synonym expansion logic:
+  - Bidirectional mapping support (English ↔ Vietnamese)
+  - Multi-word term expansion (searches individual words in phrases)
+  - Context-aware synonym weighting and deduplication
+  - Seamless integration with existing custom synonym system
+- Added comprehensive sanitization for predefined dictionary selections
+- Improved search intelligence for Vietnamese content with local terminology support
 
 = 1.7.7 – July 16, 2025 =
 - Fixed critical admin conflict with WooCommerce Payment Settings:

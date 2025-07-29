@@ -192,7 +192,7 @@ unset($post_types['attachment']);
                     <?php esc_html_e('Try trimming or using bigrams if not enough results are found.', 'init-live-search'); ?>
                 </label>
             </td>
-        </tr>
+        </tr>z
         <tr>
             <th scope="row"><?php esc_html_e('Enable Search Analytics?', 'init-live-search'); ?></th>
             <td>

@@ -581,3 +581,48 @@ msgstr ""
 
 msgid "Post Type(s)"
 msgstr ""
+
+msgid "Predefined Dictionaries"
+msgstr ""
+
+msgid "Select predefined synonym dictionaries"
+msgstr ""
+
+msgid "E-commerce & Shopping"
+msgstr ""
+
+msgid "Technology & IT"
+msgstr ""
+
+msgid "Business & Marketing"
+msgstr ""
+
+msgid "Health & Wellness"
+msgstr ""
+
+msgid "Travel & Tourism"
+msgstr ""
+
+msgid "Education & Learning"
+msgstr ""
+
+msgid "Food & Cooking"
+msgstr ""
+
+msgid "Sports & Fitness"
+msgstr ""
+
+msgid "Fashion & Style"
+msgstr ""
+
+msgid "Entertainment & Media"
+msgstr ""
+
+msgid "Select topic-specific synonym dictionaries to enhance search results. Each dictionary contains hundreds of related terms and synonyms."
+msgstr ""
+
+msgid "Note:"
+msgstr ""
+
+msgid "When at least one dictionary is selected, this feature will be automatically activated."
+msgstr ""
