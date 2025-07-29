@@ -18,13 +18,14 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',        '1.7.8');
-define('INIT_PLUGIN_SUITE_LS_SLUG',           'init-live-search');
-define('INIT_PLUGIN_SUITE_LS_GROUP_GENERAL',  'init_live_search_group_general');
-define('INIT_PLUGIN_SUITE_LS_OPTION',         'init_plugin_suite_live_search_settings');
-define('INIT_PLUGIN_SUITE_LS_GROUP_SYNONYMS', 'init_live_search_group_synonyms');
-define('INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION', 'init_plugin_suite_live_search_custom_synonyms');
-define('INIT_PLUGIN_SUITE_LS_NAMESPACE',      'initlise/v1');
+define('INIT_PLUGIN_SUITE_LS_VERSION',                '1.7.8');
+define('INIT_PLUGIN_SUITE_LS_SLUG',                   'init-live-search');
+define('INIT_PLUGIN_SUITE_LS_GROUP_GENERAL',          'init_live_search_group_general');
+define('INIT_PLUGIN_SUITE_LS_OPTION',                 'init_plugin_suite_live_search_settings');
+define('INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION', 'init_live_search_predifined_dict');
+define('INIT_PLUGIN_SUITE_LS_GROUP_SYNONYMS',         'init_live_search_group_synonyms');
+define('INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION',         'init_plugin_suite_live_search_custom_synonyms');
+define('INIT_PLUGIN_SUITE_LS_NAMESPACE',              'initlise/v1');
 
 define('INIT_PLUGIN_SUITE_LS_URL',            plugin_dir_url(__FILE__));
 define('INIT_PLUGIN_SUITE_LS_PATH',           plugin_dir_path(__FILE__));
