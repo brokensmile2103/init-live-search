@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.7.8
+Stable tag: 1.7.9
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -431,6 +431,26 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.7.9 – August 9, 2025 =
+- Enhanced keyword generation with TF-IDF algorithm for smarter suggestions:
+  - Upgraded from simple frequency counting to Term Frequency-Inverse Document Frequency (TF-IDF) scoring
+  - Intelligent keyword weighting based on post popularity using Init View Count integration
+  - Smart n-gram generation (bigrams + trigrams) with context-aware filtering
+  - Title-focused analysis for higher quality, relevant keywords without content dilution
+- Improved keyword quality and relevance:
+  - Advanced stop-word filtering for both Vietnamese and English content
+  - Automatic removal of HTML artifacts, technical terms, and low-value phrases
+  - Diversity-based selection algorithm to prevent keyword overlap and repetition
+  - Minimum frequency threshold (2+ occurrences) and optimized length filtering
+- Seamless Init View Count plugin integration:
+  - Uses `_init_view_count` meta key for accurate post popularity weighting
+  - Logarithmic scaling prevents viral posts from dominating keyword generation
+  - Comment count integration for comprehensive engagement-based scoring
+- Enhanced admin keyword generator experience:
+  - Generates up to 7 high-quality, diverse keywords per request
+  - Smart keyword selection prevents redundant terms and ensures variety
+  - Maintains backward compatibility with existing filter hooks and settings
 
 = 1.7.8 – July 29, 2025 =
 - Added Predefined Dictionaries feature for enhanced synonym expansion:

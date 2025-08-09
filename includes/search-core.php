@@ -532,6 +532,7 @@ function init_plugin_suite_live_search_find_related_ids( $keyword, $exclude_id, 
         'paged'      => 1,
         'lang'       => init_plugin_suite_live_search_detect_lang(),
         'post_type'  => $post_type,
+        'force_mode' => 'title',
     ];
 
     $raw_results = init_plugin_suite_live_search_get_results( $keyword, $args );
