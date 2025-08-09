@@ -436,20 +436,25 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 - Enhanced keyword generation with TF-IDF algorithm for smarter suggestions:
   - Upgraded from simple frequency counting to Term Frequency-Inverse Document Frequency (TF-IDF) scoring
   - Intelligent keyword weighting based on post popularity using Init View Count integration
-  - Smart n-gram generation (bigrams + trigrams) with context-aware filtering
+  - Smart bigram generation with context-aware filtering (removed trigrams for cleaner results)
   - Title-focused analysis for higher quality, relevant keywords without content dilution
 - Improved keyword quality and relevance:
   - Advanced stop-word filtering for both Vietnamese and English content
-  - Automatic removal of HTML artifacts, technical terms, and low-value phrases
+  - Automatic removal of HTML artifacts, entities (like &#8211;), and technical terms
   - Diversity-based selection algorithm to prevent keyword overlap and repetition
   - Minimum frequency threshold (2+ occurrences) and optimized length filtering
+- Performance optimizations:
+  - Optimized WP_Query to fetch only post IDs for improved database performance
+  - Streamlined text processing with enhanced HTML entity decoding
+  - Efficient memory usage with reduced data fetching overhead
 - Seamless Init View Count plugin integration:
   - Uses `_init_view_count` meta key for accurate post popularity weighting
   - Logarithmic scaling prevents viral posts from dominating keyword generation
   - Comment count integration for comprehensive engagement-based scoring
 - Enhanced admin keyword generator experience:
-  - Generates up to 7 high-quality, diverse keywords per request
-  - Smart keyword selection prevents redundant terms and ensures variety
+  - Generates up to 10 high-quality, diverse keywords per request (increased from 7)
+  - Smart keyword selection with 50/50 mix of top-performing and randomized keywords
+  - Relaxed overlap rules (60% threshold) for greater keyword variety
   - Maintains backward compatibility with existing filter hooks and settings
 
 = 1.7.8 – July 29, 2025 =
