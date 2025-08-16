@@ -16,7 +16,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 
 ![Demo of Init Live Search](https://inithtml.com/wp-content/uploads/2025/05/Init-Live-Search-Demo.gif)
 
-## What's New in v1.7.x
+## What's New in v1.7.x & v1.8.x
 
 - **Cross-site Search**: fetch & merge results from other Init Live Search-powered sites  
 - **No CORS or Auth Setup**: just enter `Site Name|https://example.com` — it works instantly  
