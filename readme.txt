@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.7.9
+Stable tag: 1.8.0
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -431,6 +431,30 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.8.0 – August 16, 2025 =
+- Major upgrade to admin keyword generator:
+  - Replaced TF-IDF with advanced BM25 scoring for more accurate term weighting
+  - Integrated NPMI (Normalized Pointwise Mutual Information) to prioritize semantically strong bigrams
+  - Added Log-Likelihood Ratio (Dunning) re-ranking to detect and boost truly collocated word pairs
+  - Combined multi-metric scoring for maximum keyword quality and relevance
+- Enhanced bigram-only keyword generation:
+  - Focused exclusively on two-word phrases for cleaner, high-impact suggestions
+  - Context-aware filtering with strict stop word, stop phrase, and length checks
+  - Automatic exclusion of numeric and non-letter sequences, plus duplicate-word pairs
+  - Unicode-safe text normalization for both Vietnamese and English content
+- Smarter fallback & resilience:
+  - Added soft fallback mode when strict filtering yields no results
+  - Guarantees up to 15 high-quality keywords per generation request
+  - Maintains diversity by mixing top-performing and randomized bigrams
+- Performance & stability improvements:
+  - Optimized BM25 and collocation statistic calculations for large datasets
+  - Memory-efficient bigram counting and scoring without sacrificing accuracy
+  - Safer regex patterns for dash normalization to avoid PCRE errors
+  - Robust error handling to prevent empty-result failures in admin UI
+- Fully backward compatible:
+  - Retains existing AJAX endpoints, filter hooks, and settings integration
+  - Continues seamless use of `_init_view_count` and comment counts for engagement-based weighting
 
 = 1.7.9 – August 9, 2025 =
 - Enhanced keyword generation with TF-IDF algorithm for smarter suggestions:

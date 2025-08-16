@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     input.value = data.data || '';
                 } else {
-                    alert('Failed to generate keywords');
+                    alert((typeof data.data === 'string' && data.data) ? data.data : 'Failed to generate keywords');
                 }
             })
             .catch(error => {

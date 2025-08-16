@@ -1,5 +1,8 @@
 <?php
-// Enhanced keyword generation with TF-IDF - Bigrams only, optimized WP_Query
+/**
+ * Bigram Keyword Generator (BM25 + NPMI + LLR)
+ */
+
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 add_action('wp_ajax_init_plugin_suite_live_search_generate_keywords', 'init_plugin_suite_live_search_generate_keywords_enhanced');
@@ -8,7 +11,7 @@ function init_plugin_suite_live_search_generate_keywords_enhanced() {
     if (!current_user_can('manage_options')) {
         wp_send_json_error('Unauthorized', 403);
     }
-    
+
     $nonce = isset($_SERVER['HTTP_X_WP_NONCE']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_X_WP_NONCE'])) : '';
     if (!wp_verify_nonce($nonce, 'init_live_search_admin_nonce')) {
         wp_send_json_error('Invalid nonce', 403);
@@ -17,14 +20,14 @@ function init_plugin_suite_live_search_generate_keywords_enhanced() {
     $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
     $post_types = !empty($options['post_types']) ? (array) $options['post_types'] : ['post'];
 
-    // Optimized query - only get IDs for performance
+    // Query tối ưu: chỉ lấy IDs
     $post_ids = get_posts([
         'post_type'           => $post_types,
         'posts_per_page'      => -1,
         'no_found_rows'       => true,
         'ignore_sticky_posts' => true,
         'post_status'         => 'publish',
-        'fields'              => 'ids', // Only get IDs
+        'fields'              => 'ids',
     ]);
 
     if (empty($post_ids)) {
@@ -33,49 +36,75 @@ function init_plugin_suite_live_search_generate_keywords_enhanced() {
 
     $locale = get_locale();
     $is_vietnamese = ($locale === 'vi' || strpos($locale, 'vi_') === 0);
-    
-    // Enhanced stop words
-    $default_stop_words = $is_vietnamese 
-        ? ['là', 'vì', 'và', 'các', 'một', 'có', 'trong', 'khi', 'những', 'được', 'lúc', 'này', 'đây', 'rằng', 'thì', 'sự', 'chap', 'chương', 'của', 'cho', 'từ', 'trên', 'dưới', 'về', 'tại', 'với', 'không', 'đã', 'sẽ', 'bị', 'làm', 'nào', 'như', 'theo', 'giữa', 'sau', 'trước']
-        : ['is', 'are', 'the', 'and', 'with', 'this', 'that', 'of', 'for', 'to', 'in', 'on', 'it', 'be', 'by', 'as', 'was', 'were', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'shall'];
 
+    // Stop words đơn
+    $default_stop_words = $is_vietnamese
+        ? ['là','vì','và','các','một','có','trong','khi','những','được','lúc','này','đây','rằng','thì','sự','chap','chương','của','cho','từ','trên','dưới','về','tại','với','không','đã','sẽ','bị','làm','nào','như','theo','giữa','sau','trước']
+        : ['is','are','the','and','with','this','that','of','for','to','in','on','it','be','by','as','was','were','been','have','has','had','do','does','did','will','would','could','should','may','might','must','can','shall'];
     $stop_words = apply_filters('init_plugin_suite_live_search_stop_single_words', $default_stop_words, $locale);
+    $stop_words_map = array_fill_keys($stop_words, true);
 
-    // Process documents for TF-IDF - TITLE ONLY, using IDs
-    $documents = [];
-    $all_terms = [];
-    $post_weights = [];
+    // Thu thập tài liệu (TITLE x3), trọng số bài viết, thống kê unigram
+    $documents = [];         // doc_id => [tokens...]
+    $post_weights = [];      // doc_id => weight
+    $global_unigram = [];    // term => total freq
+    $total_tokens = 0;
 
     foreach ($post_ids as $post_id) {
         $title = get_the_title($post_id);
-        
-        // Skip if no title
         if (empty($title)) continue;
-        
-        // Weight calculation based on post popularity
-        $comment_count = get_comments_number($post_id);
-        $view_count = get_post_meta($post_id, '_init_view_count', true) ?: 0;
-        $post_weight = 1 + log(1 + $comment_count) + log(1 + intval($view_count));
+
+        // Trọng số độ quan tâm bài viết
+        $comment_count = (int) get_comments_number($post_id);
+        $view_count    = (int) get_post_meta($post_id, '_init_view_count', true);
+        $post_weight   = 1 + log(1 + $comment_count) + log(1 + $view_count);
         $post_weights[$post_id] = $post_weight;
-        
-        // ONLY USE TITLE - repeat 3x for emphasis
+
+        // Chỉ TITLE, nhân 3 để tăng trọng số
         $combined_text = $title . ' ' . $title . ' ' . $title;
-        
-        $documents[$post_id] = init_plugin_suite_live_search_process_text($combined_text, $stop_words, $is_vietnamese);
-        $all_terms = array_merge($all_terms, $documents[$post_id]);
+
+        $tokens = init_plugin_suite_live_search_process_text($combined_text, $stop_words, $is_vietnamese);
+        if (empty($tokens)) continue;
+
+        $documents[$post_id] = $tokens;
+
+        foreach ($tokens as $t) {
+            $global_unigram[$t] = ($global_unigram[$t] ?? 0) + 1;
+            $total_tokens++;
+        }
     }
 
-    // Calculate TF-IDF scores
-    $term_scores = init_plugin_suite_live_search_calculate_tfidf($documents, $all_terms, $post_weights);
-    
-    // Generate ONLY bigrams (no trigrams)
-    $bigrams = init_plugin_suite_live_search_generate_smart_bigrams($documents, $term_scores, $is_vietnamese);
-    
-    // Filter and rank keywords
-    $keywords = init_plugin_suite_live_search_filter_and_rank_keywords($bigrams, $locale);
-    
+    if (empty($documents)) {
+        wp_send_json_error('No valid documents');
+    }
+
+    // 1) BM25 cho trọng số từ
+    $term_scores = init_plugin_suite_live_search_calculate_bm25($documents, $post_weights);
+
+    // 2) Thống kê bigram toàn cục (raw) để tính NPMI/LLR
+    $bigram_stats = init_plugin_suite_live_search_build_bigram_stats($documents);
+
+    // 3) Sinh & chấm điểm BIGRAMS: BM25 + NPMI + LLR (Dunning)
+    $bigrams_scored = init_plugin_suite_live_search_generate_scored_bigrams_bm25_npmi_llr(
+        $documents,
+        $term_scores,
+        $post_weights,
+        $global_unigram,
+        $total_tokens,
+        $bigram_stats,
+        $stop_words_map
+    );
+
+    // 4) Lọc & xếp hạng (chỉ bigram)
+    $keywords = init_plugin_suite_live_search_filter_and_rank_keywords_bi($bigrams_scored, $locale);
+
+    if (empty($keywords)) {
+        // Fallback mềm: nếu lọc quá gắt, lấy top theo score (vẫn chỉ bigrams, vẫn kiểm tra độ dài/cú pháp)
+        $keywords = init_plugin_suite_live_search_fallback_pick_bigrams($bigrams_scored, $locale, 30);
+    }
+
     if (!empty($keywords)) {
-        // Smart selection with more diversity - return 15 keywords instead of 7
+        // 5) Chọn 15 keywords đa dạng
         $selected_keywords = init_plugin_suite_live_search_smart_keyword_selection($keywords, 15);
         wp_send_json_success(implode(', ', $selected_keywords));
     }
@@ -83,190 +112,340 @@ function init_plugin_suite_live_search_generate_keywords_enhanced() {
     wp_send_json_error('No keywords found');
 }
 
+/** ========================= Core Helpers ========================= */
+
 function init_plugin_suite_live_search_process_text($text, $stop_words, $is_vietnamese = false) {
-    $text = mb_strtolower(trim($text));
-    
-    // Decode HTML entities and remove HTML tags
+    if (function_exists('normalizer_normalize')) {
+        $text = normalizer_normalize($text, Normalizer::FORM_C);
+    }
+
     $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     $text = wp_strip_all_tags($text);
-    
-    // Remove special characters but keep Vietnamese diacritics
+    $text = mb_strtolower(trim($text), 'UTF-8');
+
+    // Chuẩn hoá dash: dùng Unicode escapes & đặt '-' literal rõ ràng
+    // U+2010 (‐), U+2011 (-), U+2012 (‒), U+2013 (–), U+2014 (—), U+2212 (−), và '-'
+    $text = preg_replace('/[\x{2010}\x{2011}\x{2012}\x{2013}\x{2014}\x{2212}\-]+/u', '-', $text);
+    if ($text === null) $text = ''; // an toàn nếu PCRE lỗi vì môi trường
+
+    $text = str_replace(['&nbsp;'], ' ', $text);
+
+    // Loại ký tự đặc biệt (giữ dấu TV nếu cần)
     if ($is_vietnamese) {
-        $text = preg_replace('/[^\p{L}\p{N}\s]/u', ' ', $text);
+        $text = preg_replace('/[^\p{L}\p{N}\s\-]/u', ' ', $text);
     } else {
-        $text = preg_replace('/[^a-zA-Z0-9\s]/', ' ', $text);
+        $text = preg_replace('/[^a-zA-Z0-9\s\-]/', ' ', $text);
     }
-    
-    // Normalize whitespace
-    $text = preg_replace('/\s+/', ' ', $text);
-    
-    // Split into words
-    $words = explode(' ', $text);
-    
-    // Remove stop words, short words, numbers, and non-letter sequences
-    $words = array_filter($words, function($word) use ($stop_words) {
-        return !in_array($word, $stop_words, true) 
-            && mb_strlen($word) >= 2 
-            && !preg_match('/^\d+$/', $word) // Remove pure numbers like 8211
-            && !preg_match('/^[^\p{L}]+$/u', $word); // Remove non-letter sequences
-    });
-    
-    return array_values($words);
+    if ($text === null) $text = '';
+
+    $text = preg_replace('/\s+/u', ' ', $text);
+    if ($text === null) $text = '';
+
+    $words = $text !== '' ? explode(' ', trim($text)) : [];
+    if (empty($words)) return [];
+
+    $stop_map = array_fill_keys($stop_words, true);
+    $out = [];
+    foreach ($words as $w) {
+        if ($w === '' || isset($stop_map[$w])) continue;
+        if (mb_strlen($w, 'UTF-8') < 2) continue;
+        if (preg_match('/^\d+$/u', $w)) continue;
+        if (preg_match('/^[^\p{L}]+$/u', $w)) continue;
+        $out[] = $w;
+    }
+    return array_values($out);
 }
 
-function init_plugin_suite_live_search_calculate_tfidf($documents, $all_terms, $post_weights) {
-    $term_scores = [];
+function init_plugin_suite_live_search_calculate_bm25($documents, $post_weights, $k1 = 1.5, $b = 0.75) {
     $total_docs = count($documents);
-    
-    // Count document frequency for each term
+    if ($total_docs === 0) return [];
+
     $doc_freq = [];
-    foreach ($all_terms as $term) {
-        if (!isset($doc_freq[$term])) {
-            $doc_freq[$term] = 0;
-            foreach ($documents as $doc_id => $doc_terms) {
-                if (in_array($term, $doc_terms)) {
-                    $doc_freq[$term]++;
-                }
-            }
+    $doc_lengths = [];
+    $avgdl = 0;
+
+    foreach ($documents as $doc_id => $terms) {
+        $doc_lengths[$doc_id] = count($terms);
+        $avgdl += $doc_lengths[$doc_id];
+        foreach (array_unique($terms) as $t) {
+            $doc_freq[$t] = ($doc_freq[$t] ?? 0) + 1;
         }
     }
-    
-    // Calculate TF-IDF for each term in each document
-    foreach ($documents as $doc_id => $doc_terms) {
-        $term_freq = array_count_values($doc_terms);
-        $doc_length = count($doc_terms);
-        
-        foreach ($term_freq as $term => $freq) {
-            $tf = $freq / $doc_length;
-            $idf = log($total_docs / ($doc_freq[$term] + 1));
-            $tfidf = $tf * $idf * $post_weights[$doc_id];
-            
-            if (!isset($term_scores[$term])) {
-                $term_scores[$term] = 0;
-            }
-            $term_scores[$term] += $tfidf;
+    $avgdl = max($avgdl / $total_docs, 1);
+
+    $term_scores = [];
+    foreach ($documents as $doc_id => $terms) {
+        if (empty($terms)) continue;
+        $dl   = $doc_lengths[$doc_id];
+        $freq = array_count_values($terms);
+        $wdoc = $post_weights[$doc_id] ?? 1;
+
+        foreach ($freq as $term => $f) {
+            $df  = $doc_freq[$term] ?? 0;
+            $idf = log( ( ($total_docs - $df + 0.5) ) / ( ($df + 0.5) ) + 1 );
+            $den = $f + $k1 * (1 - $b + $b * ($dl / $avgdl));
+            $bm25 = $idf * ( ($f * ($k1 + 1)) / max($den, 1e-9) );
+            $term_scores[$term] = ($term_scores[$term] ?? 0) + $bm25 * $wdoc;
         }
     }
-    
     return $term_scores;
 }
 
-function init_plugin_suite_live_search_generate_smart_bigrams($documents, $term_scores, $is_vietnamese = false) {
-    $bigrams = [];
-    $min_score_threshold = array_sum($term_scores) / count($term_scores) * 0.5; // 50% of average score
-    
-    foreach ($documents as $doc_id => $words) {
-        // Generate ONLY bigrams (no trigrams)
-        for ($i = 0; $i < count($words) - 1; $i++) {
-            $word1 = $words[$i];
-            $word2 = $words[$i + 1];
-            
-            // Skip if either word has low TF-IDF score
-            if (($term_scores[$word1] ?? 0) < $min_score_threshold || 
-                ($term_scores[$word2] ?? 0) < $min_score_threshold) {
-                continue;
-            }
-            
-            $bigram = $word1 . ' ' . $word2;
-            $bigrams[$bigram] = ($bigrams[$bigram] ?? 0) + 1;
+function init_plugin_suite_live_search_build_bigram_stats($documents) {
+    $counts = []; // raw bigram counts (không trọng số)
+    $left   = []; // w1 => c(w1,*)
+    $right  = []; // w2 => c(*,w2)
+    $N = 0;       // tổng số bigram (raw)
+
+    foreach ($documents as $terms) {
+        $n = count($terms);
+        for ($i = 0; $i < $n - 1; $i++) {
+            $w1 = $terms[$i];
+            $w2 = $terms[$i+1];
+            $bg = $w1.' '.$w2;
+
+            $counts[$bg] = ($counts[$bg] ?? 0) + 1;
+            $left[$w1]   = ($left[$w1] ?? 0) + 1;
+            $right[$w2]  = ($right[$w2] ?? 0) + 1;
+            $N++;
         }
     }
-    
-    return $bigrams;
+
+    return [
+        'counts' => $counts,
+        'left'   => $left,
+        'right'  => $right,
+        'N'      => $N,
+    ];
 }
 
-function init_plugin_suite_live_search_filter_and_rank_keywords($ngrams, $locale) {
-    $is_vietnamese = ($locale === 'vi' || strpos($locale, 'vi_') === 0);
-    
-    // Enhanced stop phrases
-    $default_stop_phrases = $is_vietnamese
-        ? ['là gì', 'và các', 'có thể', 'với các', 'là một', 'trong khi', 'của các', 'cho các', 'từ các', 'tại các', 'về các', 'như các', 'theo các']
-        : ['what is', 'and the', 'can be', 'with the', 'this is', 'while the', 'of the', 'for the', 'in the', 'on the', 'to the', 'by the', 'as the'];
-    
-    $stop_phrases = apply_filters('init_plugin_suite_live_search_stop_words', $default_stop_phrases, $locale);
-    
-    // Filter out stop phrases and low-quality ngrams
-    $filtered = [];
-    foreach ($ngrams as $ngram => $count) {
-        // Skip stop phrases
-        if (in_array($ngram, $stop_phrases, true)) continue;
-        
-        // Skip if contains numbers only or HTML entities
-        if (preg_match('/^\d+\s+\d+/', $ngram)) continue;
-        if (preg_match('/\b\d{4,}\b/', $ngram)) continue; // Remove 4+ digit numbers like 8211
-        
-        // For bigrams only - ensure exactly 2 words
-        $word_count = substr_count($ngram, ' ') + 1;
-        if ($word_count !== 2) continue;
-        
-        // Skip if total length is too short or too long
-        $clean_length = mb_strlen(str_replace(' ', '', $ngram));
-        if ($clean_length < 4 || $clean_length > 30) continue;
-        
-        $filtered[$ngram] = $count;
+function init_plugin_suite_live_search_generate_scored_bigrams_bm25_npmi_llr(
+    $documents,
+    $term_scores,
+    $post_weights,
+    $global_unigram,
+    $total_tokens,
+    $bigram_stats,
+    $stop_words_map
+) {
+    $N_tokens  = max($total_tokens, 1);
+    $N_bigrams = max($bigram_stats['N'], 1);
+
+    $raw_bg_counts = $bigram_stats['counts'];
+    $left_totals   = $bigram_stats['left'];
+    $right_totals  = $bigram_stats['right'];
+
+    // Accumulate weighted counts
+    $weighted_counts = []; // bigram => weighted count
+    foreach ($documents as $doc_id => $words) {
+        $wdoc = $post_weights[$doc_id] ?? 1;
+        for ($i = 0, $n = count($words) - 1; $i < $n; $i++) {
+            $w1 = $words[$i];
+            $w2 = $words[$i+1];
+
+            if (isset($stop_words_map[$w1]) || isset($stop_words_map[$w2])) continue;
+            if ($w1 === $w2) continue;
+
+            $bg = $w1.' '.$w2;
+            $weighted_counts[$bg] = ($weighted_counts[$bg] ?? 0) + 1.0 * $wdoc;
+        }
     }
-    
-    // Sort by frequency and then by length
+
+    if (empty($weighted_counts)) return [];
+
+    // Convert to final score with BM25 + NPMI + LLR
+    $scored = [];
+    foreach ($weighted_counts as $bg => $wcount) {
+        [$w1, $w2] = explode(' ', $bg, 2);
+
+        // BM25 pair
+        $bm_pair = ($term_scores[$w1] ?? 0) + ($term_scores[$w2] ?? 0);
+
+        // NPMI xấp xỉ từ unigram & bigram raw
+        $c1 = max($global_unigram[$w1] ?? 0, 1);
+        $c2 = max($global_unigram[$w2] ?? 0, 1);
+        $p1 = $c1 / $N_tokens;
+        $p2 = $c2 / $N_tokens;
+
+        $c_bg_raw = max($raw_bg_counts[$bg] ?? 0, 0);
+        // Dùng N_bigrams thay vì (N_tokens - 1) cho p_bg hợp lý hơn
+        $p_bg = ($c_bg_raw + 1) / $N_bigrams;
+
+        $pmi  = log( $p_bg / max($p1 * $p2, 1e-12) );
+        $npmi = $pmi / max(-log($p_bg), 1e-9); // [-1,1]
+
+        $base = $wcount * $bm_pair * (1 + max($npmi, 0));
+
+        // LLR (Dunning)
+        $a = max($c_bg_raw, 0);
+        $b = max(($left_totals[$w1] ?? 0) - $a, 0);
+        $c = max(($right_totals[$w2] ?? 0) - $a, 0);
+        $d = max($N_bigrams - $a - $b - $c, 0);
+
+        $llr = init_plugin_suite_live_search_llr_dunning($a, $b, $c, $d);
+        $boost_llr = 1.0 + min($llr / 12.0, 2.0); // cap x3
+
+        $scored[$bg] = $base * $boost_llr;
+    }
+
+    return $scored;
+}
+
+/** ========================= Stats: LLR (Dunning) ========================= */
+
+function init_plugin_suite_live_search_ll($k, $n) {
+    if ($k == 0 || $n == 0) return 0.0;
+    return $k * log($k / $n);
+}
+
+function init_plugin_suite_live_search_llr_dunning($a, $b, $c, $d) {
+    $n = $a + $b + $c + $d;
+    if ($n == 0) return 0.0;
+
+    $row1 = $a + $b;
+    $row2 = $c + $d;
+    $col1 = $a + $c;
+    $col2 = $b + $d;
+
+    $m1 = (($row1) * ($col1)) / max($n,1);
+    $m2 = (($row1) * ($col2)) / max($n,1);
+    $m3 = (($row2) * ($col1)) / max($n,1);
+    $m4 = (($row2) * ($col2)) / max($n,1);
+
+    $ll = 0.0;
+    $ll += init_plugin_suite_live_search_ll($a, $m1);
+    $ll += init_plugin_suite_live_search_ll($b, $m2);
+    $ll += init_plugin_suite_live_search_ll($c, $m3);
+    $ll += init_plugin_suite_live_search_ll($d, $m4);
+
+    return 2.0 * $ll; // G-statistic
+}
+
+/** ========================= Filtering & Selection ========================= */
+
+function init_plugin_suite_live_search_filter_and_rank_keywords_bi($bigram_scores, $locale) {
+    $is_vietnamese = ($locale === 'vi' || strpos($locale, 'vi_') === 0);
+
+    // Stop phrases (cụm 2 từ vô nghĩa)
+    $default_stop_phrases = $is_vietnamese
+        ? ['là gì','và các','có thể','với các','là một','trong khi','của các','cho các','từ các','tại các','về các','như các','theo các']
+        : ['what is','and the','can be','with the','this is','while the','of the','for the','in the','on the','to the','by the','as the'];
+    $stop_phrases = apply_filters('init_plugin_suite_live_search_stop_words', $default_stop_phrases, $locale);
+    $stop_map = array_fill_keys($stop_phrases, true);
+
+    if (empty($bigram_scores)) return [];
+
+    $avg = array_sum($bigram_scores) / max(count($bigram_scores), 1);
+    $threshold = $avg * 0.5; // ngưỡng mềm
+
+    $filtered = [];
+    foreach ($bigram_scores as $bg => $score) {
+        if ($score < $threshold) continue;
+        if (isset($stop_map[$bg])) continue;
+
+        // loại số/HTML
+        if (preg_match('/^\d+\s+\d+$/u', $bg)) continue;
+        if (preg_match('/\b\d{4,}\b/u', $bg)) continue;
+
+        $parts = preg_split('/\s+/u', trim($bg));
+        if (count($parts) !== 2) continue;
+
+        $clean_len = mb_strlen(str_replace(' ', '', $bg), 'UTF-8');
+        if ($clean_len < 4 || $clean_len > 30) continue;
+
+        if (mb_strlen($parts[0], 'UTF-8') < 2 || mb_strlen($parts[1], 'UTF-8') < 2) continue;
+
+        $filtered[$bg] = $score;
+    }
+
+    if (empty($filtered)) return [];
+
+    // Xếp hạng: score DESC, rồi độ dài DESC, rồi từ điển ASC
     uksort($filtered, function($a, $b) use ($filtered) {
-        $count_diff = $filtered[$b] <=> $filtered[$a];
-        if ($count_diff !== 0) return $count_diff;
-        
-        $length_diff = mb_strlen($b) <=> mb_strlen($a);
-        if ($length_diff !== 0) return $length_diff;
-        
+        $diff = $filtered[$b] <=> $filtered[$a];
+        if ($diff !== 0) return $diff;
+
+        $len = mb_strlen($b, 'UTF-8') <=> mb_strlen($a, 'UTF-8');
+        if ($len !== 0) return $len;
+
         return strcmp($a, $b);
     });
-    
-    return array_keys(array_slice($filtered, 0, 30, true)); // Reduced to 30 since only bigrams
+
+    // Lấy tối đa 30 vì chỉ bigrams
+    return array_keys(array_slice($filtered, 0, 30, true));
+}
+
+function init_plugin_suite_live_search_fallback_pick_bigrams($bigram_scores, $locale, $take = 30) {
+    // Fallback: nới lỏng threshold, vẫn chỉ nhận đúng 2 từ và kiểm tra độ dài
+    if (empty($bigram_scores)) return [];
+    $items = [];
+
+    foreach ($bigram_scores as $bg => $score) {
+        $parts = preg_split('/\s+/u', trim($bg));
+        if (count($parts) !== 2) continue;
+
+        // loại số/HTML
+        if (preg_match('/^\d+\s+\d+$/u', $bg)) continue;
+        if (preg_match('/\b\d{4,}\b/u', $bg)) continue;
+
+        $clean_len = mb_strlen(str_replace(' ', '', $bg), 'UTF-8');
+        if ($clean_len < 4 || $clean_len > 30) continue;
+
+        if (mb_strlen($parts[0], 'UTF-8') < 2 || mb_strlen($parts[1], 'UTF-8') < 2) continue;
+
+        $items[$bg] = $score;
+    }
+
+    if (empty($items)) return [];
+
+    uksort($items, function($a, $b) use ($items) {
+        $diff = $items[$b] <=> $items[$a];
+        if ($diff !== 0) return $diff;
+        return strcmp($a, $b);
+    });
+
+    return array_keys(array_slice($items, 0, $take, true));
 }
 
 function init_plugin_suite_live_search_smart_keyword_selection($keywords, $limit = 10) {
     if (count($keywords) <= $limit) {
         return $keywords;
     }
-    
+
     $selected = [];
     $used_words = [];
-    
-    // Shuffle keywords first for more randomness
-    $shuffled_keywords = $keywords;
-    shuffle($shuffled_keywords);
-    
-    // Take top 50% and random 50% for diversity
+
+    $shuffled = $keywords;
+    shuffle($shuffled);
+
     $half_limit = intval($limit / 2);
-    $top_keywords = array_slice($keywords, 0, $half_limit); // Top keywords
-    $random_pool = array_slice($shuffled_keywords, 0, min(20, count($shuffled_keywords))); // Random pool
-    
-    // Combine top and random keywords
-    $combined_pool = array_merge($top_keywords, $random_pool);
-    $combined_pool = array_unique($combined_pool); // Remove duplicates
-    
-    // Select diverse keywords with relaxed overlap rules
-    foreach ($combined_pool as $keyword) {
+    $top_keywords = array_slice($keywords, 0, $half_limit);
+    $random_pool  = array_slice($shuffled, 0, min(20, count($shuffled)));
+
+    $combined_pool = array_values(array_unique(array_merge($top_keywords, $random_pool)));
+
+    foreach ($combined_pool as $kw) {
         if (count($selected) >= $limit) break;
-        
-        $words = explode(' ', $keyword);
+
+        $words = explode(' ', $kw);
         $overlap = array_intersect($words, $used_words);
-        
-        // More relaxed overlap rule - allow up to 60% overlap for more variety
+
+        // Với bigram: cho phép trùng 1 từ (60%)
         if (count($overlap) < count($words) * 0.6) {
-            $selected[] = $keyword;
+            $selected[] = $kw;
             $used_words = array_merge($used_words, $words);
         }
     }
-    
-    // Fill remaining slots with any remaining keywords
+
     if (count($selected) < $limit) {
-        foreach ($shuffled_keywords as $keyword) {
+        foreach ($shuffled as $kw) {
             if (count($selected) >= $limit) break;
-            if (!in_array($keyword, $selected)) {
-                $selected[] = $keyword;
+            if (!in_array($kw, $selected, true)) {
+                $selected[] = $kw;
             }
         }
     }
-    
-    // Final shuffle for variety
+
     shuffle($selected);
-    
     return array_slice($selected, 0, $limit);
 }
