@@ -109,7 +109,6 @@ Display a list of related posts based on the current post title (or a custom key
 
 ### `[init_live_search_related_ai]`  
 Display a list of AI-powered related posts using multi-signal scoring (tags, series, ACF `same_keyword`, title bigrams, category, views, comments, freshness).  
-Shares the same templates as `[init_live_search_related_posts]` — no extra styling required.
 
 **Attributes:**
 - `id`: (optional) Post ID to fetch related posts for (defaults to current post)  
