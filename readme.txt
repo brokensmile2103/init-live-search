@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.8.0
+Stable tag: 1.8.1
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -18,43 +18,40 @@ It replaces the default `<input name="s">` with a clean, intuitive search modal 
 
 Perfect for content-heavy blogs, WooCommerce stores, or even headless sites. Every interaction is fast, fluid, and designed to work across devices.
 
+It also brings AI-powered related posts and an advanced keyword generator — giving your visitors smarter ways to discover content.
+
 This plugin is part of the [Init Plugin Suite](https://en.inithtml.com/init-plugin-suite-minimalist-powerful-and-free-wordpress-plugins/) — a collection of minimalist, fast, and developer-focused tools for WordPress.
 
 GitHub repository: [https://github.com/brokensmile2103/init-live-search](https://github.com/brokensmile2103/init-live-search)
 
-== What's New in Version 1.7.x ==
+== What's New in Version 1.8.x ==
 
-- **Cross-site Search**: merge results from multiple Init Live Search-enabled sites  
-  - Just enter `Site Name|https://example.com/` — no auth or CORS needed  
-  - Automatically tags results by site (e.g. “Init Docs”)  
-  - Now disables single-word fallback on both local and remote sites for cleaner relevance  
-- **WooCommerce Slash Commands**: major expansion for store owners  
-  - New: `/brand`, `/attribute`, `/variation`, and `/coupon`  
-  - `/coupon` shows active coupons with usage and expiration info  
-  - Improved `/price` with optional `sort` / `rsort`  
-  - Fully supports custom taxonomies and `pa_...` attributes  
-- **New Shortcode**: `[init_live_search]`  
-  - Insert a search input or icon anywhere  
-  - Supports dark mode and custom classes
-- **Keyword Operators**: precision search using `+` and `-`  
-  - Use `+` to require keywords (e.g. `+nginx +ubuntu`)  
-  - Use `-` to exclude terms (`-centos` will filter out CentOS-related posts)  
-  - Works across all post types and supports synonym and fallback logic  
-- **Related Posts Shortcode**: `[init_live_search_related_posts]`  
-  - Display related posts using smart title-based matching  
-  - SEO-friendly: no REST call, renders full HTML  
-  - Includes template override support and optional schema markup  
-  - Auto layout: 2 columns on desktop if result count ≥ 10  
-- **Auto Insert Related Posts**: display related posts without needing a shortcode  
-  - Options: after content, before/after comment form  
-  - Enabled via settings → "Auto Insert Related Posts?"  
-  - Respects selected post types and includes filter for conditional logic  
-  - Uses `[init_live_search_related_posts template="grid" count="6"]` by default
-- **Related Posts Templates**: switch layouts easily using `template` attribute  
-  - Built-in: `default`, `grid`, `classic`, `compact`, `thumbright`  
-  - All templates fully overrideable via `init-live-search/related-posts-{template}.php`  
-  - Smart fallback to `default` if missing  
-  - Includes alt text filter and optional schema output
+- **AI-Powered Related Posts**: brand new `[init_live_search_related_ai]` shortcode  
+  - Uses multi-signal scoring (tags, series, title bigrams, same_keyword via ACF, category, views, comments, freshness)  
+  - Shares templates with `[init_live_search_related_posts]` (no extra styling needed)  
+  - Fully filterable via new developer hooks: `ai_candidates`, `ai_signals`, `ai_weights`, `ai_score`
+
+- **Advanced Keyword Generator**: upgraded algorithm for admin keyword suggestions  
+  - Replaced TF-IDF with **BM25** term weighting  
+  - Added **NPMI** and **Log-Likelihood Ratio (Dunning)** for collocation strength  
+  - Focused on **bigram-only** for higher-quality keywords  
+  - Unicode-safe, locale-aware stop words, and soft fallback mode
+
+- **Developer Filters Expansion**  
+  - New filters added for AI related posts and keyword signals  
+  - Complete list now includes over 20 filters (`*_fallback`, `*_post_ids`, `*_results`, `*_weights`, `*_commands`, etc.)  
+  - Developers can hook into candidate pools, signal scores, and schema output with fine-grained control
+
+- **Performance Optimizations**  
+  - Smarter candidate pooling for related posts (recent + context-based)  
+  - Pre-cached scoring loop for AI signals to minimize queries  
+  - Safer regex handling in keyword processing to avoid PCRE errors  
+  - Reduced memory footprint in bigram statistics without sacrificing accuracy
+
+- **Backward Compatible Enhancements**  
+  - `[init_live_search_related_posts]` and `[init_live_search_related_ai]` now share the same rendering pipeline  
+  - Existing templates, schema, and CSS continue to work without modification  
+  - Auto insert related posts still works and can be switched to AI mode via shortcode override
 
 == Features ==
 
@@ -151,6 +148,18 @@ Display a list of related posts (static HTML) based on post title or keyword, op
 - `template`: (optional) layout template to use — `default`, `grid`, `classic`, `compact`, `thumbright`  
 - `css`: `1` (default) or `0` – disable default CSS if you want to fully style it yourself  
 - `schema`: `1` (default) or `0` – disable JSON-LD `ItemList` output for SEO schema  
+
+**`[init_live_search_related_ai]`**  
+Display a list of AI-powered related posts using multi-signal scoring (tags, series, title bigrams, same_keyword via ACF, category, views, comments, freshness).  
+Uses the same templates as `[init_live_search_related_posts]`, so no extra styling is required.
+
+**Attributes:**
+- `id`: (optional) the post ID to find related posts for (defaults to current post)  
+- `count`: (optional) number of posts to display (default: `5`)  
+- `post_type`: (optional) restrict results to one or more post types (default: `post`)  
+- `template`: (optional) layout template to use — `default`, `grid`, `classic`, `compact`, `thumbright`  
+- `css`: `1` (default) or `0` – disable default CSS if you want to fully style it yourself  
+- `schema`: `1` (default) or `0` – disable JSON-LD `ItemList` output for SEO schema
 
 == Filters for Developers ==
 
@@ -249,6 +258,26 @@ Allow conditionally enabling or disabling auto-insertion of related posts based 
 Customize the shortcode string used when auto-inserting related posts into post content or comment areas.  
 **Applies to:** automatic related post output  
 **Params:** `string $shortcode`
+
+**`init_plugin_suite_live_search_ai_candidates`**  
+Inject or replace candidate post pools for the AI-powered related posts system.  
+**Applies to:** `[init_live_search_related_ai]`  
+**Params:** `array $candidates`, `int $post_id`, `string $post_type`
+
+**`init_plugin_suite_live_search_ai_signals`**  
+Add or override signal scores (tag, series, same_keyword, etc.) used in AI scoring.  
+**Applies to:** `[init_live_search_related_ai]`  
+**Params:** `array $signals`, `int $post_id`, `int $candidate_id`
+
+**`init_plugin_suite_live_search_ai_weights`**  
+Adjust the default weight configuration of signals for AI ranking.  
+**Applies to:** `[init_live_search_related_ai]`  
+**Params:** `array $weights`
+
+**`init_plugin_suite_live_search_ai_score`**  
+Modify the final computed score of a candidate before sorting.  
+**Applies to:** `[init_live_search_related_ai]`  
+**Params:** `float $score`, `int $post_id`, `int $candidate_id`, `array $signals`
 
 == REST API Endpoints ==
 
@@ -431,6 +460,23 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.8.1 – August 26, 2025 =
+- **AI-Powered Related Posts**
+  - Introduced new `[init_live_search_related_ai]` shortcode using advanced multi-signal scoring
+  - Signals include: **tag, series, title bigrams, same_keyword (ACF), category, views, comments, freshness**
+  - Automatic candidate expansion from multiple sources (recent posts, same series, same_keyword pool)
+  - Seamlessly integrates with existing **related-posts templates** (no new markup required)
+  - Fully filterable developer API with prefix `init_plugin_suite_live_search_*` for signals, weights, and candidates
+- **Developer Extensibility**
+  - Added `init_plugin_suite_live_search_ai_candidates` filter to inject custom candidate pools (e.g. ACF, taxonomy)
+  - Added `init_plugin_suite_live_search_ai_signals` filter to extend or override signal scoring logic
+  - Added `init_plugin_suite_live_search_ai_weights` filter for custom weight configurations
+  - Added `init_plugin_suite_live_search_ai_score` filter for final score adjustment
+- **Performance & Compatibility**
+  - Optimized scoring loop with pre-cached post data to minimize queries
+  - Unified template rendering across `[init_live_search_related_posts]` and `[init_live_search_related_ai]`
+  - Maintains backward compatibility with existing settings and shortcode builder
 
 = 1.8.0 – August 16, 2025 =
 - Major upgrade to admin keyword generator:

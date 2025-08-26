@@ -1,6 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+// Search icon shortcode
 add_shortcode( 'init_live_search', 'init_plugin_suite_live_search_shortcode' );
 function init_plugin_suite_live_search_shortcode( $atts ) {
     $atts = shortcode_atts(
@@ -57,6 +58,7 @@ function init_plugin_suite_live_search_shortcode( $atts ) {
     return ob_get_clean();
 }
 
+// Related Posts shortcode
 add_shortcode( 'init_live_search_related_posts', 'init_plugin_suite_live_search_related_posts_shortcode' );
 function init_plugin_suite_live_search_related_posts_shortcode( $atts ) {
     $atts = shortcode_atts(
@@ -93,11 +95,45 @@ function init_plugin_suite_live_search_related_posts_shortcode( $atts ) {
         sanitize_key( $atts['post_type'] )
     );
 
-    if ( empty( $related_ids ) ) {
+    return init_plugin_suite_live_search_render_related( $related_ids, $atts );
+}
+
+// AI Related Posts shortcode
+add_shortcode( 'init_live_search_related_ai', 'init_plugin_suite_live_search_related_ai_shortcode' );
+
+function init_plugin_suite_live_search_related_ai_shortcode( $atts ) {
+    $atts = shortcode_atts(
+        [
+            'id'        => get_the_ID(),
+            'count'     => 5,
+            'post_type' => 'post',
+            'template'  => 'default',
+            'css'       => '1',
+            'schema'    => '1',
+        ],
+        $atts,
+        'init_live_search_related_ai'
+    );
+
+    $post_id = intval( $atts['id'] );
+    if ( ! $post_id || get_post_status( $post_id ) !== 'publish' ) {
         return '';
     }
 
-    $wrapper_class = count( $related_ids ) >= 10 ? 'ils-related-list ils-related--columns' : 'ils-related-list';
+    // dùng AI scoring thay vì keyword
+    $related_ids = init_plugin_suite_live_search_get_related_ai_ids(
+        $post_id,
+        intval( $atts['count'] ),
+        sanitize_key( $atts['post_type'] )
+    );
+
+    return init_plugin_suite_live_search_render_related( $related_ids, $atts );
+}
+
+// Shortcode render
+function init_plugin_suite_live_search_render_related( $related_ids, $atts ) {
+    if ( empty( $related_ids ) ) return '';
+    $wrapper_class = count($related_ids) >= 10 ? 'ils-related-list ils-related--columns' : 'ils-related-list';
 
     if ( $atts['css'] !== '0' ) {
         wp_enqueue_style(
@@ -122,6 +158,7 @@ function init_plugin_suite_live_search_related_posts_shortcode( $atts ) {
     return ob_get_clean();
 }
 
+// Shortcode Builder
 add_action( 'admin_enqueue_scripts', function ( $hook ) {
     if ( ! current_user_can( 'manage_options' ) ) {
         return;
