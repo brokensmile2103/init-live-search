@@ -4,7 +4,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.8.0-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.8.1-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -24,14 +24,16 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - **WooCommerce Slash Expansion**: added support for `/brand`, `/attribute`, `/variation`, `/coupon`  
 - **Improved `/price` Command**: now supports `sort` and `rsort` modifiers  
 - **Cleaner Cross-site Results**: disables single-word fallback for external queries  
-- **New Shortcode**: `[init_live_search]` to render a search icon or input anywhere
+- **New Shortcode**: `[init_live_search]` to render a search icon or input anywhere  
 - **New Shortcode**: `[init_live_search_related_posts]` to render static, themeable related posts  
 - **Search Operators**: support for `+musthave` and `-mustnot` terms in queries  
-- **Visual Shortcode Builder**: build `[init_live_search]` and `[init_live_search_related_posts]` shortcode visually with live preview
+- **Visual Shortcode Builder**: build `[init_live_search]` and `[init_live_search_related_posts]` shortcode visually with live preview  
 - **Auto Insert Related Posts**: no shortcode needed — insert after content or comments automatically  
 - **Template-based Layouts**: use `template="..."` to switch between `grid`, `classic`, `compact`, `thumbright`  
 - **Theme Override Ready**: copy any layout to your theme via `init-live-search/related-posts-{template}.php`  
-- **Filter-Driven Logic**: fully extensible via `*_auto_insert_enabled` and `*_default_related_shortcode` hooks
+- **Filter-Driven Logic**: fully extensible via `*_auto_insert_enabled` and `*_default_related_shortcode` hooks  
+- **AI-Powered Related Posts**: new `[init_live_search_related_ai]` shortcode using multi-signal scoring (tags, ACF, series, views, etc.)  
+- **Advanced Keyword Generator**: upgraded to BM25 + NPMI + LLR engine for higher-quality suggestions
 
 ## Features
 
@@ -103,7 +105,19 @@ Display a list of related posts based on the current post title (or a custom key
 - `template`: (optional) Layout style — `default`, `grid`, `classic`, `compact`, `thumbright`  
 - `css`: `1` (default) or `0` — disable default CSS if styling manually  
 - `schema`: `1` (default) or `0` — disable JSON-LD schema output
-- `post_type`: (optional) Filter by one or more post types (e.g. `post`, `post,page`)  
+- `post_type`: (optional) Filter by one or more post types (e.g. `post`, `post,page`)
+
+### `[init_live_search_related_ai]`  
+Display a list of AI-powered related posts using multi-signal scoring (tags, series, ACF `same_keyword`, title bigrams, category, views, comments, freshness).  
+Shares the same templates as `[init_live_search_related_posts]` — no extra styling required.
+
+**Attributes:**
+- `id`: (optional) Post ID to fetch related posts for (defaults to current post)  
+- `count`: (optional) Number of posts to display (default: `5`)  
+- `post_type`: (optional) Restrict results to one or more post types (default: `post`)  
+- `template`: (optional) Layout style — `default`, `grid`, `classic`, `compact`, `thumbright`  
+- `css`: `1` (default) or `0` — disable default CSS if styling manually  
+- `schema`: `1` (default) or `0` — disable JSON-LD schema output  
 
 ## Developer Docs
 
