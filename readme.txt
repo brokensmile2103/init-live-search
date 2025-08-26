@@ -4,7 +4,7 @@ Tags: live search, instant search, woocommerce, rest api, slash command
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.8.1
+Stable tag: 1.8.2
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -277,7 +277,28 @@ Adjust the default weight configuration of signals for AI ranking.
 **`init_plugin_suite_live_search_ai_score`**  
 Modify the final computed score of a candidate before sorting.  
 **Applies to:** `[init_live_search_related_ai]`  
-**Params:** `float $score`, `int $post_id`, `int $candidate_id`, `array $signals`
+**Params:** `float $score`, `array $signals`, `int $post_id`, `int $candidate_id`
+
+**`init_plugin_suite_live_search_ai_half_life_recency`**  
+Customize the half-life (in days) for the **recency** decay signal (newer vs. older content).  
+**Applies to:** `[init_live_search_related_ai]`  
+**Params:** `int $days`
+
+**`init_plugin_suite_live_search_ai_half_life_gap`**  
+Customize the half-life (in days) for the **time_gap** decay signal (alignment with source post date).  
+**Applies to:** `[init_live_search_related_ai]`  
+**Params:** `int $days`
+
+**`init_plugin_suite_live_search_ai_mmr_lambda`**  
+Adjust the λ parameter in **Max Marginal Relevance (MMR)** diversification.  
+Higher values → more relevance; lower values → more diversity.  
+**Applies to:** `[init_live_search_related_ai]`  
+**Params:** `float $lambda`
+
+**`init_plugin_suite_live_search_ai_selected`**  
+Filter the final ordered list of selected candidate IDs after MMR diversification.  
+**Applies to:** `[init_live_search_related_ai]`  
+**Params:** `array $selected_ids`, `array $scored_candidates`, `int $post_id`
 
 == REST API Endpoints ==
 
@@ -460,6 +481,24 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.8.2 – August 26, 2025 =
+- **AI Related Posts Engine v2**
+  - Introduced algo version **v2** with explicit cache versioning for safer invalidation
+  - Replaced single `freshness` signal with dual model: **recency** (vs. now) + **time_gap** (vs. source post)
+  - Diversification upgraded from simple top+random to **MMR (Max Marginal Relevance)** ranking
+  - Balanced output: preserves high relevance while avoiding near-duplicate suggestions
+- **Performance Improvements**
+  - Candidate pool auto-filtered for publish status and deduplicated
+  - Pre-cached posts, meta, and terms via `_prime_post_caches` and `update_object_term_cache`
+  - Optimized scoring loop with reduced queries and safer weighted-random RNG
+- **Developer Extensibility**
+  - New filters:
+    - `init_plugin_suite_live_search_ai_half_life_recency` → control recency decay
+    - `init_plugin_suite_live_search_ai_half_life_gap` → control source-time alignment decay
+    - `init_plugin_suite_live_search_ai_mmr_lambda` → balance relevance vs. diversity
+    - `init_plugin_suite_live_search_ai_selected` → override or reorder final selection
+  - Backward compatibility fully preserved: existing `*_candidates`, `*_signals`, `*_weights`, `*_score` remain supported
 
 = 1.8.1 – August 26, 2025 =
 - **AI-Powered Related Posts**

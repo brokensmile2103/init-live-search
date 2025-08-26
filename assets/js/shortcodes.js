@@ -87,6 +87,46 @@
                         default: '1'
                     }
                 }
+            },
+            {
+                label: t('related_posts_ai', 'AI Related Posts'),
+                shortcode: 'init_live_search_related_ai',
+                attributes: {
+                    id: {
+                        label: t('post_id', 'Post ID (optional)'),
+                        type: 'number',
+                        default: ''
+                    },
+                    count: {
+                        label: t('post_count', 'Number of Posts'),
+                        type: 'number',
+                        default: '5'
+                    },
+                    post_type: {
+                        label: t('post_type', 'Post Type(s)'),
+                        type: 'text',
+                        // PHP default là 'post' nên để sẵn cho thân thiện
+                        default: 'post'
+                    },
+                    template: {
+                        label: t('template', 'Template'),
+                        type: 'select',
+                        options: ['default', 'grid', 'classic', 'compact', 'thumbright'],
+                        default: 'default'
+                    },
+                    css: {
+                        label: t('load_css', 'Load CSS'),
+                        type: 'select',
+                        options: ['1', '0'],
+                        default: '1'
+                    },
+                    schema: {
+                        label: t('output_schema', 'Output Schema'),
+                        type: 'select',
+                        options: ['1', '0'],
+                        default: '1'
+                    }
+                }
             }
         ];
 
