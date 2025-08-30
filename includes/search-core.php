@@ -229,6 +229,8 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
         if (!empty($acf_fields)) {
             $acf_like = '%' . $wpdb->esc_like($term) . '%';
             $acf_placeholders = implode(', ', array_fill(0, count($acf_fields), '%s'));
+            // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $acf_ids = $wpdb->get_col($wpdb->prepare(
                 "
                 SELECT pm.post_id
@@ -241,6 +243,7 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
                 ",
                 ...array_merge($acf_fields, [$acf_like])
             ));
+            // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $post_ids = array_unique(array_merge($post_ids, array_map('intval', $acf_ids)));
         }
     }
@@ -294,6 +297,8 @@ function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like,
 
 // Get post IDs where the title matches the search term
 function init_plugin_suite_live_search_get_ids_by_title($wpdb, $term, $like, $post_types, $placeholders, $limit) {
+    // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
     return $wpdb->get_col($wpdb->prepare(
         "
         SELECT ID FROM {$wpdb->posts}
@@ -305,10 +310,13 @@ function init_plugin_suite_live_search_get_ids_by_title($wpdb, $term, $like, $po
         ",
         ...array_merge($post_types, [$like, $term, $limit])
     ));
+    // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 }
 
 // Get post IDs where the excerpt matches the search term
 function init_plugin_suite_live_search_get_ids_by_excerpt($wpdb, $term, $like, $post_types, $placeholders, $limit) {
+    // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
     return $wpdb->get_col($wpdb->prepare(
         "
         SELECT ID FROM {$wpdb->posts}
@@ -320,10 +328,13 @@ function init_plugin_suite_live_search_get_ids_by_excerpt($wpdb, $term, $like, $
         ",
         ...array_merge($post_types, [$like, $limit])
     ));
+    // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 }
 
 // Get post IDs where the content matches the search term
 function init_plugin_suite_live_search_get_ids_by_content($wpdb, $term, $like, $post_types, $placeholders, $limit) {
+    // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
     return $wpdb->get_col($wpdb->prepare(
         "
         SELECT ID FROM {$wpdb->posts}
@@ -335,10 +346,13 @@ function init_plugin_suite_live_search_get_ids_by_content($wpdb, $term, $like, $
         ",
         ...array_merge($post_types, [$like, $limit])
     ));
+    // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 }
 
 // Get post IDs where the tag name partially or exactly matches the search term
 function init_plugin_suite_live_search_get_ids_by_tag($wpdb, $term, $like, $post_types, $placeholders, $limit) {
+    // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
     $ids_tag = $wpdb->get_col($wpdb->prepare(
         "
         SELECT DISTINCT p.ID
@@ -355,6 +369,7 @@ function init_plugin_suite_live_search_get_ids_by_tag($wpdb, $term, $like, $post
         ",
         ...array_merge($post_types, [$like, $limit])
     ));
+    // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
     $ids_tag_exact = [];
     $words = preg_split('/\\s+/', $term);
@@ -362,6 +377,8 @@ function init_plugin_suite_live_search_get_ids_by_tag($wpdb, $term, $like, $post
         foreach ($words as $word) {
             $exact = trim($word);
             if ($exact !== '') {
+                // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
                 $result = $wpdb->get_col($wpdb->prepare(
                     "
                     SELECT DISTINCT p.ID
@@ -378,6 +395,7 @@ function init_plugin_suite_live_search_get_ids_by_tag($wpdb, $term, $like, $post
                     ",
                     ...array_merge($post_types, [$exact, $limit])
                 ));
+                // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $ids_tag_exact = array_merge($ids_tag_exact, $result);
             }
         }
@@ -400,6 +418,8 @@ function init_plugin_suite_live_search_get_seo_ids($wpdb, $term, $like, $post_ty
     $placeholders_meta = implode(', ', array_fill(0, count($keys), '%s'));
     $seo_like = '%' . $wpdb->esc_like($term) . '%';
 
+    // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
     return $wpdb->get_col($wpdb->prepare(
         "
         SELECT DISTINCT pm.post_id
@@ -413,6 +433,7 @@ function init_plugin_suite_live_search_get_seo_ids($wpdb, $term, $like, $post_ty
         ",
         ...array_merge($keys, [$seo_like, ...$post_types, $limit])
     ));
+    // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 }
 
 // Get post IDs where the title matches an exact word using REGEXP
@@ -420,6 +441,8 @@ function init_plugin_suite_live_search_get_ids_by_title_exact_word($wpdb, $word,
     $escaped = preg_quote($word, '/');
     $regexp = '\\b' . $escaped . '\\b';
 
+    // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
     return $wpdb->get_col($wpdb->prepare(
         "
         SELECT ID FROM {$wpdb->posts}
@@ -431,6 +454,7 @@ function init_plugin_suite_live_search_get_ids_by_title_exact_word($wpdb, $word,
         ",
         ...array_merge($post_types, [$regexp, $limit])
     ));
+    // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 }
 
 // Get post IDs from SEO metadata where word matches exactly
@@ -446,6 +470,8 @@ function init_plugin_suite_live_search_get_seo_ids_by_word($wpdb, $word, $post_t
     $placeholders_meta = implode(', ', array_fill(0, count($keys), '%s'));
     $escaped = '\\b' . preg_quote($word, '/') . '\\b';
 
+    // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
     return $wpdb->get_col($wpdb->prepare(
         "
         SELECT DISTINCT pm.post_id
@@ -459,6 +485,7 @@ function init_plugin_suite_live_search_get_seo_ids_by_word($wpdb, $word, $post_t
         ",
         ...array_merge($keys, [$escaped, ...$post_types, $limit])
     ));
+    // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 }
 
 // Expand a search term by including its synonyms.
@@ -528,6 +555,7 @@ function init_plugin_suite_live_search_find_related_ids( $keyword, $exclude_id, 
     if ( strlen( $keyword ) < 3 ) return [];
 
     $args = [
+        // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
         'exclude'    => $exclude_id,
         'paged'      => 1,
         'lang'       => init_plugin_suite_live_search_detect_lang(),

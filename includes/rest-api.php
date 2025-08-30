@@ -268,6 +268,7 @@ function init_plugin_suite_live_search_tax_query($request) {
         'ignore_sticky_posts' => true,
         'no_found_rows'       => true,
         'fields'              => 'ids',
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
         'tax_query'           => [[
             'taxonomy' => $taxonomy,
             'field'    => 'term_id',
@@ -319,6 +320,7 @@ function init_plugin_suite_live_search_related($request) {
     }
 
     $results = init_plugin_suite_live_search_get_results($clean, [
+        // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
         'exclude'    => $exclude_id,
         'paged'      => $paged,
         'lang'       => init_plugin_suite_live_search_detect_lang(),
@@ -538,6 +540,7 @@ function init_plugin_suite_live_search_products($request) {
     ];
 
     if (!empty($meta_query)) {
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
         $args['meta_query'] = [
             'relation' => 'AND',
             ...$meta_query
@@ -546,11 +549,13 @@ function init_plugin_suite_live_search_products($request) {
 
     if ($price_order === 'asc' || $price_order === 'desc') {
         $args['orderby'] = 'meta_value_num';
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
         $args['meta_key'] = '_price';
         $args['order'] = strtoupper($price_order);
     }
 
     if (!empty($brand)) {
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
         $args['tax_query'][] = [
             'taxonomy' => 'product_brand',
             'field'    => 'slug',
@@ -559,6 +564,7 @@ function init_plugin_suite_live_search_products($request) {
     }
 
     if (!empty($attribute) && !empty($value)) {
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
         $args['tax_query'][] = [
             'taxonomy' => 'pa_' . sanitize_title($attribute),
             'field'    => 'slug',
@@ -567,6 +573,7 @@ function init_plugin_suite_live_search_products($request) {
     }
 
     if (!empty($variation) && !empty($value)) {
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
         $args['tax_query'][] = [
             'taxonomy' => 'pa_' . sanitize_title($variation),
             'field'    => 'slug',
@@ -606,87 +613,95 @@ function init_plugin_suite_live_search_products($request) {
 }
 
 // Fetch coupon
-function init_plugin_suite_live_search_coupon($request) {
-    if (!class_exists('WC_Coupon')) {
-        return rest_ensure_response([]);
+function init_plugin_suite_live_search_coupon( $request ) {
+    if ( ! class_exists( 'WC_Coupon' ) ) {
+        return rest_ensure_response( [] );
     }
 
-    $options   = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
-    $per_page  = (!empty($options['max_results']) && is_numeric($options['max_results']) && $options['max_results'] > 0)
+    $options  = get_option( INIT_PLUGIN_SUITE_LS_OPTION, [] );
+    $per_page = ( ! empty( $options['max_results'] ) && is_numeric( $options['max_results'] ) && $options['max_results'] > 0 )
         ? (int) $options['max_results']
         : 10;
 
-    $paged     = max(1, (int) $request->get_param('page'));
+    $paged     = max( 1, (int) $request->get_param( 'page' ) );
     $cache_key = 'ils_coupon_p' . $paged . '_' . $per_page;
-    $results   = wp_cache_get($cache_key, 'init_plugin_suite_live_search');
+    $results   = wp_cache_get( $cache_key, 'init_plugin_suite_live_search' );
 
-    if ($results !== false) {
-        return rest_ensure_response($results);
+    if ( false !== $results ) {
+        return rest_ensure_response( $results );
     }
 
-    $posts = get_posts([
-        'post_type'     => 'shop_coupon',
-        'post_status'   => 'publish',
-        'numberposts'   => $per_page,
-        'paged'         => $paged,
-        'orderby'       => 'date',
-        'order'         => 'DESC',
-        'fields'        => 'ids',
-        'no_found_rows' => true,
-    ]);
+    $posts = get_posts( [
+        'post_type'      => 'shop_coupon',
+        'post_status'    => 'publish',
+        'posts_per_page' => $per_page,
+        'paged'          => $paged,
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'fields'         => 'ids',
+        'no_found_rows'  => true,
+    ] );
 
     $results = [];
 
-    foreach ($posts as $post_id) {
-        $coupon = new WC_Coupon($post_id);
+    foreach ( $posts as $post_id ) {
+        try {
+            $coupon = new WC_Coupon( (int) $post_id );
 
-        $expiry = $coupon->get_date_expires();
-        if ($expiry && $expiry->getTimestamp() < time()) {
-            continue;
+            $expiry = $coupon->get_date_expires();
+            if ( $expiry && $expiry->getTimestamp() < time() ) {
+                continue;
+            }
+
+            $limit = (int) $coupon->get_usage_limit();
+            $used  = (int) $coupon->get_usage_count();
+            if ( $limit > 0 && $used >= $limit ) {
+                continue;
+            }
+
+            $code = (string) $coupon->get_code();
+            $desc = (string) $coupon->get_description();
+
+            if ( '' === $desc ) {
+                $type   = (string) $coupon->get_discount_type();
+                $amount = (float) $coupon->get_amount();
+
+                if ( in_array( $type, [ 'percent', 'percent_product' ], true ) ) {
+                    // translators: %s is the discount percentage (e.g. 20 for 20%)
+                    $desc = sprintf( __( 'Save %s%%', 'init-live-search' ), wc_format_coupon_amount( $amount ) );
+                } else {
+                    // translators: %s is the monetary discount amount (e.g. $10)
+                    $desc = sprintf( __( 'Save %s', 'init-live-search' ), wc_price( $amount ) );
+                }
+            }
+
+            $meta = [];
+            if ( $limit > 0 ) {
+                // translators: %d is the number of remaining uses
+                $meta[] = sprintf( __( 'Remaining: %d uses', 'init-live-search' ), max( 0, $limit - $used ) );
+            } else {
+                $meta[] = __( 'Unlimited uses', 'init-live-search' );
+            }
+
+            if ( $expiry ) {
+                // translators: %s is the expiration date
+                $meta[] = sprintf( __( 'Expires on: %s', 'init-live-search' ), $expiry->date_i18n( function_exists( 'wc_date_format' ) ? wc_date_format() : get_option( 'date_format' ) ) );
+            } else {
+                $meta[] = __( 'No expiration', 'init-live-search' );
+            }
+
+            $results[] = [
+                'type'  => 'coupon',
+                'title' => strtoupper( $code ),
+                'desc'  => $desc,
+                'meta'  => $meta,
+                'copy'  => $code,
+            ];
+        } catch ( \Throwable $t ) {
+            continue; // Không log gì cả, bỏ qua coupon lỗi
         }
-
-        $limit = $coupon->get_usage_limit();
-        $used  = $coupon->get_usage_count();
-        if ($limit && $used >= $limit) {
-            continue;
-        }
-
-        $code = $coupon->get_code();
-        $desc = $coupon->get_description();
-        if (!$desc) {
-            $amount = wc_format_coupon_amount($coupon->get_amount());
-            $desc = $coupon->get_discount_type() === 'percent'
-                // translators: %s is the discount percentage (e.g. 20 for 20%)
-                ? sprintf(__('Save %s%%', 'init-live-search'), $amount)
-                // translators: %s is the monetary discount amount (e.g. $10)
-                : sprintf(__('Save %s', 'init-live-search'), wc_price($amount));
-        }
-
-        $meta = [];
-
-        if ($limit) {
-            // translators: %d is the number of remaining uses
-            $meta[] = sprintf(__('Remaining: %d uses', 'init-live-search'), $limit - $used);
-        } else {
-            $meta[] = __('Unlimited uses', 'init-live-search');
-        }
-
-        if ($expiry) {
-            // translators: %s is the expiration date
-            $meta[] = sprintf(__('Expires on: %s', 'init-live-search'), $expiry->date_i18n(get_option('date_format')));
-        } else {
-            $meta[] = __('No expiration', 'init-live-search');
-        }
-
-        $results[] = [
-            'type'  => 'coupon',
-            'title' => strtoupper($code),
-            'desc'  => $desc,
-            'meta'  => $meta,
-            'copy'  => $code,
-        ];
     }
 
-    wp_cache_set($cache_key, $results, 'init_plugin_suite_live_search', 300);
-    return rest_ensure_response($results);
+    wp_cache_set( $cache_key, $results, 'init_plugin_suite_live_search', 300 );
+    return rest_ensure_response( $results );
 }

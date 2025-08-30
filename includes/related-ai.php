@@ -44,6 +44,7 @@ function init_plugin_suite_live_search_get_related_ai_ids( $post_id, $limit = 5,
         'post_type'           => $post_type,
         'post_status'         => 'publish',
         'posts_per_page'      => 50,
+        // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
         'post__not_in'        => [ $post_id ],
         'fields'              => 'ids',
         'orderby'             => 'date',
@@ -58,11 +59,13 @@ function init_plugin_suite_live_search_get_related_ai_ids( $post_id, $limit = 5,
             'post_type'           => $post_type,
             'post_status'         => 'publish',
             'posts_per_page'      => 50,
+            // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
             'post__not_in'        => [ $post_id ],
             'fields'              => 'ids',
             'orderby'             => 'rand',
             'no_found_rows'       => true,
             'ignore_sticky_posts' => true,
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
             'tax_query'           => [
                 [
                     'taxonomy' => 'category',
@@ -205,7 +208,8 @@ function init_plugin_suite_live_search_get_related_ai_ids( $post_id, $limit = 5,
             $post_type
         );
         if ( ! empty( $fallback ) ) {
-            set_transient( $cache_key, $fallback, 12 * HOUR_IN_SECONDS );
+            $ttl = (int) apply_filters('init_plugin_suite_live_search_ai_cache_ttl', DAY_IN_SECONDS, $post_id, $post_type, $limit);
+            set_transient( $cache_key, $fallback, $ttl );
             return $fallback;
         }
 
@@ -215,11 +219,13 @@ function init_plugin_suite_live_search_get_related_ai_ids( $post_id, $limit = 5,
                 'post_type'           => $post_type,
                 'post_status'         => 'publish',
                 'posts_per_page'      => $limit,
+                // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
                 'post__not_in'        => [ $post_id ],
                 'fields'              => 'ids',
                 'orderby'             => 'rand',
                 'no_found_rows'       => true,
                 'ignore_sticky_posts' => true,
+                // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
                 'tax_query'           => [
                     [
                         'taxonomy' => 'category',
@@ -229,7 +235,8 @@ function init_plugin_suite_live_search_get_related_ai_ids( $post_id, $limit = 5,
                 ],
             ] );
             if ( ! empty( $rand ) ) {
-                set_transient( $cache_key, $rand, 12 * HOUR_IN_SECONDS );
+                $ttl = (int) apply_filters('init_plugin_suite_live_search_ai_cache_ttl', DAY_IN_SECONDS, $post_id, $post_type, $limit);
+                set_transient( $cache_key, $rand, $ttl );
                 return $rand;
             }
         }
@@ -321,7 +328,8 @@ function init_plugin_suite_live_search_get_related_ai_ids( $post_id, $limit = 5,
     // Optional hook cho “spice” hoặc reorder nhẹ
     $selected = apply_filters( 'init_plugin_suite_live_search_ai_selected', $selected, $scored, $post_id );
 
-    set_transient( $cache_key, $selected, 12 * HOUR_IN_SECONDS );
+    $ttl = (int) apply_filters('init_plugin_suite_live_search_ai_cache_ttl', DAY_IN_SECONDS, $post_id, $post_type, $limit);
+    set_transient( $cache_key, $selected, $ttl );
     return $selected;
 }
 

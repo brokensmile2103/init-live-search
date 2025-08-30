@@ -40,7 +40,9 @@ function init_plugin_suite_live_search_render_settings_page() {
     $current_tab = 'general';
     
     // Chỉ xử lý tab khi đang ở trang của plugin này
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
     if (isset($_GET['page']) && $_GET['page'] === 'init-live-search-settings' && isset($_GET['tab'])) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $tab_value = sanitize_key(wp_unslash($_GET['tab']));
         // Đảm bảo $tab_value không phải null hoặc empty
         if (!empty($tab_value)) {
