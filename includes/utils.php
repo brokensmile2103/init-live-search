@@ -282,17 +282,21 @@ function init_plugin_suite_live_search_prepare_keywords_and_thumb($term) {
 // Determine which post types to search against
 function init_plugin_suite_live_search_resolve_post_types($options, $args) {
     if (!empty($args['post_types']) && is_array($args['post_types'])) {
-        return array_map('sanitize_key', $args['post_types']);
-    }
-
-    if (!empty($args['post_type']) && is_string($args['post_type'])) {
+        $resolved = array_map('sanitize_key', $args['post_types']);
+    } elseif (!empty($args['post_type']) && is_string($args['post_type'])) {
         $types = explode(',', $args['post_type']);
-        return array_map('sanitize_key', array_filter(array_map('trim', $types)));
+        $resolved = array_map('sanitize_key', array_filter(array_map('trim', $types)));
+    } elseif (!empty($options['post_types']) && is_array($options['post_types'])) {
+        $resolved = array_map('sanitize_key', $options['post_types']);
+    } else {
+        $resolved = ['post']; // fallback mặc định
     }
 
-    return !empty($options['post_types']) && is_array($options['post_types'])
-        ? array_map('sanitize_key', $options['post_types'])
-        : ['post'];
+    // Filter cho phép modify list (ép thêm, xoá, etc.)
+    $resolved = apply_filters('init_plugin_suite_live_search_post_types', $resolved, $options, $args);
+
+    // Loại bỏ trùng lặp, reset index
+    return array_values(array_unique($resolved));
 }
 
 // Determine result limit from args or settings

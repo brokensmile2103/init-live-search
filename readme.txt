@@ -4,7 +4,7 @@ Tags: AI search, live search, related posts, slash commands, woocommerce
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.8.3
+Stable tag: 1.8.4
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -349,6 +349,11 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.8.4 – September 17, 2025 =
+- **Dev Filter**: `init_plugin_suite_live_search_post_types` – allow themes/plugins to modify or enforce post type list  
+- **Example Use Case**: ensure a custom post type (e.g. `manga`) is always included in search results without affecting plugin settings  
+- **Code Quality**: standardized return handling with `array_values(array_unique())` for consistent output
 
 = 1.8.3 – August 30, 2025 =
 - **Fix**: `/coupon` REST endpoint – prevent 500 errors on expired or limited coupons  
