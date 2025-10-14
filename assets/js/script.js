@@ -1711,8 +1711,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 e.stopPropagation();
 
                 if (isProduct) {
-                    const addToCart = item.add_to_cart_url || finalUrl;
-                    window.location.href = addToCart;
+                    // Luôn đi tới trang sản phẩm, tránh wc-ajax trả JSON
+                    window.location.href = finalUrl;
+                    return;
                 } else {
                     if (localStorage.getItem(favKey)) {
                         localStorage.removeItem(favKey);

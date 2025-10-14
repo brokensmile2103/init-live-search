@@ -4,7 +4,7 @@ Tags: AI search, live search, related posts, slash commands, woocommerce
 Requires at least: 5.2  
 Tested up to: 6.8  
 Requires PHP: 7.4  
-Stable tag: 1.8.4
+Stable tag: 1.8.5
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -349,6 +349,11 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.8.5 – October 15, 2025 =
+- **Fix**: `.ils-cart-btn` now consistently redirects to the **product page** for *all* WooCommerce product types (simple, variable, grouped, etc.) instead of calling the AJAX `add_to_cart` endpoint that returned a JSON response.  
+- **UX Consistency**: ensures identical “View Product” behavior across all product types in live search results.  
+- **Thanks**: special thanks to **m0n0brands** for reporting and confirming the issue.
 
 = 1.8.4 – September 17, 2025 =
 - **Dev Filter**: `init_plugin_suite_live_search_post_types` – allow themes/plugins to modify or enforce post type list  
