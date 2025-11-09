@@ -230,7 +230,7 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
             $acf_like = '%' . $wpdb->esc_like($term) . '%';
             $acf_placeholders = implode(', ', array_fill(0, count($acf_fields), '%s'));
             // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
             $acf_ids = $wpdb->get_col($wpdb->prepare(
                 "
                 SELECT pm.post_id
@@ -298,7 +298,7 @@ function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like,
 // Get post IDs where the title matches the search term
 function init_plugin_suite_live_search_get_ids_by_title($wpdb, $term, $like, $post_types, $placeholders, $limit) {
     // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
     return $wpdb->get_col($wpdb->prepare(
         "
         SELECT ID FROM {$wpdb->posts}
@@ -316,7 +316,7 @@ function init_plugin_suite_live_search_get_ids_by_title($wpdb, $term, $like, $po
 // Get post IDs where the excerpt matches the search term
 function init_plugin_suite_live_search_get_ids_by_excerpt($wpdb, $term, $like, $post_types, $placeholders, $limit) {
     // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
     return $wpdb->get_col($wpdb->prepare(
         "
         SELECT ID FROM {$wpdb->posts}
@@ -334,7 +334,7 @@ function init_plugin_suite_live_search_get_ids_by_excerpt($wpdb, $term, $like, $
 // Get post IDs where the content matches the search term
 function init_plugin_suite_live_search_get_ids_by_content($wpdb, $term, $like, $post_types, $placeholders, $limit) {
     // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
     return $wpdb->get_col($wpdb->prepare(
         "
         SELECT ID FROM {$wpdb->posts}
@@ -352,7 +352,7 @@ function init_plugin_suite_live_search_get_ids_by_content($wpdb, $term, $like, $
 // Get post IDs where the tag name partially or exactly matches the search term
 function init_plugin_suite_live_search_get_ids_by_tag($wpdb, $term, $like, $post_types, $placeholders, $limit) {
     // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $ids_tag = $wpdb->get_col($wpdb->prepare(
         "
         SELECT DISTINCT p.ID
@@ -378,7 +378,7 @@ function init_plugin_suite_live_search_get_ids_by_tag($wpdb, $term, $like, $post
             $exact = trim($word);
             if ($exact !== '') {
                 // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
                 $result = $wpdb->get_col($wpdb->prepare(
                     "
                     SELECT DISTINCT p.ID
@@ -419,7 +419,7 @@ function init_plugin_suite_live_search_get_seo_ids($wpdb, $term, $like, $post_ty
     $seo_like = '%' . $wpdb->esc_like($term) . '%';
 
     // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
     return $wpdb->get_col($wpdb->prepare(
         "
         SELECT DISTINCT pm.post_id
@@ -442,7 +442,7 @@ function init_plugin_suite_live_search_get_ids_by_title_exact_word($wpdb, $word,
     $regexp = '\\b' . $escaped . '\\b';
 
     // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
     return $wpdb->get_col($wpdb->prepare(
         "
         SELECT ID FROM {$wpdb->posts}
@@ -471,7 +471,7 @@ function init_plugin_suite_live_search_get_seo_ids_by_word($wpdb, $word, $post_t
     $escaped = '\\b' . preg_quote($word, '/') . '\\b';
 
     // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
     return $wpdb->get_col($wpdb->prepare(
         "
         SELECT DISTINCT pm.post_id

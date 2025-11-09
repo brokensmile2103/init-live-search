@@ -32,6 +32,11 @@
                         type: 'text',
                         default: ''
                     },
+                    id: {
+                        label: t('id_attr', 'Element ID'),
+                        type: 'text',
+                        default: ''
+                    },
                     stroke_width: {
                         label: t('stroke_width', 'Stroke Width'),
                         type: 'number',
@@ -41,7 +46,41 @@
                         label: t('radius', 'Border Radius (input mode)'),
                         type: 'text',
                         default: '9999px'
+                    },
+                    // --- New QoL fields ---
+                    width: {
+                        label: t('width', 'Width'),
+                        type: 'text',
+                        default: ''
+                    },
+                    max_width: {
+                        label: t('max_width', 'Max Width'),
+                        type: 'text',
+                        default: ''
+                    },
+                    align: {
+                        label: t('align', 'Align'),
+                        type: 'select',
+                        options: ['', 'left', 'center', 'right'],
+                        default: ''
+                    },
+                    name: {
+                        label: t('input_name', 'Input name (input mode)'),
+                        type: 'text',
+                        default: ''
+                    },
+                    aria_label: {
+                        label: t('aria_label', 'ARIA Label'),
+                        type: 'text',
+                        default: ''
+                    },
+                    button: {
+                        label: t('button_visibility', 'Search Button (input mode)'),
+                        type: 'select',
+                        options: ['show', 'hide'],
+                        default: 'show'
                     }
+                    // ----------------------
                 }
             },
             {
@@ -105,8 +144,7 @@
                     post_type: {
                         label: t('post_type', 'Post Type(s)'),
                         type: 'text',
-                        // PHP default là 'post' nên để sẵn cho thân thiện
-                        default: 'post'
+                        default: 'post' // thân thiện với user
                     },
                     template: {
                         label: t('template', 'Template'),

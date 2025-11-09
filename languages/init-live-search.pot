@@ -626,3 +626,24 @@ msgstr ""
 
 msgid "When at least one dictionary is selected, this feature will be automatically activated."
 msgstr ""
+
+msgid "Width"
+msgstr ""
+
+msgid "Max Width"
+msgstr ""
+
+msgid "Align"
+msgstr ""
+
+msgid "Element ID"
+msgstr ""
+
+msgid "ARIA Label"
+msgstr ""
+
+msgid "Search Button (input mode)"
+msgstr ""
+
+msgid "Input name (input mode)"
+msgstr ""

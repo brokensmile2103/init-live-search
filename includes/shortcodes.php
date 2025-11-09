@@ -1,59 +1,115 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-// Search icon shortcode
+// Search icon/input shortcode (UPGRADED + PHPCS-safe)
 add_shortcode( 'init_live_search', 'init_plugin_suite_live_search_shortcode' );
 function init_plugin_suite_live_search_shortcode( $atts ) {
     $atts = shortcode_atts(
         [
-            'type'          => 'icon', // icon | input
-            'placeholder'   => 'Search...',
-            'label'         => '',
-            'class'         => '',
-            'stroke_width'  => '1', // icon stroke-width
-            'radius'        => '9999px', // input border-radius
+            'type'         => 'icon',      // icon | input
+            'placeholder'  => 'Search...',
+            'label'        => '',
+            'class'        => '',
+            'id'           => '',
+            'stroke_width' => '1',         // icon stroke-width
+            'radius'       => '9999px',    // input border-radius
+            // New QoL options:
+            'width'        => '',          // e.g. 320px | 100% | 20rem
+            'max_width'    => '',          // e.g. 480px
+            'align'        => '',          // left | center | right
+            'name'         => '',          // override input name (default launcher uses "ils")
+            'aria_label'   => '',          // override aria-label
+            'button'       => 'show',      // show | hide (input mode)
         ],
         $atts,
         'init_live_search'
     );
 
-    $form_style = '';
-    if ( 'input' === $atts['type'] && trim( $atts['radius'] ) !== '9999px' ) {
-        $form_style = 'style="border-radius: ' . esc_attr( $atts['radius'] ) . ';"';
+    // Sanitize lightweight (không đổi logic)
+    $type         = $atts['type'] === 'input' ? 'input' : 'icon';
+    $stroke_width = preg_replace( '/[^0-9.]/', '', $atts['stroke_width'] );
+    $radius       = trim( $atts['radius'] );
+    $placeholder  = $atts['placeholder'];
+    $label        = $atts['label'];
+    $name_attr    = trim( $atts['name'] ) !== '' ? $atts['name'] : 'ils';
+    $aria_label   = trim( $atts['aria_label'] ) !== '' ? $atts['aria_label'] : ( $label ? $label : 'Open Search' );
+    $show_button  = ( $atts['button'] !== 'hide' );
+
+    // allow units: px, %, rem, em, vw, vh, ch
+    $unit_ok   = '/^\s*\d+(\.\d+)?\s*(px|%|rem|em|vw|vh|ch)?\s*$/i';
+    $width     = ( $atts['width']     !== '' && preg_match( $unit_ok, $atts['width'] ) )     ? $atts['width']     : '';
+    $max_width = ( $atts['max_width'] !== '' && preg_match( $unit_ok, $atts['max_width'] ) ) ? $atts['max_width'] : '';
+
+    $align = in_array( strtolower( $atts['align'] ), [ 'left', 'center', 'right' ], true ) ? strtolower( $atts['align'] ) : '';
+
+    // Build style parts (PHPCS-safe: chỉ giữ mảng, in ra bằng esc_attr ngay tại chỗ)
+    $wrap_style_parts = [];
+    if ( $width     !== '' ) $wrap_style_parts[] = 'width:' . $width;
+    if ( $max_width !== '' ) $wrap_style_parts[] = 'max-width:' . $max_width;
+    if ( $type === 'input' && $radius !== '' && $radius !== '9999px' ) {
+        $wrap_style_parts[] = 'border-radius:' . $radius;
     }
+    if ( $align === 'center' ) {
+        $wrap_style_parts[] = 'margin-left:auto';
+        $wrap_style_parts[] = 'margin-right:auto';
+    } elseif ( $align === 'right' ) {
+        $wrap_style_parts[] = 'margin-left:auto';
+    }
+
+    // Compose class
+    $base_class = $type === 'input' ? 'ils-input-launch' : 'ils-icon-launch';
+    $classes    = trim( $base_class . ( $atts['class'] ? ' ' . $atts['class'] : '' ) );
 
     ob_start();
 
-    if ( 'input' === $atts['type'] ) {
-        ?>
-        <form class="ils-input-launch <?php echo esc_attr( $atts['class'] ); ?>" role="search" <?php echo esc_attr($form_style); ?>>
+    if ( $type === 'input' ) : ?>
+        <form
+            <?php if ( $atts['id'] !== '' ) : ?>
+                id="<?php echo esc_attr( $atts['id'] ); ?>"
+            <?php endif; ?>
+            class="<?php echo esc_attr( $classes ); ?>"
+            role="search"
+            <?php if ( ! empty( $wrap_style_parts ) ) : ?>
+                style="<?php echo esc_attr( implode( ';', $wrap_style_parts ) ); ?>"
+            <?php endif; ?>
+        >
             <input
-                name="ils"
+                name="<?php echo esc_attr( $name_attr ); ?>"
                 type="search"
-                placeholder="<?php echo esc_attr( $atts['placeholder'] ); ?>"
+                placeholder="<?php echo esc_attr( $placeholder ); ?>"
                 autocomplete="off"
             />
-            <button type="submit" tabindex="-1" aria-label="Search">
-                <svg viewBox="0 0 24 24" width="20" height="20">
-                    <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="<?php echo esc_attr( $atts['stroke_width'] ); ?>" fill="none"></circle>
-                    <line x1="17" y1="17" x2="22" y2="22" stroke="currentColor" stroke-width="<?php echo esc_attr( $atts['stroke_width'] ); ?>"></line>
-                </svg>
-            </button>
+            <?php if ( $show_button ) : ?>
+                <button type="submit" tabindex="-1" aria-label="<?php echo esc_attr( $aria_label ); ?>">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                        <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="<?php echo esc_attr( $stroke_width ); ?>" fill="none"></circle>
+                        <line x1="17" y1="17" x2="22" y2="22" stroke="currentColor" stroke-width="<?php echo esc_attr( $stroke_width ); ?>"></line>
+                    </svg>
+                </button>
+            <?php endif; ?>
         </form>
-        <?php
-    } else {
-        ?>
-        <a href="#init-live-search" class="ils-icon-launch <?php echo esc_attr( $atts['class'] ); ?>" aria-label="<?php echo esc_attr( $atts['label'] ? $atts['label'] : 'Open Search' ); ?>">
-            <svg viewBox="0 0 24 24" width="20" height="20">
-                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="<?php echo esc_attr( $atts['stroke_width'] ); ?>" fill="none"></circle>
-                <line x1="17" y1="17" x2="22" y2="22" stroke="currentColor" stroke-width="<?php echo esc_attr( $atts['stroke_width'] ); ?>"></line>
+    <?php else : ?>
+        <a
+            <?php if ( $atts['id'] !== '' ) : ?>
+                id="<?php echo esc_attr( $atts['id'] ); ?>"
+            <?php endif; ?>
+            href="#init-live-search"
+            class="<?php echo esc_attr( $classes ); ?>"
+            aria-label="<?php echo esc_attr( $aria_label ); ?>"
+            <?php if ( ! empty( $wrap_style_parts ) ) : ?>
+                style="<?php echo esc_attr( implode( ';', $wrap_style_parts ) ); ?>"
+            <?php endif; ?>
+        >
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="<?php echo esc_attr( $stroke_width ); ?>" fill="none"></circle>
+                <line x1="17" y1="17" x2="22" y2="22" stroke="currentColor" stroke-width="<?php echo esc_attr( $stroke_width ); ?>"></line>
             </svg>
-            <?php if ( $atts['label'] ) : ?>
-                <span class="ils-icon-label"><?php echo esc_html( $atts['label'] ); ?></span>
+            <?php if ( $label ) : ?>
+                <span class="ils-icon-label"><?php echo esc_html( $label ); ?></span>
             <?php endif; ?>
         </a>
-        <?php
-    }
+    <?php
+    endif;
 
     return ob_get_clean();
 }
@@ -202,6 +258,13 @@ add_action( 'admin_enqueue_scripts', function ( $hook ) {
                 'template'            => __( 'Template', 'init-live-search' ),
                 'load_css'            => __( 'Load CSS', 'init-live-search' ),
                 'output_schema'       => __( 'Output Schema', 'init-live-search' ),
+                'width'               => __( 'Width', 'init-live-search' ),
+                'max_width'           => __( 'Max Width', 'init-live-search' ),
+                'align'               => __( 'Align', 'init-live-search' ),
+                'id_attr'             => __( 'Element ID', 'init-live-search' ),
+                'aria_label'          => __( 'ARIA Label', 'init-live-search' ),
+                'button_visibility'   => __( 'Search Button (input mode)', 'init-live-search' ),
+                'input_name'          => __( 'Input name (input mode)', 'init-live-search' ),
             ],
         ]
     );

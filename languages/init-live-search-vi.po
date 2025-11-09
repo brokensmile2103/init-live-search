@@ -629,3 +629,24 @@ msgstr "Lưu ý:"
 
 msgid "When at least one dictionary is selected, this feature will be automatically activated."
 msgstr "Khi chọn ít nhất một từ điển, tính năng này sẽ được kích hoạt tự động."
+
+msgid "Width"
+msgstr "Độ rộng"
+
+msgid "Max Width"
+msgstr "Độ rộng tối đa"
+
+msgid "Align"
+msgstr "Canh lề"
+
+msgid "Element ID"
+msgstr "ID phần tử"
+
+msgid "ARIA Label"
+msgstr "Nhãn ARIA"
+
+msgid "Search Button (input mode)"
+msgstr "Nút tìm kiếm (chế độ input)"
+
+msgid "Input name (input mode)"
+msgstr "Tên input (chế độ input)"

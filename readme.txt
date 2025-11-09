@@ -1,12 +1,12 @@
 === Init Live Search – AI-Powered, Related Posts, Slash Commands ===
-Contributors: brokensmile.2103  
+Contributors: brokensmile.2103
 Tags: AI search, live search, related posts, slash commands, woocommerce
-Requires at least: 5.2  
-Tested up to: 6.8  
-Requires PHP: 7.4  
-Stable tag: 1.8.5
-License: GPLv2 or later  
-License URI: https://www.gnu.org/licenses/gpl-2.0.html  
+Requires at least: 5.2
+Tested up to: 6.9
+Requires PHP: 7.4
+Stable tag: 1.8.6
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Fast, modern live search powered by REST API — with AI-powered Related Posts Engine, slash commands, SEO-aware, ACF, Woo, and custom UI presets.
 
@@ -350,10 +350,16 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 
 == Changelog ==
 
+= 1.8.6 – November 09, 2025 =
+- **Shortcode Enhancement**: `[init_live_search]` now supports new attributes:
+  `width`, `max_width`, `align`, `id`, `name`, `aria_label`, `button` (show/hide), and improved `radius`.
+- **Security / Code Quality**: escaped dynamic attributes, removed unsafe inline output, and improved PHPCS compliance.
+- **SQL Safety**: converted `LIMIT` values to `%d` and applied scoped PHPCS ignores for dynamic placeholder lists.
+
 = 1.8.5 – October 15, 2025 =
-- **Fix**: `.ils-cart-btn` now consistently redirects to the **product page** for *all* WooCommerce product types (simple, variable, grouped, etc.) instead of calling the AJAX `add_to_cart` endpoint that returned a JSON response.  
-- **UX Consistency**: ensures identical “View Product” behavior across all product types in live search results.  
-- **Thanks**: special thanks to **m0n0brands** for reporting and confirming the issue.
+- **Fix**: `.ils-cart-btn` now consistently redirects to the **product page** for *all* WooCommerce product types (simple, variable, grouped, etc.) instead of calling the AJAX `add_to_cart` endpoint that returned a JSON response
+- **UX Consistency**: ensures identical “View Product” behavior across all product types in live search results
+- **Thanks**: special thanks to **m0n0brands** for reporting and confirming the issue
 
 = 1.8.4 – September 17, 2025 =
 - **Dev Filter**: `init_plugin_suite_live_search_post_types` – allow themes/plugins to modify or enforce post type list  
