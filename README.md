@@ -34,6 +34,7 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 - **Filter-Driven Logic**: fully extensible via `*_auto_insert_enabled` and `*_default_related_shortcode` hooks  
 - **AI-Powered Related Posts**: new `[init_live_search_related_ai]` shortcode using multi-signal scoring (tags, ACF, series, views, etc.)  
 - **Advanced Keyword Generator**: upgraded to BM25 + NPMI + LLR engine for higher-quality suggestions
+- **404 Smart Redirect**: automatically redirect 404 URLs to the most relevant post, respecting post type settings and unified resolver logic
 
 ## Features
 
