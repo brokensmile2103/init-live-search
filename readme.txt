@@ -4,7 +4,7 @@ Tags: AI search, live search, related posts, slash commands, woocommerce
 Requires at least: 5.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.8.6
+Stable tag: 1.8.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -349,6 +349,13 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.8.7 – December 11, 2025 =
+- **404 Smart Redirect**: added new option “Auto Redirect 404 to Best Match” — automatically redirects 404 pages to the most relevant post determined by Init Live Search.
+- **Post Type Awareness**: redirect engine now respects the plugin’s “Post Types to Include” setting and works seamlessly with multiple post types.
+- **Unified Resolver**: 404 redirect now uses `init_plugin_suite_live_search_resolve_post_types()` and the filter `init_plugin_suite_live_search_post_types` for consistent, extensible post-type handling.
+- **Safety & Accuracy**: redirect only triggers on valid, published posts and prevents unexpected loops or mismatches across post types.
+- **Code Quality**: improved sanitization of `$_SERVER['REQUEST_URI']` (unslash + sanitize), removed unsafe patterns, standardized function prefixes, and ensured PHPCS compliance.
 
 = 1.8.6 – November 09, 2025 =
 - **Shortcode Enhancement**: `[init_live_search]` now supports new attributes:

@@ -647,3 +647,12 @@ msgstr ""
 
 msgid "Input name (input mode)"
 msgstr ""
+
+msgid "Auto Redirect 404 to Best Match?"
+msgstr ""
+
+msgid "When a 404 page is requested, automatically redirect to the most relevant post found by Init Live Search."
+msgstr ""
+
+msgid "Leave unchecked to keep the default 404 behavior of your theme."
+msgstr ""

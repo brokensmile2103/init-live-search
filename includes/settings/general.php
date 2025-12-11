@@ -204,6 +204,23 @@ unset($post_types['attachment']);
             </td>
         </tr>
         <tr>
+            <th scope="row"><?php esc_html_e('Auto Redirect 404 to Best Match?', 'init-live-search'); ?></th>
+            <td>
+                <label>
+                    <input
+                        type="checkbox"
+                        name="init_plugin_suite_live_search_settings[auto_redirect_404]"
+                        value="1"
+                        <?php checked(!empty($options['auto_redirect_404'])); ?>
+                    >
+                    <?php esc_html_e('When a 404 page is requested, automatically redirect to the most relevant post found by Init Live Search.', 'init-live-search'); ?>
+                </label>
+                <p class="description">
+                    <?php esc_html_e('Leave unchecked to keep the default 404 behavior of your theme.', 'init-live-search'); ?>
+                </p>
+            </td>
+        </tr>
+        <tr>
             <th colspan="2"><h2 id="performance-ux"><?php esc_html_e('Performance & UX', 'init-live-search'); ?></h2></th>
         </tr>
         <tr>

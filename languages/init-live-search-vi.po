@@ -650,3 +650,12 @@ msgstr "Nút tìm kiếm (chế độ input)"
 
 msgid "Input name (input mode)"
 msgstr "Tên input (chế độ input)"
+
+msgid "Auto Redirect 404 to Best Match?"
+msgstr "Tự động chuyển hướng 404 sang bài viết liên quan nhất?"
+
+msgid "When a 404 page is requested, automatically redirect to the most relevant post found by Init Live Search."
+msgstr "Khi người dùng vào trang 404, tự động chuyển hướng sang bài viết liên quan nhất được tìm thấy bởi Init Live Search."
+
+msgid "Leave unchecked to keep the default 404 behavior of your theme."
+msgstr "Bỏ chọn để giữ nguyên hành vi 404 mặc định của giao diện."
