@@ -4,7 +4,7 @@ Tags: AI search, live search, related posts, slash commands, woocommerce
 Requires at least: 5.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.8.7
+Stable tag: 1.8.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,6 +36,12 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
   - Added **NPMI** and **Log-Likelihood Ratio (Dunning)** for collocation strength  
   - Focused on **bigram-only** for higher-quality keywords  
   - Unicode-safe, locale-aware stop words, and soft fallback mode
+
+- **404 Smart Redirect**
+  - Added “Auto Redirect 404 to Best Match” mode driven by Init Live Search scoring
+  - Fully respects “Post Types to Include” settings
+  - Uses unified resolver + filters for extensible post-type handling
+  - Safety checks to avoid loops, invalid targets, and cross-type mismatches
 
 - **Developer Filters Expansion**  
   - New filters added for AI related posts and keyword signals  
@@ -349,6 +355,12 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.8.8 – February 23, 2026 =
+- **Native Search Mode**: added new option "Use WordPress Native Search?" — bypasses all custom logic and delegates to WP_Query's built-in `s` parameter for a simpler, lightweight search experience.
+- **Third-party Compatibility**: native mode automatically benefits from search plugins (e.g. SearchWP, ElasticPress) that hook into WP_Query, with zero extra configuration.
+- **Settings UX**: options incompatible with native mode (Search Mode, Fallback, Synonym, SEO Fields, ACF, Operators) are visually dimmed and non-interactive when the option is enabled.
+- **Sanitization**: `use_native_search` is properly sanitized and persisted via the existing settings flow.
 
 = 1.8.7 – December 11, 2025 =
 - **404 Smart Redirect**: added new option “Auto Redirect 404 to Best Match” — automatically redirects 404 pages to the most relevant post determined by Init Live Search.

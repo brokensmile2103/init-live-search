@@ -61,16 +61,6 @@ unset($post_types['attachment']);
             </td>
         </tr>
         <tr>
-            <th scope="row"><?php esc_html_e('Enable + / - Search Operators?', 'init-live-search'); ?></th>
-            <td>
-                <label>
-                    <input type="checkbox" name="init_plugin_suite_live_search_settings[enable_search_operators]" value="1" <?php checked(!empty($options['enable_search_operators']) && $options['enable_search_operators']); ?>>
-                    <?php esc_html_e('Allow using +word to force match, -word to exclude.', 'init-live-search'); ?>
-                </label>
-                <p class="description"><?php esc_html_e('Enable this if you want to support advanced users using must-have (+) and must-not-have (-) keyword operators.', 'init-live-search'); ?></p>
-            </td>
-        </tr>
-        <tr>
             <th scope="row"><?php esc_html_e('Cross-site Search Domains', 'init-live-search'); ?></th>
             <td>
                 <textarea name="init_plugin_suite_live_search_settings[cross_sites]" rows="5" class="large-text code"><?php echo esc_textarea($options['cross_sites'] ?? ''); ?></textarea>
@@ -122,6 +112,16 @@ unset($post_types['attachment']);
             </td>
         </tr>
         <tr>
+            <th scope="row"><?php esc_html_e('Use WordPress Native Search?', 'init-live-search'); ?></th>
+            <td>
+                <label>
+                    <input type="checkbox" name="init_plugin_suite_live_search_settings[use_native_search]" value="1" <?php checked(!empty($options['use_native_search'])); ?>>
+                    <?php esc_html_e('Bypass all custom search logic and use WordPress built-in WP_Query search instead.', 'init-live-search'); ?>
+                </label>
+                <p class="description"><?php esc_html_e('Recommended for small sites or when using third-party search plugins (e.g. SearchWP, ElasticPress) that hook into WP_Query.', 'init-live-search'); ?></p>
+            </td>
+        </tr>
+        <tr data-native-locked="1">
             <th scope="row"><?php esc_html_e('Search Mode', 'init-live-search'); ?></th>
             <td>
                 <fieldset>
@@ -145,6 +145,16 @@ unset($post_types['attachment']);
                 </fieldset>
             </td>
         </tr>
+        <tr data-native-locked="1">
+            <th scope="row"><?php esc_html_e('Enable + / - Search Operators?', 'init-live-search'); ?></th>
+            <td>
+                <label>
+                    <input type="checkbox" name="init_plugin_suite_live_search_settings[enable_search_operators]" value="1" <?php checked(!empty($options['enable_search_operators']) && $options['enable_search_operators']); ?>>
+                    <?php esc_html_e('Allow using +word to force match, -word to exclude.', 'init-live-search'); ?>
+                </label>
+                <p class="description"><?php esc_html_e('Enable this if you want to support advanced users using must-have (+) and must-not-have (-) keyword operators.', 'init-live-search'); ?></p>
+            </td>
+        </tr>
         <tr>
             <th scope="row"><?php esc_html_e('Show Excerpt in Search Results?', 'init-live-search'); ?></th>
             <td>
@@ -155,14 +165,14 @@ unset($post_types['attachment']);
                 <p class="description"><?php esc_html_e('If disabled, excerpt will be omitted from results to simplify the UI.', 'init-live-search'); ?></p>
             </td>
         </tr>
-        <tr>
+        <tr data-native-locked="1">
             <th scope="row"><?php esc_html_e('Search in ACF Fields (Advanced)', 'init-live-search'); ?></th>
             <td>
                 <input type="text" name="init_plugin_suite_live_search_settings[acf_search_fields]" value="<?php echo esc_attr($options['acf_search_fields'] ?? ''); ?>" class="regular-text">
                 <p class="description"><?php esc_html_e('Optional. Enter comma-separated ACF field keys to include in search (e.g. company_name, project_code). If left blank, ACF fields will not be searched.', 'init-live-search'); ?></p>
             </td>
         </tr>
-        <tr>
+        <tr data-native-locked="1">
             <th scope="row"><?php esc_html_e('Search in SEO Metadata?', 'init-live-search'); ?></th>
             <td>
                 <label>
@@ -172,7 +182,7 @@ unset($post_types['attachment']);
                 <p class="description"><?php esc_html_e('Enable this to improve accuracy by searching within SEO-optimized content written by the author.', 'init-live-search'); ?></p>
             </td>
         </tr>
-        <tr>
+        <tr data-native-locked="1">
             <th scope="row"><?php esc_html_e('Enable Synonym Expansion?', 'init-live-search'); ?></th>
             <td>
                 <label>
@@ -184,7 +194,7 @@ unset($post_types['attachment']);
                 </p>
             </td>
         </tr>
-        <tr>
+        <tr data-native-locked="1">
             <th scope="row"><?php esc_html_e('Enable fallback matching?', 'init-live-search'); ?></th>
             <td>
                 <label>

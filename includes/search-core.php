@@ -89,6 +89,17 @@ function init_plugin_suite_live_search_fallback_single_words($wpdb, $term, $post
 
 // Resolve post IDs based on search term, fallback, and ACF fields
 function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_types, $placeholders, $search_mode, $limit, $paged, $options, $args) {
+    if (!empty($options['use_native_search'])) {
+        $query = new WP_Query([
+            's'              => $term,
+            'post_type'      => $post_types,
+            'post_status'    => 'publish',
+            'posts_per_page' => $limit,
+            'fields'         => 'ids',
+        ]);
+        return $query->posts;
+    }
+
     global $wpdb;
     $internal_limit = min($limit * 3, 300);
 

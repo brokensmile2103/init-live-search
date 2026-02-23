@@ -659,3 +659,12 @@ msgstr "Khi người dùng vào trang 404, tự động chuyển hướng sang b
 
 msgid "Leave unchecked to keep the default 404 behavior of your theme."
 msgstr "Bỏ chọn để giữ nguyên hành vi 404 mặc định của giao diện."
+
+msgid "Use WordPress Native Search?"
+msgstr "Dùng tìm kiếm mặc định của WordPress?"
+
+msgid "Bypass all custom search logic and use WordPress built-in WP_Query search instead."
+msgstr "Bỏ qua toàn bộ logic tìm kiếm tùy chỉnh và dùng WP_Query mặc định của WordPress."
+
+msgid "Recommended for small sites or when using third-party search plugins (e.g. SearchWP, ElasticPress) that hook into WP_Query."
+msgstr "Khuyến nghị cho site nhỏ hoặc khi dùng plugin tìm kiếm bên thứ ba (ví dụ: SearchWP, ElasticPress) có hook vào WP_Query."

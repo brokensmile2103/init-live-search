@@ -656,3 +656,12 @@ msgstr ""
 
 msgid "Leave unchecked to keep the default 404 behavior of your theme."
 msgstr ""
+
+msgid "Use WordPress Native Search?"
+msgstr ""
+
+msgid "Bypass all custom search logic and use WordPress built-in WP_Query search instead."
+msgstr ""
+
+msgid "Recommended for small sites or when using third-party search plugins (e.g. SearchWP, ElasticPress) that hook into WP_Query."
+msgstr ""
