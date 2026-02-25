@@ -1,451 +1,551 @@
 <?php
 /**
- * Bigram Keyword Generator (BM25 + NPMI + LLR)
+ * Keyword Generator v3 — BM25 + NPMI + LLR + MMR
+ *
+ * Nguồn dữ liệu : chỉ POST TITLE (chính xác, nhẹ, phù hợp mọi site)
+ * N-gram        : bigram (2 từ) + trigram (3 từ)
+ * Scoring       : BM25 × NPMI × LLR-boost
+ * Penalty       : cross-document frequency (phrase quá phổ biến → hạ điểm)
+ * Selection     : MMR – Maximal Marginal Relevance (đa dạng + điểm cao)
+ * Ngôn ngữ     : auto-detect theo locale, stop-words riêng cho mỗi ngôn ngữ
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-add_action('wp_ajax_init_plugin_suite_live_search_generate_keywords', 'init_plugin_suite_live_search_generate_keywords_enhanced');
+add_action(
+    'wp_ajax_init_plugin_suite_live_search_generate_keywords',
+    'init_plugin_suite_live_search_generate_keywords_v3'
+);
 
-function init_plugin_suite_live_search_generate_keywords_enhanced() {
-    if (!current_user_can('manage_options')) {
-        wp_send_json_error('Unauthorized', 403);
+// ═══════════════════════════════════════════════════════════════════════════
+// Main handler
+// ═══════════════════════════════════════════════════════════════════════════
+
+function init_plugin_suite_live_search_generate_keywords_v3() {
+
+    /* ── Auth ─────────────────────────────────────────────────────────── */
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Unauthorized', 403 );
     }
 
-    $nonce = isset($_SERVER['HTTP_X_WP_NONCE']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_X_WP_NONCE'])) : '';
-    if (!wp_verify_nonce($nonce, 'init_live_search_admin_nonce')) {
-        wp_send_json_error('Invalid nonce', 403);
+    $nonce = isset( $_SERVER['HTTP_X_WP_NONCE'] )
+        ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ) )
+        : '';
+
+    if ( ! wp_verify_nonce( $nonce, 'init_live_search_admin_nonce' ) ) {
+        wp_send_json_error( 'Invalid nonce', 403 );
     }
 
-    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
-    $post_types = !empty($options['post_types']) ? (array) $options['post_types'] : ['post'];
+    /* ── Config ───────────────────────────────────────────────────────── */
+    $options    = get_option( INIT_PLUGIN_SUITE_LS_OPTION, [] );
+    $post_types = ! empty( $options['post_types'] ) ? (array) $options['post_types'] : [ 'post' ];
 
-    // Query tối ưu: chỉ lấy IDs
-    $post_ids = get_posts([
+    /* ── Fetch post IDs ───────────────────────────────────────────────── */
+    $post_ids = get_posts( [
         'post_type'           => $post_types,
         'posts_per_page'      => -1,
         'no_found_rows'       => true,
         'ignore_sticky_posts' => true,
         'post_status'         => 'publish',
         'fields'              => 'ids',
-    ]);
+    ] );
 
-    if (empty($post_ids)) {
-        wp_send_json_error('No posts found');
+    if ( empty( $post_ids ) ) {
+        wp_send_json_error( 'No posts found' );
     }
 
+    /* ── Locale & stop-words ──────────────────────────────────────────── */
     $locale = get_locale();
-    $is_vietnamese = ($locale === 'vi' || strpos($locale, 'vi_') === 0);
+    $is_vi  = ( $locale === 'vi' || str_starts_with( $locale, 'vi_' ) );
 
-    // Stop words đơn
-    $default_stop_words = $is_vietnamese
-        ? ['là','vì','và','các','một','có','trong','khi','những','được','lúc','này','đây','rằng','thì','sự','chap','chương','của','cho','từ','trên','dưới','về','tại','với','không','đã','sẽ','bị','làm','nào','như','theo','giữa','sau','trước']
-        : ['is','are','the','and','with','this','that','of','for','to','in','on','it','be','by','as','was','were','been','have','has','had','do','does','did','will','would','could','should','may','might','must','can','shall'];
-    $stop_words = apply_filters('init_plugin_suite_live_search_stop_single_words', $default_stop_words, $locale);
-    $stop_words_map = array_fill_keys($stop_words, true);
+    $stop_words = $is_vi
+        ? init_plugin_suite_live_search_stop_words_vi()
+        : init_plugin_suite_live_search_stop_words_en();
 
-    // Thu thập tài liệu (TITLE x3), trọng số bài viết, thống kê unigram
-    $documents = [];         // doc_id => [tokens...]
-    $post_weights = [];      // doc_id => weight
-    $global_unigram = [];    // term => total freq
-    $total_tokens = 0;
+    $stop_words     = apply_filters( 'init_plugin_suite_live_search_stop_single_words', $stop_words, $locale );
+    $stop_words_map = array_fill_keys( $stop_words, true );
 
-    foreach ($post_ids as $post_id) {
-        $title = get_the_title($post_id);
-        if (empty($title)) continue;
+    /* ── Build documents (title only, no artificial repetition) ──────── */
+    $documents      = [];   // post_id => [token, …]
+    $post_weights   = [];   // post_id => engagement weight
+    $global_unigram = [];   // token   => total count
+    $total_tokens   = 0;
 
-        // Trọng số độ quan tâm bài viết
-        $comment_count = (int) get_comments_number($post_id);
-        $view_count    = (int) get_post_meta($post_id, '_init_view_count', true);
-        $post_weight   = 1 + log(1 + $comment_count) + log(1 + $view_count);
-        $post_weights[$post_id] = $post_weight;
+    foreach ( $post_ids as $pid ) {
+        $title = get_the_title( $pid );
+        if ( empty( $title ) ) continue;
 
-        // Chỉ TITLE, nhân 3 để tăng trọng số
-        $combined_text = $title . ' ' . $title . ' ' . $title;
+        // Engagement weight — boosts posts users actually care about
+        $comments    = (int) get_comments_number( $pid );
+        $views       = (int) get_post_meta( $pid, '_init_view_count', true );
+        $post_weight = 1.0 + log( 1 + $comments ) + log( 1 + $views );
+        $post_weights[ $pid ] = $post_weight;
 
-        $tokens = init_plugin_suite_live_search_process_text($combined_text, $stop_words, $is_vietnamese);
-        if (empty($tokens)) continue;
+        $tokens = init_plugin_suite_live_search_tokenise( $title, $stop_words, $is_vi );
+        if ( empty( $tokens ) ) continue;
 
-        $documents[$post_id] = $tokens;
+        $documents[ $pid ] = $tokens;
 
-        foreach ($tokens as $t) {
-            $global_unigram[$t] = ($global_unigram[$t] ?? 0) + 1;
-            $total_tokens++;
+        foreach ( $tokens as $t ) {
+            $global_unigram[ $t ] = ( $global_unigram[ $t ] ?? 0 ) + 1;
+            ++$total_tokens;
         }
     }
 
-    if (empty($documents)) {
-        wp_send_json_error('No valid documents');
+    if ( empty( $documents ) ) {
+        wp_send_json_error( 'No valid documents' );
     }
 
-    // 1) BM25 cho trọng số từ
-    $term_scores = init_plugin_suite_live_search_calculate_bm25($documents, $post_weights);
+    $total_docs = count( $documents );
 
-    // 2) Thống kê bigram toàn cục (raw) để tính NPMI/LLR
-    $bigram_stats = init_plugin_suite_live_search_build_bigram_stats($documents);
+    /* ── BM25 unigram scores ──────────────────────────────────────────── */
+    $term_scores = init_plugin_suite_live_search_bm25( $documents, $post_weights );
 
-    // 3) Sinh & chấm điểm BIGRAMS: BM25 + NPMI + LLR (Dunning)
-    $bigrams_scored = init_plugin_suite_live_search_generate_scored_bigrams_bm25_npmi_llr(
-        $documents,
-        $term_scores,
-        $post_weights,
-        $global_unigram,
-        $total_tokens,
-        $bigram_stats,
-        $stop_words_map
+    /* ── N-gram stats ─────────────────────────────────────────────────── */
+    $bi_stats  = init_plugin_suite_live_search_ngram_stats( $documents, 2 );
+    $tri_stats = init_plugin_suite_live_search_ngram_stats( $documents, 3 );
+
+    /* ── Score n-grams ────────────────────────────────────────────────── */
+    $bi_scored  = init_plugin_suite_live_search_score_ngrams(
+        $documents, $term_scores, $post_weights,
+        $global_unigram, $total_tokens,
+        $bi_stats, $stop_words_map, 2
+    );
+    $tri_scored = init_plugin_suite_live_search_score_ngrams(
+        $documents, $term_scores, $post_weights,
+        $global_unigram, $total_tokens,
+        $tri_stats, $stop_words_map, 3
     );
 
-    // 4) Lọc & xếp hạng (chỉ bigram)
-    $keywords = init_plugin_suite_live_search_filter_and_rank_keywords_bi($bigrams_scored, $locale);
-
-    if (empty($keywords)) {
-        // Fallback mềm: nếu lọc quá gắt, lấy top theo score (vẫn chỉ bigrams, vẫn kiểm tra độ dài/cú pháp)
-        $keywords = init_plugin_suite_live_search_fallback_pick_bigrams($bigrams_scored, $locale, 30);
+    // Merge pools — trigrams boost ×1.2 (more specific → more valuable)
+    $all_scored = $bi_scored;
+    foreach ( $tri_scored as $ng => $s ) {
+        $all_scored[ $ng ] = $s * 1.2;
     }
 
-    if (!empty($keywords)) {
-        // 5) Chọn 15 keywords đa dạng
-        $selected_keywords = init_plugin_suite_live_search_smart_keyword_selection($keywords, 15);
-        wp_send_json_success(implode(', ', $selected_keywords));
-    }
+    /* ── Cross-document frequency penalty ────────────────────────────── */
+    // A phrase appearing in >60% of docs is too generic for a plugin
+    // serving diverse sites → down-rank proportionally up to ×0.3.
+    $doc_ng_freq = init_plugin_suite_live_search_doc_ngram_freq( $documents, [ 2, 3 ] );
 
-    wp_send_json_error('No keywords found');
-}
-
-/** ========================= Core Helpers ========================= */
-
-function init_plugin_suite_live_search_process_text($text, $stop_words, $is_vietnamese = false) {
-    if (function_exists('normalizer_normalize')) {
-        $text = normalizer_normalize($text, Normalizer::FORM_C);
-    }
-
-    $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-    $text = wp_strip_all_tags($text);
-    $text = mb_strtolower(trim($text), 'UTF-8');
-
-    // Chuẩn hoá dash: dùng Unicode escapes & đặt '-' literal rõ ràng
-    // U+2010 (‐), U+2011 (-), U+2012 (‒), U+2013 (–), U+2014 (—), U+2212 (−), và '-'
-    $text = preg_replace('/[\x{2010}\x{2011}\x{2012}\x{2013}\x{2014}\x{2212}\-]+/u', '-', $text);
-    if ($text === null) $text = ''; // an toàn nếu PCRE lỗi vì môi trường
-
-    $text = str_replace(['&nbsp;'], ' ', $text);
-
-    // Loại ký tự đặc biệt (giữ dấu TV nếu cần)
-    if ($is_vietnamese) {
-        $text = preg_replace('/[^\p{L}\p{N}\s\-]/u', ' ', $text);
-    } else {
-        $text = preg_replace('/[^a-zA-Z0-9\s\-]/', ' ', $text);
-    }
-    if ($text === null) $text = '';
-
-    $text = preg_replace('/\s+/u', ' ', $text);
-    if ($text === null) $text = '';
-
-    $words = $text !== '' ? explode(' ', trim($text)) : [];
-    if (empty($words)) return [];
-
-    $stop_map = array_fill_keys($stop_words, true);
-    $out = [];
-    foreach ($words as $w) {
-        if ($w === '' || isset($stop_map[$w])) continue;
-        if (mb_strlen($w, 'UTF-8') < 2) continue;
-        if (preg_match('/^\d+$/u', $w)) continue;
-        if (preg_match('/^[^\p{L}]+$/u', $w)) continue;
-        $out[] = $w;
-    }
-    return array_values($out);
-}
-
-function init_plugin_suite_live_search_calculate_bm25($documents, $post_weights, $k1 = 1.5, $b = 0.75) {
-    $total_docs = count($documents);
-    if ($total_docs === 0) return [];
-
-    $doc_freq = [];
-    $doc_lengths = [];
-    $avgdl = 0;
-
-    foreach ($documents as $doc_id => $terms) {
-        $doc_lengths[$doc_id] = count($terms);
-        $avgdl += $doc_lengths[$doc_id];
-        foreach (array_unique($terms) as $t) {
-            $doc_freq[$t] = ($doc_freq[$t] ?? 0) + 1;
+    foreach ( $all_scored as $ng => &$score ) {
+        $ratio = ( $doc_ng_freq[ $ng ] ?? 0 ) / $total_docs;
+        if ( $ratio > 0.6 ) {
+            $penalty = 1.0 - ( ( $ratio - 0.6 ) / 0.4 ) * 0.7; // min ×0.3
+            $score  *= max( $penalty, 0.3 );
         }
     }
-    $avgdl = max($avgdl / $total_docs, 1);
+    unset( $score );
 
-    $term_scores = [];
-    foreach ($documents as $doc_id => $terms) {
-        if (empty($terms)) continue;
-        $dl   = $doc_lengths[$doc_id];
-        $freq = array_count_values($terms);
-        $wdoc = $post_weights[$doc_id] ?? 1;
+    /* ── Filter & rank ────────────────────────────────────────────────── */
+    $filtered = init_plugin_suite_live_search_filter_ngrams( $all_scored, $locale, $stop_words_map );
 
-        foreach ($freq as $term => $f) {
-            $df  = $doc_freq[$term] ?? 0;
-            $idf = log( ( ($total_docs - $df + 0.5) ) / ( ($df + 0.5) ) + 1 );
-            $den = $f + $k1 * (1 - $b + $b * ($dl / $avgdl));
-            $bm25 = $idf * ( ($f * ($k1 + 1)) / max($den, 1e-9) );
-            $term_scores[$term] = ($term_scores[$term] ?? 0) + $bm25 * $wdoc;
-        }
+    if ( empty( $filtered ) ) {
+        $filtered = init_plugin_suite_live_search_fallback_ngrams( $all_scored );
     }
-    return $term_scores;
+
+    if ( empty( $filtered ) ) {
+        wp_send_json_error( 'No keywords found' );
+    }
+
+    /* ── MMR diverse selection ────────────────────────────────────────── */
+    $selected = init_plugin_suite_live_search_mmr_selection( $filtered, 15, 0.65 );
+
+    wp_send_json_success( implode( ', ', $selected ) );
 }
 
-function init_plugin_suite_live_search_build_bigram_stats($documents) {
-    $counts = []; // raw bigram counts (không trọng số)
-    $left   = []; // w1 => c(w1,*)
-    $right  = []; // w2 => c(*,w2)
-    $N = 0;       // tổng số bigram (raw)
+// ═══════════════════════════════════════════════════════════════════════════
+// Stop-word lists
+// ═══════════════════════════════════════════════════════════════════════════
 
-    foreach ($documents as $terms) {
-        $n = count($terms);
-        for ($i = 0; $i < $n - 1; $i++) {
-            $w1 = $terms[$i];
-            $w2 = $terms[$i+1];
-            $bg = $w1.' '.$w2;
-
-            $counts[$bg] = ($counts[$bg] ?? 0) + 1;
-            $left[$w1]   = ($left[$w1] ?? 0) + 1;
-            $right[$w2]  = ($right[$w2] ?? 0) + 1;
-            $N++;
-        }
-    }
-
+function init_plugin_suite_live_search_stop_words_vi(): array {
     return [
-        'counts' => $counts,
-        'left'   => $left,
-        'right'  => $right,
-        'N'      => $N,
+        // Giới từ, liên từ, trợ từ
+        'là','vì','và','các','một','có','trong','khi','những','được','lúc',
+        'này','đây','rằng','thì','sự','của','cho','từ','trên','dưới','về',
+        'tại','với','không','đã','sẽ','bị','làm','nào','như','theo','giữa',
+        'sau','trước','hay','hoặc','mà','nên','vẫn','cũng','đến','ra','vào',
+        'lên','xuống','qua','lại','đi','đó','thế','thôi','nhưng','hơn','nhất',
+        'rất','quá','còn','chỉ','mình','ta','bạn','họ','chúng','tôi','anh',
+        'chị','em','ông','bà','cô','chú','bác','nó','gì','sao','đâu','kể',
+        'dù','dù','hết','khác','nhiều','ít','cần','thể','ai','mọi','luôn',
+        // Từ meta truyện/blog hay gặp
+        'chap','chương','phần','tập','số','hồi','bài','mục','kỳ','kì',
     ];
 }
 
-function init_plugin_suite_live_search_generate_scored_bigrams_bm25_npmi_llr(
-    $documents,
-    $term_scores,
-    $post_weights,
-    $global_unigram,
-    $total_tokens,
-    $bigram_stats,
-    $stop_words_map
-) {
-    $N_tokens  = max($total_tokens, 1);
-    $N_bigrams = max($bigram_stats['N'], 1);
+function init_plugin_suite_live_search_stop_words_en(): array {
+    return [
+        // Articles, conjunctions, prepositions
+        'a','an','the','and','or','but','nor','so','yet','for','of','to',
+        'in','on','at','by','up','as','is','are','was','were','be','been',
+        'being','have','has','had','do','does','did','will','would','could',
+        'should','may','might','must','can','shall','not','no','nor','than',
+        'then','too','very','just','also','both','each','few','more','most',
+        'other','some','such','into','over','after','before','between','out',
+        'from','with','this','that','these','those','what','which','who',
+        'how','when','where','why','all','any','its','our','your','my','his',
+        'her','we','you','they','it','he','she','i','me','him','us','them',
+        // Common filler words in post titles
+        'new','get','top','best','how','why','what','review','list','guide',
+        'tips','free','now','here','using','make','use','via','per','vs',
+        'one','two','three','part','step','ways','week','year','day','time',
+    ];
+}
 
-    $raw_bg_counts = $bigram_stats['counts'];
-    $left_totals   = $bigram_stats['left'];
-    $right_totals  = $bigram_stats['right'];
+// ═══════════════════════════════════════════════════════════════════════════
+// Tokeniser
+// ═══════════════════════════════════════════════════════════════════════════
 
-    // Accumulate weighted counts
-    $weighted_counts = []; // bigram => weighted count
-    foreach ($documents as $doc_id => $words) {
-        $wdoc = $post_weights[$doc_id] ?? 1;
-        for ($i = 0, $n = count($words) - 1; $i < $n; $i++) {
-            $w1 = $words[$i];
-            $w2 = $words[$i+1];
+function init_plugin_suite_live_search_tokenise( string $text, array $stop_words, bool $is_vi ): array {
+    if ( function_exists( 'normalizer_normalize' ) ) {
+        $text = normalizer_normalize( $text, Normalizer::FORM_C );
+    }
 
-            if (isset($stop_words_map[$w1]) || isset($stop_words_map[$w2])) continue;
-            if ($w1 === $w2) continue;
+    $text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+    $text = wp_strip_all_tags( $text );
+    $text = mb_strtolower( trim( $text ), 'UTF-8' );
 
-            $bg = $w1.' '.$w2;
-            $weighted_counts[$bg] = ($weighted_counts[$bg] ?? 0) + 1.0 * $wdoc;
+    // Normalise various dash characters → space (hyphens split tokens)
+    $text = preg_replace( '/[\x{2010}\x{2011}\x{2012}\x{2013}\x{2014}\x{2212}\-]+/u', ' ', $text ) ?? '';
+
+    $text = str_replace( '&nbsp;', ' ', $text );
+
+    // Strip punctuation (keep Unicode letters/numbers and spaces)
+    $text = $is_vi
+        ? ( preg_replace( '/[^\p{L}\p{N}\s]/u', ' ', $text ) ?? '' )
+        : ( preg_replace( '/[^a-zA-Z0-9\s]/', ' ', $text ) ?? '' );
+
+    $text = preg_replace( '/\s+/u', ' ', $text ) ?? '';
+
+    if ( $text === '' ) return [];
+
+    $stop_map = array_fill_keys( $stop_words, true );
+    $tokens   = [];
+
+    foreach ( explode( ' ', trim( $text ) ) as $w ) {
+        if ( $w === '' ) continue;
+        if ( isset( $stop_map[ $w ] ) ) continue;
+        if ( mb_strlen( $w, 'UTF-8' ) < 2 ) continue;
+        if ( preg_match( '/^\d+$/u', $w ) ) continue;           // pure numbers
+        if ( preg_match( '/^[^\p{L}]+$/u', $w ) ) continue;     // no letters at all
+        $tokens[] = $w;
+    }
+
+    return $tokens;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BM25 (k1 = 1.5, b = 0.75)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function init_plugin_suite_live_search_bm25( array $documents, array $post_weights, float $k1 = 1.5, float $b = 0.75 ): array {
+    $total_docs = count( $documents );
+    if ( $total_docs === 0 ) return [];
+
+    $doc_freq    = [];
+    $doc_lengths = [];
+    $sum_len     = 0;
+
+    foreach ( $documents as $pid => $terms ) {
+        $len               = count( $terms );
+        $doc_lengths[$pid] = $len;
+        $sum_len          += $len;
+        foreach ( array_unique( $terms ) as $t ) {
+            $doc_freq[$t] = ( $doc_freq[$t] ?? 0 ) + 1;
         }
     }
 
-    if (empty($weighted_counts)) return [];
+    $avgdl = max( $sum_len / $total_docs, 1 );
 
-    // Convert to final score with BM25 + NPMI + LLR
+    $term_scores = [];
+    foreach ( $documents as $pid => $terms ) {
+        $dl   = $doc_lengths[$pid];
+        $freq = array_count_values( $terms );
+        $wdoc = $post_weights[$pid] ?? 1.0;
+
+        foreach ( $freq as $term => $f ) {
+            $df   = $doc_freq[$term] ?? 0;
+            $idf  = log( ( $total_docs - $df + 0.5 ) / ( $df + 0.5 ) + 1 );
+            $den  = $f + $k1 * ( 1 - $b + $b * $dl / $avgdl );
+            $bm25 = $idf * ( $f * ( $k1 + 1 ) ) / max( $den, 1e-9 );
+            $term_scores[$term] = ( $term_scores[$term] ?? 0.0 ) + $bm25 * $wdoc;
+        }
+    }
+
+    return $term_scores;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// N-gram statistics
+// ═══════════════════════════════════════════════════════════════════════════
+
+function init_plugin_suite_live_search_ngram_stats( array $documents, int $n ): array {
+    $counts = [];   // ngram  => raw count
+    $left   = [];   // first token => marginal count
+    $right  = [];   // last  token => marginal count
+    $N      = 0;
+
+    foreach ( $documents as $terms ) {
+        $len = count( $terms );
+        for ( $i = 0; $i <= $len - $n; $i++ ) {
+            $ng          = implode( ' ', array_slice( $terms, $i, $n ) );
+            $counts[$ng] = ( $counts[$ng] ?? 0 ) + 1;
+            $left[ $terms[$i] ]            = ( $left[ $terms[$i] ] ?? 0 ) + 1;
+            $right[ $terms[$i + $n - 1] ]  = ( $right[ $terms[$i + $n - 1] ] ?? 0 ) + 1;
+            ++$N;
+        }
+    }
+
+    return [ 'counts' => $counts, 'left' => $left, 'right' => $right, 'N' => $N ];
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Score n-grams: weighted count × BM25 pair score × NPMI bonus × LLR boost
+// ═══════════════════════════════════════════════════════════════════════════
+
+function init_plugin_suite_live_search_score_ngrams(
+    array $documents,
+    array $term_scores,
+    array $post_weights,
+    array $global_unigram,
+    int   $total_tokens,
+    array $stats,
+    array $stop_words_map,
+    int   $n
+): array {
+
+    $N_tok = max( $total_tokens, 1 );
+    $N_ng  = max( $stats['N'], 1 );
+    $raw   = $stats['counts'];
+
+    /* ── Weighted occurrence count per n-gram ─────────────────────────── */
+    $weighted = [];
+    foreach ( $documents as $pid => $words ) {
+        $wdoc = $post_weights[$pid] ?? 1.0;
+        $len  = count( $words );
+
+        for ( $i = 0; $i <= $len - $n; $i++ ) {
+            $slice = array_slice( $words, $i, $n );
+
+            // Skip if any token is a stop word
+            foreach ( $slice as $w ) {
+                if ( isset( $stop_words_map[$w] ) ) continue 2;
+            }
+
+            // Skip if all tokens are identical
+            if ( count( array_unique( $slice ) ) < $n ) continue;
+
+            $ng            = implode( ' ', $slice );
+            $weighted[$ng] = ( $weighted[$ng] ?? 0.0 ) + $wdoc;
+        }
+    }
+
+    if ( empty( $weighted ) ) return [];
+
+    /* ── Compute final score ──────────────────────────────────────────── */
     $scored = [];
-    foreach ($weighted_counts as $bg => $wcount) {
-        [$w1, $w2] = explode(' ', $bg, 2);
+    foreach ( $weighted as $ng => $wcount ) {
+        $parts = explode( ' ', $ng );
 
-        // BM25 pair
-        $bm_pair = ($term_scores[$w1] ?? 0) + ($term_scores[$w2] ?? 0);
+        // BM25 sum across constituent tokens
+        $bm_sum = 0.0;
+        foreach ( $parts as $p ) {
+            $bm_sum += $term_scores[$p] ?? 0.0;
+        }
 
-        // NPMI xấp xỉ từ unigram & bigram raw
-        $c1 = max($global_unigram[$w1] ?? 0, 1);
-        $c2 = max($global_unigram[$w2] ?? 0, 1);
-        $p1 = $c1 / $N_tokens;
-        $p2 = $c2 / $N_tokens;
+        // NPMI — both p_joint AND p_ng use N_tok (uniform base)
+        $p_joint = 1.0;
+        foreach ( $parts as $p ) {
+            $p_joint *= max( $global_unigram[$p] ?? 0, 1 ) / $N_tok;
+        }
+        $c_ng = max( $raw[$ng] ?? 0, 0 );
+        $p_ng = ( $c_ng + 1 ) / ( $N_tok + 1 );   // smoothed, same base as p_joint
 
-        $c_bg_raw = max($raw_bg_counts[$bg] ?? 0, 0);
-        // Dùng N_bigrams thay vì (N_tokens - 1) cho p_bg hợp lý hơn
-        $p_bg = ($c_bg_raw + 1) / $N_bigrams;
+        $pmi  = log( $p_ng / max( $p_joint, 1e-15 ) );
+        $npmi = $pmi / max( -log( $p_ng ), 1e-9 ); // ∈ [-1, 1]
 
-        $pmi  = log( $p_bg / max($p1 * $p2, 1e-12) );
-        $npmi = $pmi / max(-log($p_bg), 1e-9); // [-1,1]
+        $base = $wcount * $bm_sum * ( 1.0 + max( $npmi, 0.0 ) );
 
-        $base = $wcount * $bm_pair * (1 + max($npmi, 0));
+        // LLR / G-test boost
+        if ( $n === 2 ) {
+            // Exact Dunning 2×2 contingency table
+            $a   = $c_ng;
+            $b_v = max( ( $stats['left'][ $parts[0] ] ?? 0 ) - $a, 0 );
+            $c_v = max( ( $stats['right'][ $parts[1] ] ?? 0 ) - $a, 0 );
+            $d_v = max( $N_ng - $a - $b_v - $c_v, 0 );
+            $llr = init_plugin_suite_live_search_llr_dunning( $a, $b_v, $c_v, $d_v );
+        } else {
+            // Trigram: approximate LLR from observed vs expected
+            $expected = $p_joint * $N_tok;
+            $llr      = ( $c_ng > 0 && $expected > 0 )
+                ? max( 2.0 * $c_ng * log( $c_ng / $expected ), 0.0 )
+                : 0.0;
+        }
 
-        // LLR (Dunning)
-        $a = max($c_bg_raw, 0);
-        $b = max(($left_totals[$w1] ?? 0) - $a, 0);
-        $c = max(($right_totals[$w2] ?? 0) - $a, 0);
-        $d = max($N_bigrams - $a - $b - $c, 0);
-
-        $llr = init_plugin_suite_live_search_llr_dunning($a, $b, $c, $d);
-        $boost_llr = 1.0 + min($llr / 12.0, 2.0); // cap x3
-
-        $scored[$bg] = $base * $boost_llr;
+        $boost         = 1.0 + min( $llr / 12.0, 2.0 ); // cap: max ×3 total
+        $scored[$ng]   = $base * $boost;
     }
 
     return $scored;
 }
 
-/** ========================= Stats: LLR (Dunning) ========================= */
+// ═══════════════════════════════════════════════════════════════════════════
+// LLR — Dunning G-test
+// ═══════════════════════════════════════════════════════════════════════════
 
-function init_plugin_suite_live_search_ll($k, $n) {
-    if ($k == 0 || $n == 0) return 0.0;
-    return $k * log($k / $n);
+function init_plugin_suite_live_search_ll( float $k, float $n ): float {
+    return ( $k > 0 && $n > 0 ) ? $k * log( $k / $n ) : 0.0;
 }
 
-function init_plugin_suite_live_search_llr_dunning($a, $b, $c, $d) {
+function init_plugin_suite_live_search_llr_dunning( float $a, float $b, float $c, float $d ): float {
     $n = $a + $b + $c + $d;
-    if ($n == 0) return 0.0;
+    if ( $n <= 0 ) return 0.0;
 
-    $row1 = $a + $b;
-    $row2 = $c + $d;
-    $col1 = $a + $c;
-    $col2 = $b + $d;
-
-    $m1 = (($row1) * ($col1)) / max($n,1);
-    $m2 = (($row1) * ($col2)) / max($n,1);
-    $m3 = (($row2) * ($col1)) / max($n,1);
-    $m4 = (($row2) * ($col2)) / max($n,1);
-
-    $ll = 0.0;
-    $ll += init_plugin_suite_live_search_ll($a, $m1);
-    $ll += init_plugin_suite_live_search_ll($b, $m2);
-    $ll += init_plugin_suite_live_search_ll($c, $m3);
-    $ll += init_plugin_suite_live_search_ll($d, $m4);
-
-    return 2.0 * $ll; // G-statistic
+    return 2.0 * (
+        init_plugin_suite_live_search_ll( $a, ( ( $a + $b ) * ( $a + $c ) ) / $n ) +
+        init_plugin_suite_live_search_ll( $b, ( ( $a + $b ) * ( $b + $d ) ) / $n ) +
+        init_plugin_suite_live_search_ll( $c, ( ( $c + $d ) * ( $a + $c ) ) / $n ) +
+        init_plugin_suite_live_search_ll( $d, ( ( $c + $d ) * ( $b + $d ) ) / $n )
+    );
 }
 
-/** ========================= Filtering & Selection ========================= */
+// ═══════════════════════════════════════════════════════════════════════════
+// Cross-document n-gram frequency (how many docs contain the phrase)
+// ═══════════════════════════════════════════════════════════════════════════
 
-function init_plugin_suite_live_search_filter_and_rank_keywords_bi($bigram_scores, $locale) {
-    $is_vietnamese = ($locale === 'vi' || strpos($locale, 'vi_') === 0);
-
-    // Stop phrases (cụm 2 từ vô nghĩa)
-    $default_stop_phrases = $is_vietnamese
-        ? ['là gì','và các','có thể','với các','là một','trong khi','của các','cho các','từ các','tại các','về các','như các','theo các']
-        : ['what is','and the','can be','with the','this is','while the','of the','for the','in the','on the','to the','by the','as the'];
-    $stop_phrases = apply_filters('init_plugin_suite_live_search_stop_words', $default_stop_phrases, $locale);
-    $stop_map = array_fill_keys($stop_phrases, true);
-
-    if (empty($bigram_scores)) return [];
-
-    $avg = array_sum($bigram_scores) / max(count($bigram_scores), 1);
-    $threshold = $avg * 0.5; // ngưỡng mềm
-
-    $filtered = [];
-    foreach ($bigram_scores as $bg => $score) {
-        if ($score < $threshold) continue;
-        if (isset($stop_map[$bg])) continue;
-
-        // loại số/HTML
-        if (preg_match('/^\d+\s+\d+$/u', $bg)) continue;
-        if (preg_match('/\b\d{4,}\b/u', $bg)) continue;
-
-        $parts = preg_split('/\s+/u', trim($bg));
-        if (count($parts) !== 2) continue;
-
-        $clean_len = mb_strlen(str_replace(' ', '', $bg), 'UTF-8');
-        if ($clean_len < 4 || $clean_len > 30) continue;
-
-        if (mb_strlen($parts[0], 'UTF-8') < 2 || mb_strlen($parts[1], 'UTF-8') < 2) continue;
-
-        $filtered[$bg] = $score;
-    }
-
-    if (empty($filtered)) return [];
-
-    // Xếp hạng: score DESC, rồi độ dài DESC, rồi từ điển ASC
-    uksort($filtered, function($a, $b) use ($filtered) {
-        $diff = $filtered[$b] <=> $filtered[$a];
-        if ($diff !== 0) return $diff;
-
-        $len = mb_strlen($b, 'UTF-8') <=> mb_strlen($a, 'UTF-8');
-        if ($len !== 0) return $len;
-
-        return strcmp($a, $b);
-    });
-
-    // Lấy tối đa 30 vì chỉ bigrams
-    return array_keys(array_slice($filtered, 0, 30, true));
-}
-
-function init_plugin_suite_live_search_fallback_pick_bigrams($bigram_scores, $locale, $take = 30) {
-    // Fallback: nới lỏng threshold, vẫn chỉ nhận đúng 2 từ và kiểm tra độ dài
-    if (empty($bigram_scores)) return [];
-    $items = [];
-
-    foreach ($bigram_scores as $bg => $score) {
-        $parts = preg_split('/\s+/u', trim($bg));
-        if (count($parts) !== 2) continue;
-
-        // loại số/HTML
-        if (preg_match('/^\d+\s+\d+$/u', $bg)) continue;
-        if (preg_match('/\b\d{4,}\b/u', $bg)) continue;
-
-        $clean_len = mb_strlen(str_replace(' ', '', $bg), 'UTF-8');
-        if ($clean_len < 4 || $clean_len > 30) continue;
-
-        if (mb_strlen($parts[0], 'UTF-8') < 2 || mb_strlen($parts[1], 'UTF-8') < 2) continue;
-
-        $items[$bg] = $score;
-    }
-
-    if (empty($items)) return [];
-
-    uksort($items, function($a, $b) use ($items) {
-        $diff = $items[$b] <=> $items[$a];
-        if ($diff !== 0) return $diff;
-        return strcmp($a, $b);
-    });
-
-    return array_keys(array_slice($items, 0, $take, true));
-}
-
-function init_plugin_suite_live_search_smart_keyword_selection($keywords, $limit = 10) {
-    if (count($keywords) <= $limit) {
-        return $keywords;
-    }
-
-    $selected = [];
-    $used_words = [];
-
-    $shuffled = $keywords;
-    shuffle($shuffled);
-
-    $half_limit = intval($limit / 2);
-    $top_keywords = array_slice($keywords, 0, $half_limit);
-    $random_pool  = array_slice($shuffled, 0, min(20, count($shuffled)));
-
-    $combined_pool = array_values(array_unique(array_merge($top_keywords, $random_pool)));
-
-    foreach ($combined_pool as $kw) {
-        if (count($selected) >= $limit) break;
-
-        $words = explode(' ', $kw);
-        $overlap = array_intersect($words, $used_words);
-
-        // Với bigram: cho phép trùng 1 từ (60%)
-        if (count($overlap) < count($words) * 0.6) {
-            $selected[] = $kw;
-            $used_words = array_merge($used_words, $words);
-        }
-    }
-
-    if (count($selected) < $limit) {
-        foreach ($shuffled as $kw) {
-            if (count($selected) >= $limit) break;
-            if (!in_array($kw, $selected, true)) {
-                $selected[] = $kw;
+function init_plugin_suite_live_search_doc_ngram_freq( array $documents, array $sizes ): array {
+    $freq = [];
+    foreach ( $documents as $terms ) {
+        $seen = [];
+        $len  = count( $terms );
+        foreach ( $sizes as $n ) {
+            for ( $i = 0; $i <= $len - $n; $i++ ) {
+                $ng = implode( ' ', array_slice( $terms, $i, $n ) );
+                if ( ! isset( $seen[$ng] ) ) {
+                    $freq[$ng] = ( $freq[$ng] ?? 0 ) + 1;
+                    $seen[$ng] = true;
+                }
             }
         }
     }
+    return $freq;
+}
 
-    shuffle($selected);
-    return array_slice($selected, 0, $limit);
+// ═══════════════════════════════════════════════════════════════════════════
+// Filter — remove noise, rank by score
+// ═══════════════════════════════════════════════════════════════════════════
+
+function init_plugin_suite_live_search_filter_ngrams( array $scored, string $locale, array $stop_words_map ): array {
+    $is_vi = ( $locale === 'vi' || str_starts_with( $locale, 'vi_' ) );
+
+    $stop_phrases = $is_vi
+        ? [ 'là gì','và các','có thể','với các','là một','trong khi','của các','cho các','từ các' ]
+        : [ 'what is','and the','can be','with the','this is','of the','for the','in the','on the','by the' ];
+
+    $stop_phrases = apply_filters( 'init_plugin_suite_live_search_stop_words', $stop_phrases, $locale );
+    $stop_ph_map  = array_fill_keys( $stop_phrases, true );
+
+    if ( empty( $scored ) ) return [];
+
+    $avg       = array_sum( $scored ) / count( $scored );
+    $threshold = $avg * 0.35; // generous lower bound — MMR will handle diversity
+
+    $filtered = [];
+    foreach ( $scored as $ng => $score ) {
+        if ( $score < $threshold ) continue;
+        if ( isset( $stop_ph_map[$ng] ) ) continue;
+        if ( preg_match( '/^\d[\d\s]*$/u', $ng ) ) continue;   // pure digits
+        if ( preg_match( '/\b\d{4,}\b/u', $ng ) ) continue;    // 4-digit years etc.
+
+        $parts = preg_split( '/\s+/u', trim( $ng ) );
+        $pc    = count( $parts );
+        if ( $pc < 2 || $pc > 3 ) continue;
+
+        $clean_len = mb_strlen( str_replace( ' ', '', $ng ), 'UTF-8' );
+        if ( $clean_len < 4 || $clean_len > 45 ) continue;     // wider max for trigrams
+
+        // Every token must be ≥ 2 chars and not a stop word
+        foreach ( $parts as $p ) {
+            if ( mb_strlen( $p, 'UTF-8' ) < 2 ) continue 2;
+            if ( isset( $stop_words_map[$p] ) ) continue 2;
+        }
+
+        $filtered[$ng] = $score;
+    }
+
+    arsort( $filtered );
+    return array_keys( array_slice( $filtered, 0, 80, true ) );
+}
+
+function init_plugin_suite_live_search_fallback_ngrams( array $scored ): array {
+    $items = [];
+    foreach ( $scored as $ng => $score ) {
+        $parts = preg_split( '/\s+/u', trim( $ng ) );
+        $pc    = count( $parts );
+        if ( $pc < 2 || $pc > 3 ) continue;
+        if ( preg_match( '/^\d[\d\s]*$/u', $ng ) ) continue;
+        $cl = mb_strlen( str_replace( ' ', '', $ng ), 'UTF-8' );
+        if ( $cl < 4 || $cl > 45 ) continue;
+        foreach ( $parts as $p ) {
+            if ( mb_strlen( $p, 'UTF-8' ) < 2 ) continue 2;
+        }
+        $items[$ng] = $score;
+    }
+    arsort( $items );
+    return array_keys( array_slice( $items, 0, 50, true ) );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MMR — Maximal Marginal Relevance
+//   λ = 0.65 → prefer relevance over diversity (tunable)
+//   Similarity: Jaccard over token sets
+// ═══════════════════════════════════════════════════════════════════════════
+
+function init_plugin_suite_live_search_mmr_selection( array $keywords, int $limit = 15, float $lambda = 0.65 ): array {
+    if ( count( $keywords ) <= $limit ) return $keywords;
+
+    // Rank-based relevance proxy (keywords already sorted score DESC)
+    $total = count( $keywords );
+    $rel   = [];
+    foreach ( $keywords as $i => $kw ) {
+        $rel[$kw] = ( $total - $i ) / $total;
+    }
+
+    // Token sets for Jaccard
+    $tok = [];
+    foreach ( $keywords as $kw ) {
+        $tok[$kw] = array_flip( explode( ' ', $kw ) );
+    }
+
+    $selected  = [];
+    $remaining = $keywords;
+
+    while ( count( $selected ) < $limit && ! empty( $remaining ) ) {
+        $best_kw    = null;
+        $best_score = -INF;
+
+        foreach ( $remaining as $kw ) {
+            // Max Jaccard similarity to already-selected set
+            $max_sim = 0.0;
+            foreach ( $selected as $s ) {
+                $inter   = count( array_intersect_key( $tok[$kw], $tok[$s] ) );
+                $union   = count( $tok[$kw] ) + count( $tok[$s] ) - $inter;
+                $sim     = $union > 0 ? $inter / $union : 0.0;
+                if ( $sim > $max_sim ) $max_sim = $sim;
+            }
+
+            $mmr = $lambda * $rel[$kw] - ( 1.0 - $lambda ) * $max_sim;
+            if ( $mmr > $best_score ) {
+                $best_score = $mmr;
+                $best_kw    = $kw;
+            }
+        }
+
+        if ( $best_kw === null ) break;
+        $selected[] = $best_kw;
+        $remaining  = array_values( array_diff( $remaining, [ $best_kw ] ) );
+    }
+
+    return $selected;
 }

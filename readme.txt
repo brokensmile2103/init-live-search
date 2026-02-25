@@ -4,7 +4,7 @@ Tags: AI search, live search, related posts, slash commands, woocommerce
 Requires at least: 5.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.8.8
+Stable tag: 1.8.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,13 +33,16 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 
 - **Advanced Keyword Generator**: upgraded algorithm for admin keyword suggestions  
   - Replaced TF-IDF with **BM25** term weighting  
-  - Added **NPMI** and **Log-Likelihood Ratio (Dunning)** for collocation strength  
-  - Focused on **bigram-only** for higher-quality keywords  
-  - Unicode-safe, locale-aware stop words, and soft fallback mode
+  - Added **NPMI** (fixed probability base) and **Log-Likelihood Ratio (Dunning)** for collocation strength  
+  - Generates **bigrams and trigrams** for richer, more specific keyword suggestions  
+  - **Cross-document frequency penalty** down-ranks phrases that are too generic across the site  
+  - **MMR (Maximal Marginal Relevance)** selection ensures diverse, non-redundant final keywords  
+  - Title-only source: clean signal, no excerpt noise, works reliably across all site types  
+  - Unicode-safe, locale-aware stop words (Vietnamese & English), and soft fallback mode
 
 - **404 Smart Redirect**
-  - Added “Auto Redirect 404 to Best Match” mode driven by Init Live Search scoring
-  - Fully respects “Post Types to Include” settings
+  - Added "Auto Redirect 404 to Best Match" mode driven by Init Live Search scoring
+  - Fully respects "Post Types to Include" settings
   - Uses unified resolver + filters for extensible post-type handling
   - Safety checks to avoid loops, invalid targets, and cross-type mismatches
 
@@ -182,7 +185,7 @@ Enable or disable fallback logic when few results are found.
 Customize the array of post IDs returned from the query.  
 
 **`init_plugin_suite_live_search_result_item`**  
-Modify each result item before it’s sent in the response.  
+Modify each result item before it's sent in the response.  
 
 **`init_plugin_suite_live_search_results`**  
 Filter the final array of results before being returned.  
@@ -260,7 +263,7 @@ By default, it binds to any `<input name="s">`. You can also trigger it via:
 Yes. Append `?modal=search&term=your+keyword` or `#search` to any URL to prefill the modal and trigger it.
 
 = Is voice search supported? =  
-Yes. It uses the browser’s SpeechRecognition API with auto-stop, language detection, and error handling.
+Yes. It uses the browser's SpeechRecognition API with auto-stop, language detection, and error handling.
 
 = What are slash commands? =  
 Slash commands are typed commands starting with `/`, such as:  
@@ -289,7 +292,7 @@ Yes. You can define custom keyword → synonym mappings via the **Synonyms** tab
 When enabled, the plugin will auto-expand search terms using these synonyms if few results are found.
 
 = Can it search in SEO fields and tags? =  
-Yes. The plugin supports a special “Smart Tag-Aware” mode that matches both post titles and tags.  
+Yes. The plugin supports a special "Smart Tag-Aware" mode that matches both post titles and tags.  
 It can also search inside SEO Titles and Meta Descriptions from plugins like Yoast SEO, Rank Math, AIOSEO, The SEO Framework, and SEOPress.
 
 = Does it support WooCommerce? =  
@@ -311,7 +314,7 @@ Yes. In the plugin settings, you can choose to automatically insert related post
 It uses the `[init_live_search_related_posts]` shortcode internally with a default layout.  
 You can still use the shortcode manually for full control.
 
-= Can I override or disable the plugin’s CSS? =  
+= Can I override or disable the plugin's CSS? =  
 Yes. You can:  
 - Drop `init-live-search/style.css` in your theme  
 - Choose a built-in preset (`style-full.css`, `style-topbar.css`)  
@@ -331,7 +334,7 @@ Only if **Search Analytics** is enabled. It logs:
 No personal information (IP, user agent, etc.) is stored.
 
 = What happens if I press Enter without selecting a result? =  
-The plugin will redirect to WordPress’s default search results page.
+The plugin will redirect to WordPress's default search results page.
 
 = Can I use this in a headless setup? =  
 Yes. All features are powered by REST API (`initlise/v1`) — ideal for decoupled frontends.
@@ -356,6 +359,15 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 
 == Changelog ==
 
+= 1.8.9 – February 25, 2026 =
+- **Keyword Generator v3**: fully redesigned scoring pipeline for higher accuracy across diverse site types
+- **Title-only source**: removed excerpt from input — cleaner signal, no auto-generated noise, consistent across all WordPress sites
+- **NPMI fix**: corrected probability base so unigram and n-gram probabilities use a unified token count — eliminates score inflation from the previous implementation
+- **Trigram support**: generator now produces both bigrams and trigrams, surfacing longer, more specific keyword phrases
+- **Cross-document frequency penalty**: phrases appearing in more than 60% of posts are down-ranked — prevents generic terms from dominating results on content-heavy sites
+- **MMR selection**: replaced random shuffling with Maximal Marginal Relevance — final 15 keywords are guaranteed to be both high-scoring and semantically diverse
+- **Expanded stop-word lists**: broader coverage for Vietnamese and English, including common post-title filler words
+
 = 1.8.8 – February 23, 2026 =
 - **Native Search Mode**: added new option "Use WordPress Native Search?" — bypasses all custom logic and delegates to WP_Query's built-in `s` parameter for a simpler, lightweight search experience.
 - **Third-party Compatibility**: native mode automatically benefits from search plugins (e.g. SearchWP, ElasticPress) that hook into WP_Query, with zero extra configuration.
@@ -363,8 +375,8 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 - **Sanitization**: `use_native_search` is properly sanitized and persisted via the existing settings flow.
 
 = 1.8.7 – December 11, 2025 =
-- **404 Smart Redirect**: added new option “Auto Redirect 404 to Best Match” — automatically redirects 404 pages to the most relevant post determined by Init Live Search.
-- **Post Type Awareness**: redirect engine now respects the plugin’s “Post Types to Include” setting and works seamlessly with multiple post types.
+- **404 Smart Redirect**: added new option "Auto Redirect 404 to Best Match" — automatically redirects 404 pages to the most relevant post determined by Init Live Search.
+- **Post Type Awareness**: redirect engine now respects the plugin's "Post Types to Include" setting and works seamlessly with multiple post types.
 - **Unified Resolver**: 404 redirect now uses `init_plugin_suite_live_search_resolve_post_types()` and the filter `init_plugin_suite_live_search_post_types` for consistent, extensible post-type handling.
 - **Safety & Accuracy**: redirect only triggers on valid, published posts and prevents unexpected loops or mismatches across post types.
 - **Code Quality**: improved sanitization of `$_SERVER['REQUEST_URI']` (unslash + sanitize), removed unsafe patterns, standardized function prefixes, and ensured PHPCS compliance.
@@ -377,7 +389,7 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 
 = 1.8.5 – October 15, 2025 =
 - **Fix**: `.ils-cart-btn` now consistently redirects to the **product page** for *all* WooCommerce product types (simple, variable, grouped, etc.) instead of calling the AJAX `add_to_cart` endpoint that returned a JSON response
-- **UX Consistency**: ensures identical “View Product” behavior across all product types in live search results
+- **UX Consistency**: ensures identical "View Product" behavior across all product types in live search results
 - **Thanks**: special thanks to **m0n0brands** for reporting and confirming the issue
 
 = 1.8.4 – September 17, 2025 =
