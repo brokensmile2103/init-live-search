@@ -668,3 +668,12 @@ msgstr "Bỏ qua toàn bộ logic tìm kiếm tùy chỉnh và dùng WP_Query m�
 
 msgid "Recommended for small sites or when using third-party search plugins (e.g. SearchWP, ElasticPress) that hook into WP_Query."
 msgstr "Khuyến nghị cho site nhỏ hoặc khi dùng plugin tìm kiếm bên thứ ba (ví dụ: SearchWP, ElasticPress) có hook vào WP_Query."
+
+msgid "Use First Image as Thumbnail Fallback?"
+msgstr "Sử dụng ảnh đầu tiên làm thumbnail dự phòng?"
+
+msgid "Automatically extract the first image from post content when no featured image is available."
+msgstr "Tự động lấy ảnh đầu tiên trong nội dung bài viết khi không có ảnh đại diện."
+
+msgid "Useful for older posts or sites that do not consistently use featured images."
+msgstr "Hữu ích cho các bài viết cũ hoặc website không sử dụng ảnh đại diện một cách đồng nhất."

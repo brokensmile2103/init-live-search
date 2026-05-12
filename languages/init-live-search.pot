@@ -665,3 +665,12 @@ msgstr ""
 
 msgid "Recommended for small sites or when using third-party search plugins (e.g. SearchWP, ElasticPress) that hook into WP_Query."
 msgstr ""
+
+msgid "Use First Image as Thumbnail Fallback?"
+msgstr ""
+
+msgid "Automatically extract the first image from post content when no featured image is available."
+msgstr ""
+
+msgid "Useful for older posts or sites that do not consistently use featured images."
+msgstr ""

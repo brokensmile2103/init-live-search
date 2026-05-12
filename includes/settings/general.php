@@ -165,6 +165,24 @@ unset($post_types['attachment']);
                 <p class="description"><?php esc_html_e('If disabled, excerpt will be omitted from results to simplify the UI.', 'init-live-search'); ?></p>
             </td>
         </tr>
+        <tr>
+            <th scope="row"><?php esc_html_e('Use First Image as Thumbnail Fallback?', 'init-live-search'); ?></th>
+            <td>
+                <label>
+                    <input
+                        type="checkbox"
+                        name="init_plugin_suite_live_search_settings[first_image_fallback]"
+                        value="1"
+                        <?php checked(!empty($options['first_image_fallback'])); ?>
+                    >
+                    <?php esc_html_e('Automatically extract the first image from post content when no featured image is available.', 'init-live-search'); ?>
+                </label>
+
+                <p class="description">
+                    <?php esc_html_e('Useful for older posts or sites that do not consistently use featured images.', 'init-live-search'); ?>
+                </p>
+            </td>
+        </tr>
         <tr data-native-locked="1">
             <th scope="row"><?php esc_html_e('Search in ACF Fields (Advanced)', 'init-live-search'); ?></th>
             <td>

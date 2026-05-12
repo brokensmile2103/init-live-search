@@ -34,76 +34,82 @@ function init_plugin_suite_live_search_ranked_merge_weighted(array $arrays, arra
     return array_keys($score_map);
 }
 
-// Highlight matching keywords in a string using <mark> tags.
+/**
+ * Highlight matching keywords in a string using <mark> tags.
+ * - Diacritic-insensitive (supports Vietnamese)
+ * - XSS-safe: escapes all output, only <mark> tags are raw HTML
+ * - Handles overlapping/adjacent ranges by merging them
+ *
+ * @param string $text
+ * @param string|string[] $keywords
+ * @return string HTML-escaped string with <mark> tags
+ */
 function init_plugin_suite_live_search_highlight_keyword($text, $keywords) {
-    if (empty($text) || empty($keywords)) return $text;
+    if (empty($text) || empty($keywords)) return esc_html($text);
 
-    $remove_accents = function($str) {
-        static $patterns = null, $replacements = null;
-        if (!$patterns) {
-            $patterns = [
-                '/[áàảãạăắằẳẵặâấầẩẫậ]/u', '/[ÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬ]/u',
-                '/[éèẻẽẹêếềểễệ]/u', '/[ÉÈẺẼẸÊẾỀỂỄỆ]/u',
-                '/[íìỉĩị]/u', '/[ÍÌỈĨỊ]/u',
-                '/[óòỏõọôốồổỗộơớờởỡợ]/u', '/[ÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢ]/u',
-                '/[úùủũụưứừửữự]/u', '/[ÚÙỦŨỤƯỨỪỬỮỰ]/u',
-                '/[ýỳỷỹỵ]/u', '/[ÝỲỶỸỴ]/u',
-                '/[đ]/u', '/[Đ]/u'
-            ];
-            $replacements = [
-                'a','A','e','E','i','I','o','O','u','U','y','Y','d','D'
-            ];
-        }
-        return preg_replace($patterns, $replacements, $str);
-    };
+    static $patterns = null, $replacements = null;
+    if (!$patterns) {
+        $patterns = [
+            '/[áàảãạăắằẳẵặâấầẩẫậ]/u', '/[ÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬ]/u',
+            '/[éèẻẽẹêếềểễệ]/u',        '/[ÉÈẺẼẸÊẾỀỂỄỆ]/u',
+            '/[íìỉĩị]/u',               '/[ÍÌỈĨỊ]/u',
+            '/[óòỏõọôốồổỗộơớờởỡợ]/u',  '/[ÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢ]/u',
+            '/[úùủũụưứừửữự]/u',         '/[ÚÙỦŨỤƯỨỪỬỮỰ]/u',
+            '/[ýỳỷỹỵ]/u',               '/[ÝỲỶỸỴ]/u',
+            '/[đ]/u',                    '/[Đ]/u',
+        ];
+        $replacements = ['a','A','e','E','i','I','o','O','u','U','y','Y','d','D'];
+    }
 
-    $original_text = $text;
-    $text_no_diacritics = $remove_accents(mb_strtolower($text));
+    $remove_accents = fn($str) => preg_replace($patterns, $replacements, $str);
+
+    $text_normalized = $remove_accents(mb_strtolower($text));
+
     if (is_string($keywords)) {
         $keywords = [$keywords];
     }
 
-    $highlights = [];
-
+    // --- Collect all match ranges ---
+    $ranges = [];
     foreach ($keywords as $keyword) {
-        $keyword_no_diacritics = $remove_accents(mb_strtolower($keyword));
-        if (empty($keyword_no_diacritics)) continue;
+        $kw_normalized = $remove_accents(mb_strtolower($keyword));
+        if (empty($kw_normalized)) continue;
 
-        $len = mb_strlen($keyword_no_diacritics);
+        $kw_len = mb_strlen($kw_normalized);
         $offset = 0;
-
-        while (true) {
-            $pos = mb_stripos($text_no_diacritics, $keyword_no_diacritics, $offset);
-            if ($pos === false) break;
-
-            $overlap = false;
-            foreach ($highlights as $h) {
-                if (!($pos + $len <= $h['start'] || $pos >= $h['end'])) {
-                    $overlap = true;
-                    break;
-                }
-            }
-            if (!$overlap) {
-                $highlights[] = ['start' => $pos, 'end' => $pos + $len];
-            }
-            $offset = $pos + $len;
+        while (($pos = mb_stripos($text_normalized, $kw_normalized, $offset)) !== false) {
+            $ranges[] = [$pos, $pos + $kw_len];
+            $offset = $pos + 1; // +1 thay vì +$kw_len để không bỏ sót overlapping keywords
         }
     }
 
-    if (empty($highlights)) return $text;
+    if (empty($ranges)) return esc_html($text);
 
-    usort($highlights, function($a, $b) {
-        return $a['start'] <=> $b['start'];
-    });
+    // --- Sort + merge overlapping/adjacent ranges ---
+    usort($ranges, fn($a, $b) => $a[0] <=> $b[0]);
 
-    $result = '';
-    $last_pos = 0;
-    foreach ($highlights as $hl) {
-        $result .= mb_substr($original_text, $last_pos, $hl['start'] - $last_pos);
-        $result .= '<mark>' . mb_substr($original_text, $hl['start'], $hl['end'] - $hl['start']) . '</mark>';
-        $last_pos = $hl['end'];
+    $merged = [];
+    [$cur_start, $cur_end] = $ranges[0];
+    foreach (array_slice($ranges, 1) as [$start, $end]) {
+        if ($start <= $cur_end) {
+            // Overlap hoặc adjacent → merge
+            $cur_end = max($cur_end, $end);
+        } else {
+            $merged[] = [$cur_start, $cur_end];
+            [$cur_start, $cur_end] = [$start, $end];
+        }
     }
-    $result .= mb_substr($original_text, $last_pos);
+    $merged[] = [$cur_start, $cur_end];
+
+    // --- Build result, escape từng segment ---
+    $result   = '';
+    $last_pos = 0;
+    foreach ($merged as [$start, $end]) {
+        $result .= esc_html(mb_substr($text, $last_pos, $start - $last_pos));
+        $result .= '<mark>' . esc_html(mb_substr($text, $start, $end - $start)) . '</mark>';
+        $last_pos = $end;
+    }
+    $result .= esc_html(mb_substr($text, $last_pos));
 
     return $result;
 }
@@ -160,7 +166,74 @@ function init_plugin_suite_live_search_get_product_data($post_id) {
 // Build result item for a post: title, thumb, category, etc.
 function init_plugin_suite_live_search_build_result_item($post_id, $term = '', $keywords = [], $default_thumb = '', $args = []) {
     $thumb_id  = get_post_thumbnail_id($post_id);
-    $thumb_url = $thumb_id ? wp_get_attachment_image_url($thumb_id, 'thumbnail') : $default_thumb;
+    $thumb_url = $thumb_id ? wp_get_attachment_image_url($thumb_id, 'thumbnail') : '';
+
+    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
+
+    if (
+        empty($thumb_id)
+        && !empty($options['first_image_fallback'])
+    ) {
+        $post_content = get_post_field('post_content', $post_id);
+
+        if (!empty($post_content)) {
+
+            // Try extracting attachment ID from wp-image-{ID} class first
+            if (
+                preg_match('/wp-image-([0-9]+)/i', $post_content, $id_matches)
+            ) {
+                $attachment_id = absint($id_matches[1]);
+
+                if ($attachment_id) {
+                    $attachment_thumb = wp_get_attachment_image_url(
+                        $attachment_id,
+                        'thumbnail'
+                    );
+
+                    if (!empty($attachment_thumb)) {
+                        $thumb_url = $attachment_thumb;
+                    }
+                }
+            }
+
+            // Fallback to raw image src if attachment lookup fails
+            if (
+                empty($thumb_url)
+                && preg_match(
+                    '/<img[^>]+src=["\']([^"\']+)["\']/i',
+                    $post_content,
+                    $src_matches
+                )
+            ) {
+                $candidate_thumb = esc_url_raw($src_matches[1]);
+
+                $site_host  = wp_parse_url(home_url(), PHP_URL_HOST);
+                $image_host = wp_parse_url($candidate_thumb, PHP_URL_HOST);
+
+                $allowed = (
+                    empty($image_host)
+                    || $image_host === $site_host
+                    || str_ends_with($image_host, '.' . $site_host)
+                );
+
+                $allowed = apply_filters(
+                    'init_plugin_suite_live_search_allow_fallback_image_host',
+                    $allowed,
+                    $image_host,
+                    $candidate_thumb,
+                    $post_id
+                );
+
+                if ($allowed) {
+                    $thumb_url = $candidate_thumb;
+                }
+            }
+        }
+    }
+
+    if (empty($thumb_url)) {
+        $thumb_url = $default_thumb;
+    }
 
     $post_type_slug = get_post_type($post_id);
     $post_type_obj  = get_post_type_object($post_type_slug);

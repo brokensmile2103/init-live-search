@@ -4,7 +4,7 @@ Tags: AI search, live search, related posts, slash commands, woocommerce
 Requires at least: 5.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.8.9
+Stable tag: 1.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -358,6 +358,14 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.9.0 – May 12, 2026 =
+- **Thumbnail Fallback**: added new option "Use First Image as Thumbnail Fallback?" — automatically extracts the first image from post content when no featured image is available.
+- **WordPress-native Detection**: fallback engine now prioritizes parsing `wp-image-{ID}` classes and retrieves the proper WordPress thumbnail size using attachment metadata.
+- **Smart Fallback Chain**: if attachment lookup fails, the plugin gracefully falls back to the raw `<img src="">` URL before using the default thumbnail.
+- **Host Validation**: external image URLs are validated against the current site host/subdomain by default to prevent unwanted third-party hotlinks.
+- **Developer Extensibility**: introduced new filter `init_plugin_suite_live_search_allow_fallback_image_host` for customizing allowed fallback image hosts.
+- **Settings Integration**: added full admin setting, sanitization flow, and translation support for the new thumbnail fallback feature.
 
 = 1.8.9 – February 25, 2026 =
 - **Keyword Generator v3**: fully redesigned scoring pipeline for higher accuracy across diverse site types
