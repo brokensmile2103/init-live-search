@@ -39,4 +39,25 @@ document.addEventListener('DOMContentLoaded', function () {
             toggleNativeLock(this.checked);
         });
     }
+
+    // === Related Command Lock ===
+    const relatedRadios = document.querySelectorAll('input[name="init_plugin_suite_live_search_settings[default_command]"]');
+    const relatedLockedRows = document.querySelectorAll('tr[data-related-locked="1"]');
+
+    function toggleRelatedLock() {
+        const isRelated = Array.from(relatedRadios).some(function (r) {
+            return r.value === 'related' && r.checked;
+        });
+        relatedLockedRows.forEach(function (row) {
+            row.style.opacity = isRelated ? '' : '0.5';
+            row.style.pointerEvents = isRelated ? '' : 'none';
+        });
+    }
+
+    if (relatedRadios.length && relatedLockedRows.length) {
+        toggleRelatedLock();
+        relatedRadios.forEach(function (radio) {
+            radio.addEventListener('change', toggleRelatedLock);
+        });
+    }
 });

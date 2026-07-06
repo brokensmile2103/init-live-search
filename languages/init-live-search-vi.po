@@ -677,3 +677,15 @@ msgstr "Tự động lấy ảnh đầu tiên trong nội dung bài viết khi k
 
 msgid "Useful for older posts or sites that do not consistently use featured images."
 msgstr "Hữu ích cho các bài viết cũ hoặc website không sử dụng ảnh đại diện một cách đồng nhất."
+
+msgid "Only run /related on Single pages?"
+msgstr "Chỉ chạy /related trên trang Single?"
+
+msgid "Only execute the /related command when viewing a single post page."
+msgstr "Chỉ tự động chạy lệnh /related khi đang xem trang bài viết đơn lẻ (single post)."
+
+msgid "Exclude /related on pages with these slug keywords"
+msgstr "Không chạy /related ở các trang có slug chứa từ khóa sau"
+
+msgid "Enter one keyword per line. If the current page slug contains any of these keywords, /related will not auto-run."
+msgstr "Nhập mỗi từ khóa một dòng. Nếu slug của trang hiện tại chứa bất kỳ từ khóa này, /related sẽ không tự động chạy."

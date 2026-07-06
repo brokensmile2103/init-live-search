@@ -111,6 +111,24 @@ unset($post_types['attachment']);
                 </p>
             </td>
         </tr>
+        <tr data-related-locked="1">
+            <th scope="row"><?php esc_html_e('Only run /related on Single pages?', 'init-live-search'); ?></th>
+            <td>
+                <label>
+                    <input type="checkbox" name="init_plugin_suite_live_search_settings[related_only_single]" value="1" <?php checked(!empty($options['related_only_single'])); ?>>
+                    <?php esc_html_e('Only execute the /related command when viewing a single post page.', 'init-live-search'); ?>
+                </label>
+            </td>
+        </tr>
+        <tr data-related-locked="1">
+            <th scope="row"><?php esc_html_e('Exclude /related on pages with these slug keywords', 'init-live-search'); ?></th>
+            <td>
+                <textarea name="init_plugin_suite_live_search_settings[related_exclude_slugs]" rows="3" class="large-text code"><?php echo esc_textarea($options['related_exclude_slugs'] ?? ''); ?></textarea>
+                <p class="description">
+                    <?php esc_html_e('Enter one keyword per line. If the current page slug contains any of these keywords, /related will not auto-run.', 'init-live-search'); ?>
+                </p>
+            </td>
+        </tr>
         <tr>
             <th scope="row"><?php esc_html_e('Use WordPress Native Search?', 'init-live-search'); ?></th>
             <td>

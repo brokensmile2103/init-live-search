@@ -720,6 +720,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Xử lý hiển thị và reset modal mỗi lần mở/đóng.
     function openModal() {
         if (!modalInitialized) createModal();
+        
+        window.dispatchEvent(new Event('ils:before-modal-open'));
+
         modal.classList.add('open');
         document.body.classList.add('ils-modal-open');
 
@@ -730,8 +733,28 @@ document.addEventListener('DOMContentLoaded', function () {
             if (saved) {
                 inputSearch.value = saved + ' ';
             } else if (defaultCommand) {
-                inputSearch.value = defaultCommand;
-                inputSearch.dispatchEvent(new Event('input'));
+                let shouldRunDefault = true;
+
+                if (defaultCommand === '/related') {
+                    if (InitPluginSuiteLiveSearch.related_only_single && !document.body.classList.contains('single')) {
+                        shouldRunDefault = false;
+                    }
+
+                    if (shouldRunDefault && InitPluginSuiteLiveSearch.related_exclude_slugs?.length) {
+                        const path = window.location.pathname.toLowerCase();
+                        for (const slug of InitPluginSuiteLiveSearch.related_exclude_slugs) {
+                            if (path.includes(slug.toLowerCase())) {
+                                shouldRunDefault = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (shouldRunDefault) {
+                    inputSearch.value = defaultCommand;
+                    inputSearch.dispatchEvent(new Event('input'));
+                }
             }
 
             inputSearch.focus();

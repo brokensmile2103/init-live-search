@@ -1,10 +1,10 @@
 === Init Live Search – AI-Powered, Related Posts, Slash Commands ===
 Contributors: brokensmile.2103
 Tags: AI search, live search, related posts, slash commands, woocommerce
-Requires at least: 5.2
-Tested up to: 6.9
+Requires at least: 5.9
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.9.0
+Stable tag: 1.9.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,7 +24,7 @@ This plugin is part of the [Init Plugin Suite](https://en.inithtml.com/init-plug
 
 GitHub repository: [https://github.com/brokensmile2103/init-live-search](https://github.com/brokensmile2103/init-live-search)
 
-== What's New in Version 1.8.x ==
+== What's New in Version 1.8.x & 1.9.x ==
 
 - **AI-Powered Related Posts**: brand new `[init_live_search_related_ai]` shortcode  
   - Uses multi-signal scoring (tags, series, title bigrams, same_keyword via ACF, category, views, comments, freshness)  
@@ -358,6 +358,12 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.9.1 – July 07, 2026 =
+- **Related Posts Command Conditions**: added two new conditional settings for the "/related" default command — restrict auto-execution to single post pages only, and exclude specific URL slug keywords.
+- **Smart Default Command Guard**: frontend now validates `related_only_single` and `related_exclude_slugs` before auto-injecting `/related` into the search modal, preventing unwanted related searches on archives, pages, or excluded paths.
+- **Settings UX**: related command options are visually dimmed and non-interactive when "Related Posts" is not selected as the default slash command.
+- **Sanitization**: `related_only_single` and `related_exclude_slugs` are properly sanitized via the existing settings flow with keyword trimming and line-by-line validation.
 
 = 1.9.0 – May 12, 2026 =
 - **Thumbnail Fallback**: added new option "Use First Image as Thumbnail Fallback?" — automatically extracts the first image from post content when no featured image is available.

@@ -155,6 +155,18 @@ function init_plugin_suite_live_search_sanitize_settings($input) {
     }
     $output['cross_sites'] = implode("\n", $clean_sites);
 
+    $output['related_only_single'] = !empty($input['related_only_single']) ? '1' : '0';
+
+    $clean_exclude_slugs = [];
+    $raw_exclude_lines = explode("\n", $input['related_exclude_slugs'] ?? '');
+    foreach ($raw_exclude_lines as $line) {
+        $line = sanitize_text_field(trim($line));
+        if ($line !== '') {
+            $clean_exclude_slugs[] = $line;
+        }
+    }
+    $output['related_exclude_slugs'] = implode("\n", $clean_exclude_slugs);
+
     return $output;
 }
 

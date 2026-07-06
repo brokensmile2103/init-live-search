@@ -3,13 +3,13 @@
  * Plugin Name: Init Live Search
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
  * Description: A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API.
- * Version: 1.9.0
+ * Version: 1.9.1
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-live-search
  * Domain Path: /languages
- * Requires at least: 5.2
- * Tested up to: 6.9
+ * Requires at least: 5.9
+ * Tested up to: 7.0
  * Requires PHP: 7.4
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -18,7 +18,7 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',                '1.9.0');
+define('INIT_PLUGIN_SUITE_LS_VERSION',                '1.9.1');
 define('INIT_PLUGIN_SUITE_LS_SLUG',                   'init-live-search');
 define('INIT_PLUGIN_SUITE_LS_GROUP_GENERAL',          'init_live_search_group_general');
 define('INIT_PLUGIN_SUITE_LS_OPTION',                 'init_plugin_suite_live_search_settings');
@@ -266,6 +266,10 @@ add_action('wp_enqueue_scripts', function () {
         'commands'          => $commands,
         'default_command'   => $enable_slash ? $default_command : '',
         'cross_sites'       => $cross_sites,
+        'related_only_single'   => !empty($options['related_only_single']),
+        'related_exclude_slugs' => !empty($options['related_exclude_slugs'])
+            ? array_values(array_filter(array_map('trim', explode("\n", $options['related_exclude_slugs']))))
+            : [],
     ]);
 });
 

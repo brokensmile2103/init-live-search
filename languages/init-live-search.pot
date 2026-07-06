@@ -674,3 +674,15 @@ msgstr ""
 
 msgid "Useful for older posts or sites that do not consistently use featured images."
 msgstr ""
+
+msgid "Only run /related on Single pages?"
+msgstr ""
+
+msgid "Only execute the /related command when viewing a single post page."
+msgstr ""
+
+msgid "Exclude /related on pages with these slug keywords"
+msgstr ""
+
+msgid "Enter one keyword per line. If the current page slug contains any of these keywords, /related will not auto-run."
+msgstr ""
