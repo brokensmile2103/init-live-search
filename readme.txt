@@ -4,7 +4,7 @@ Tags: AI search, live search, related posts, slash commands, woocommerce
 Requires at least: 5.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.9.1
+Stable tag: 1.9.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -358,6 +358,13 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.9.2 – July 17, 2026 =
+- **Race Condition Fix**: search requests in the modal (`script.js`) now use `AbortController` to cancel stale in-flight requests when the user keeps typing, preventing older/slower responses from overwriting newer search results.
+- **+/- Search Operator Redesign**: `+word`/`-word` now correctly *narrow* the results of the plain search terms instead of being merged into the same fuzzy/fallback pool. Plain words still drive the base search (with all existing fuzzy matching, synonyms, and fallback logic intact); `+word` requires the narrowed results to also contain that word, `-word` excludes results containing it — supporting multiple `+`/`-` operators in the same query (e.g. `wordpress -plugin -theme`).
+- **Predefined Dictionary Expansion**: significantly expanded the E-commerce, Technology, Business, and Health dictionaries (previously the thinnest of the 10 built-in dictionaries) with dozens of additional English/Vietnamese synonym pairs, bringing them in line with the other dictionaries.
+- **Dictionary Cleanup**: fixed 4 duplicate dictionary keys (`sale`, `visa`, `gym`, `vintage`) that were silently overwriting earlier synonym definitions.
+- **Minor Bug Fixes**: added missing optional chaining in `loadMoreRecent()` to prevent a potential crash when an item is missing its `data-url` attribute; normalized trailing-slash URL comparison in `loadMoreGeneric()` to prevent possible duplicate items when loading more results.
 
 = 1.9.1 – July 07, 2026 =
 - **Related Posts Command Conditions**: added two new conditional settings for the "/related" default command — restrict auto-execution to single post pages only, and exclude specific URL slug keywords.

@@ -16,6 +16,10 @@ document.addEventListener('DOMContentLoaded', function () {
     let isLoadingMore = false;
     let activeFilter = '*';
 
+    // AbortController cho lần search hiện tại (tránh race condition khi gõ nhanh).
+    // Mỗi lần handleSearch() chạy sẽ abort request search trước đó (nếu còn đang chạy).
+    let searchAbortController = null;
+
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
     const delay = isMobile ? (InitPluginSuiteLiveSearch.debounce * 1.5) : InitPluginSuiteLiveSearch.debounce;
 
@@ -592,7 +596,7 @@ document.addEventListener('DOMContentLoaded', function () {
               if (data.length < 10) hasMoreResults = false;
 
               const prevUrls = Array.from(resultsContainer.querySelectorAll('.ils-item'))
-                  .map(el => el.getAttribute('data-url').replace(/\/$/, ''));
+                  .map(el => el.getAttribute('data-url')?.replace(/\/$/, ''));
 
               const freshItems = data.filter(item => !prevUrls.includes((item.url || '').replace(/\/$/, '')));
 
@@ -667,9 +671,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.length < 10) hasMoreResults = false;
 
                 const prev = Array.from(resultsContainer.querySelectorAll('.ils-item'))
-                    .map(el => el.getAttribute('data-url'));
+                    .map(el => el.getAttribute('data-url')?.replace(/\/$/, ''));
 
-                const fresh = data.filter(item => !prev.includes(item.url));
+                const fresh = data.filter(item => !prev.includes((item.url || '').replace(/\/$/, '')));
                 if (fresh.length) {
                     renderResults(fresh, true);
                 }
@@ -770,6 +774,12 @@ document.addEventListener('DOMContentLoaded', function () {
     function closeModal() {
         modal.classList.remove('open');
         document.body.classList.remove('ils-modal-open');
+
+        // Đóng modal thì hủy luôn request search đang chờ, tránh render "hụt" sau khi đóng.
+        if (searchAbortController) {
+            searchAbortController.abort();
+            searchAbortController = null;
+        }
 
         resultsContainer.innerHTML = '';
         inputSearch.value = '';
@@ -1814,6 +1824,14 @@ document.addEventListener('DOMContentLoaded', function () {
         currentPage = 1;
         isLoadingMore = false;
 
+        // Hủy request search trước đó (nếu còn đang chờ) để tránh trường hợp
+        // response cũ đến sau và ghi đè kết quả của từ khóa mới hơn.
+        if (searchAbortController) {
+            searchAbortController.abort();
+        }
+        searchAbortController = new AbortController();
+        const { signal } = searchAbortController;
+
         const term = inputSearch.value.trim();
 
         window.dispatchEvent(new CustomEvent('ils:search-started', {
@@ -1874,13 +1892,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const paramExtras = '&no_fallback=1';
         const allResults = [];
 
-        const primaryFetch = fetch(`${InitPluginSuiteLiveSearch.api}?term=${encodeURIComponent(term)}`)
+        const primaryFetch = fetch(`${InitPluginSuiteLiveSearch.api}?term=${encodeURIComponent(term)}`, { signal })
             .then(res => res.json())
             .catch(() => []);
 
         const crossSites = InitPluginSuiteLiveSearch.cross_sites || [];
         const extraFetches = crossSites.map(site => {
-            return fetch(`${site.url}/wp-json/initlise/v1/search?term=${encodeURIComponent(term)}${paramExtras}`)
+            return fetch(`${site.url}/wp-json/initlise/v1/search?term=${encodeURIComponent(term)}${paramExtras}`, { signal })
                 .then(res => res.json())
                 .then(data => data.map(item => ({
                     ...item,
@@ -1891,6 +1909,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         primaryFetch.then(primaryData => {
+            // Đã bị 1 lần search mới hơn abort -> bỏ qua, không render kết quả cũ.
+            if (signal.aborted) return;
+
             if (primaryData.length) {
                 allResults.push(...primaryData);
                 setCommand('search', 'term', term);
@@ -1912,6 +1933,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             extraFetches.forEach(promise => {
                 promise.then(extraData => {
+                    if (signal.aborted) return;
+
                     resolvedSites++;
 
                     if (extraData.length) {

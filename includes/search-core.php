@@ -134,11 +134,17 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
         $must_have = array_slice($must_have, 0, 5);
         $must_not_have = array_slice($must_not_have, 0, 5);
 
-        // Rebuild sanitized term for normal search
-        $term = implode(' ', array_merge($must_have, $normal));
+        // Từ thường (normal) là NỀN TẢNG tìm kiếm — chạy qua toàn bộ pipeline hiện có
+        // (LIKE, synonym, fallback, bigram...) y như một search bình thường, để giữ nguyên
+        // độ "mờ"/fuzzy vốn có. +/- KHÔNG được trộn vào đây, chỉ dùng để lọc thu hẹp
+        // (narrow) tập kết quả gốc ở bước sau — không thay thế vai trò của normal.
+        // Nếu người dùng chỉ gõ toàn +/- (không có từ thường nào), dùng must_have làm nền
+        // để vẫn có gì đó cho pipeline tìm kiếm.
+        $base_words = !empty($normal) ? $normal : $must_have;
+        $term = implode(' ', $base_words);
         $like = '%' . $wpdb->esc_like($term) . '%';
 
-        // Store operator filters in $args for later filtering (if needed)
+        // Store operator filters in $args để lọc thu hẹp sau khi có post_ids gốc
         $args['operator_must'] = $must_have;
         $args['operator_must_not'] = $must_not_have;
     }
@@ -259,19 +265,49 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
         }
     }
 
-    // Filter out must-not-have posts if applicable
-    if ( $enable_ops && !empty($args['operator_must_not']) ) {
-        $post_ids = array_filter($post_ids, function($post_id) use ($args) {
-            $content = get_post_field('post_title', $post_id);
-            foreach ($args['operator_must_not'] as $bad) {
-                if (stripos($content, $bad) !== false) return false;
+    // Apply +/- operator filters (must-have / must-not-have) if applicable.
+    // Cả 2 đều check trên field phù hợp với search_mode hiện tại (title / +excerpt / +content),
+    // thay vì chỉ title như trước — để "-" loại đúng bài chứa từ đó dù nó nằm ở excerpt/content.
+    if ( $enable_ops && (!empty($args['operator_must']) || !empty($args['operator_must_not'])) ) {
+        $post_ids = array_values(array_filter($post_ids, function($post_id) use ($args, $search_mode) {
+            $haystack = init_plugin_suite_live_search_get_operator_haystack($post_id, $search_mode);
+
+            // "-word": bài viết không được chứa bất kỳ từ nào trong danh sách must_not_have.
+            if (!empty($args['operator_must_not'])) {
+                foreach ($args['operator_must_not'] as $bad) {
+                    if (stripos($haystack, $bad) !== false) return false;
+                }
             }
+
+            // "+word": bài viết bắt buộc phải chứa TẤT CẢ từ trong danh sách must_have.
+            if (!empty($args['operator_must'])) {
+                foreach ($args['operator_must'] as $required) {
+                    if (stripos($haystack, $required) === false) return false;
+                }
+            }
+
             return true;
-        });
+        }));
     }
 
     $post_ids = apply_filters('init_plugin_suite_live_search_post_ids', $post_ids, $term, $args);
     return apply_filters('init_plugin_suite_live_search_filter_lang', $post_ids, $term, $args);
+}
+
+// Build the text haystack used to evaluate +/- search operators for a post,
+// scoped to whichever fields the current search_mode actually covers.
+function init_plugin_suite_live_search_get_operator_haystack($post_id, $search_mode) {
+    $parts = [ get_post_field('post_title', $post_id) ];
+
+    if (in_array($search_mode, ['title_excerpt', 'title_content'], true)) {
+        $parts[] = get_post_field('post_excerpt', $post_id);
+    }
+
+    if ($search_mode === 'title_content') {
+        $parts[] = wp_strip_all_tags((string) get_post_field('post_content', $post_id));
+    }
+
+    return implode(' ', array_filter($parts));
 }
 
 // Retrieve post IDs by specific search mode: title, tag, excerpt, etc.
