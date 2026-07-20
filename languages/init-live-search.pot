@@ -10,6 +10,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Domain: init-live-search\n"
 
+#: Description
+msgid "A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API."
+msgstr ""
+
 #: init-live-search.php:129
 msgid "Show latest posts"
 msgstr ""

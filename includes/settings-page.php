@@ -250,6 +250,13 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
     );
     wp_localize_script('init_plugin_suite_live_search_admin', 'init_plugin_suite_live_search_ajax', [
         'ajaxurl' => admin_url('admin-ajax.php'),
-        'nonce'   => wp_create_nonce('init_live_search_admin_nonce')
+        'nonce'   => wp_create_nonce('init_live_search_admin_nonce'),
+        'i18n'    => [
+            'meiliTesting'          => __('Testing...', 'init-live-search'),
+            'meiliConnected'        => __('Connected successfully', 'init-live-search'),
+            'meiliDocuments'        => __('documents', 'init-live-search'),
+            'meiliConnectionFailed' => __('Connection failed', 'init-live-search'),
+            'meiliUnknownError'     => __('Unknown error', 'init-live-search'),
+        ],
     ]);
 });

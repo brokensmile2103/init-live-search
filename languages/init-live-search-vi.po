@@ -13,6 +13,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit-compatible (manual)\n"
 
+#: Description
+msgid "A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API."
+msgstr "Giải pháp tìm kiếm trực tiếp nhanh, gọn và linh hoạt cho WordPress — phát triển bằng JavaScript thuần, tích hợp sâu với REST API."
+
 #: init-live-search.php:129
 msgid "Show latest posts"
 msgstr "Hiển thị bài viết mới nhất"

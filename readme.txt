@@ -4,7 +4,7 @@ Tags: AI search, live search, meilisearch, related posts, woocommerce
 Requires at least: 5.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.9.3
+Stable tag: 1.9.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -400,6 +400,11 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.9.4 – July 20, 2026 =
+- **Fixed**: the Search API Key and Admin/Indexing Key fields on the Meilisearch settings tab could be silently autofilled by the browser's saved password manager, risking accidental exposure of an unrelated saved password if the form was submitted without checking. These fields are now correctly excluded from autofill.
+- **Fixed**: the "Test Connection" button on the Meilisearch settings tab always displayed "? documents" instead of the actual estimated document count, due to a naming mismatch between the connection test response and the display script.
+- **Code Quality**: moved the Meilisearch "Test Connection" JavaScript out of an inline `<script>` block into `admin.js` (enqueued properly via `wp_enqueue_script`), in line with WordPress Coding Standards; translated strings are passed through via `wp_localize_script` so existing translations are unaffected.
 
 = 1.9.3 – July 20, 2026 =
 - **Meilisearch Integration (optional)**: added a new "Meilisearch" settings tab to connect a self-hosted (bring-your-own-server) Meilisearch instance as the primary search source. When enabled and reachable, search requests are answered by Meilisearch's typo-tolerant, relevance-ranked engine; if the request fails or times out for any reason, the plugin automatically falls back to the existing local database search — search never goes down solely because of a Meilisearch outage.

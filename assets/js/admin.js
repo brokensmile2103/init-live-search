@@ -60,4 +60,48 @@ document.addEventListener('DOMContentLoaded', function () {
             radio.addEventListener('change', toggleRelatedLock);
         });
     }
+
+    // === Meilisearch: Test Connection ===
+    const meiliTestBtn = document.getElementById('init-ls-meili-test-connection');
+    const meiliResultEl = document.getElementById('init-ls-meili-test-result');
+    if (meiliTestBtn && meiliResultEl) {
+        const i18n = init_plugin_suite_live_search_ajax.i18n || {};
+
+        meiliTestBtn.addEventListener('click', function () {
+            meiliTestBtn.disabled = true;
+            meiliResultEl.style.color = '';
+            meiliResultEl.style.lineHeight = '40px';
+            meiliResultEl.textContent = i18n.meiliTesting || 'Testing...';
+
+            fetch(init_plugin_suite_live_search_ajax.ajaxurl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-WP-Nonce': init_plugin_suite_live_search_ajax.nonce
+                },
+                body: new URLSearchParams({
+                    action: 'init_plugin_suite_live_search_meili_test',
+                    host: document.getElementById('meili_host').value,
+                    index: document.getElementById('meili_index').value,
+                    search_key: document.getElementById('meili_search_key').value
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        meiliResultEl.style.color = '#00a32a';
+                        meiliResultEl.textContent = (i18n.meiliConnected || 'Connected successfully') + ' — ' +
+                            (data.data.estimatedTotalHits ?? '?') + ' ' + (i18n.meiliDocuments || 'documents');
+                    } else {
+                        meiliResultEl.style.color = '#d63638';
+                        meiliResultEl.textContent = data.data || (i18n.meiliConnectionFailed || 'Connection failed');
+                    }
+                })
+                .catch(() => {
+                    meiliResultEl.style.color = '#d63638';
+                    meiliResultEl.textContent = i18n.meiliUnknownError || 'Unknown error';
+                })
+                .finally(() => { meiliTestBtn.disabled = false; });
+        });
+    }
 });

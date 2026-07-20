@@ -49,7 +49,7 @@ $admin_key_from_constant = defined( 'INIT_LIVE_SEARCH_MEILI_ADMIN_KEY' ) && INIT
         <tr>
             <th scope="row"><label for="meili_search_key"><?php esc_html_e( 'Search API Key', 'init-live-search' ); ?></label></th>
             <td>
-                <input type="password" id="meili_search_key" class="regular-text code" autocomplete="off"
+                <input type="password" id="meili_search_key" class="regular-text code" autocomplete="new-password"
                        name="<?php echo esc_attr( INIT_PLUGIN_SUITE_LS_MEILI_OPTION ); ?>[search_key]"
                        value="<?php echo esc_attr( $meili['search_key'] ?? '' ); ?>">
                 <p class="description"><?php esc_html_e( 'Use a key scoped to the "search" action only — this key is sent with every search request, so never use your master key here.', 'init-live-search' ); ?></p>
@@ -63,7 +63,7 @@ $admin_key_from_constant = defined( 'INIT_LIVE_SEARCH_MEILI_ADMIN_KEY' ) && INIT
                         <?php esc_html_e( 'Currently defined via the INIT_LIVE_SEARCH_MEILI_ADMIN_KEY constant in wp-config.php (this takes priority over any value entered here).', 'init-live-search' ); ?>
                     </p>
                 <?php else : ?>
-                    <input type="password" id="meili_admin_key" class="regular-text code" autocomplete="off"
+                    <input type="password" id="meili_admin_key" class="regular-text code" autocomplete="new-password"
                            name="<?php echo esc_attr( INIT_PLUGIN_SUITE_LS_MEILI_OPTION ); ?>[admin_key]"
                            value="<?php echo esc_attr( $meili['admin_key'] ?? '' ); ?>">
                     <p class="description">
@@ -102,42 +102,3 @@ $admin_key_from_constant = defined( 'INIT_LIVE_SEARCH_MEILI_ADMIN_KEY' ) && INIT
     <?php esc_html_e( 'New, updated, or deleted posts are synced to Meilisearch automatically. To index all existing content for the first time (or to rebuild the index), run the following WP-CLI command on your server:', 'init-live-search' ); ?>
 </p>
 <pre style="background:#f0f0f1; padding: 10px 14px; max-width: 700px; overflow-x: auto;">wp init-live-search meili-reindex</pre>
-
-<script>
-document.getElementById('init-ls-meili-test-connection')?.addEventListener('click', function () {
-    const btn = this;
-    const resultEl = document.getElementById('init-ls-meili-test-result');
-    btn.disabled = true;
-    resultEl.textContent = '<?php echo esc_js( __( 'Testing...', 'init-live-search' ) ); ?>';
-
-    fetch(init_plugin_suite_live_search_ajax.ajaxurl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-WP-Nonce': init_plugin_suite_live_search_ajax.nonce
-        },
-        body: new URLSearchParams({
-            action: 'init_plugin_suite_live_search_meili_test',
-            host: document.getElementById('meili_host').value,
-            index: document.getElementById('meili_index').value,
-            search_key: document.getElementById('meili_search_key').value
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            resultEl.style.color = '#00a32a';
-            resultEl.textContent = '<?php echo esc_js( __( 'Connected successfully', 'init-live-search' ) ); ?>' + ' — ' +
-                (data.data.numberOfDocuments ?? '?') + ' <?php echo esc_js( __( 'documents', 'init-live-search' ) ); ?>';
-        } else {
-            resultEl.style.color = '#d63638';
-            resultEl.textContent = data.data || '<?php echo esc_js( __( 'Connection failed', 'init-live-search' ) ); ?>';
-        }
-    })
-    .catch(() => {
-        resultEl.style.color = '#d63638';
-        resultEl.textContent = '<?php echo esc_js( __( 'Unknown error', 'init-live-search' ) ); ?>';
-    })
-    .finally(() => { btn.disabled = false; });
-});
-</script>
