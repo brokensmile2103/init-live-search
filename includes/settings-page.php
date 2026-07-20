@@ -21,6 +21,13 @@ add_action('admin_init', function () {
         INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION,
         'init_plugin_suite_live_search_sanitize_predefined_dictionaries'
     );
+
+    // Register Meilisearch setting
+    register_setting(
+        INIT_PLUGIN_SUITE_LS_GROUP_MEILI,
+        INIT_PLUGIN_SUITE_LS_MEILI_OPTION,
+        'init_plugin_suite_live_search_sanitize_meili_settings'
+    );
 });
 
 // Tạo menu trong admin
@@ -51,9 +58,10 @@ function init_plugin_suite_live_search_render_settings_page() {
     }
 
     $tabs = [
-        'general'   => __('General Settings', 'init-live-search'),
-        'synonyms'  => __('Synonyms', 'init-live-search'),
-        'analytics' => __('Analytics', 'init-live-search'),
+        'general'     => __('General Settings', 'init-live-search'),
+        'meilisearch' => __('Meilisearch', 'init-live-search'),
+        'synonyms'    => __('Synonyms', 'init-live-search'),
+        'analytics'   => __('Analytics', 'init-live-search'),
     ];
 
     echo '<div class="wrap">';
@@ -177,6 +185,25 @@ function init_plugin_suite_live_search_sanitize_synonyms($raw) {
 
     json_decode($clean);
     return (json_last_error() === JSON_ERROR_NONE) ? $clean : '{}';
+}
+
+// Sanitize: MEILISEARCH
+function init_plugin_suite_live_search_sanitize_meili_settings($input) {
+    $output = [];
+
+    $output['enabled'] = !empty($input['enabled']) ? 1 : 0;
+    $output['host'] = esc_url_raw(untrailingslashit(trim($input['host'] ?? '')));
+    $output['index'] = sanitize_text_field(trim($input['index'] ?? ''));
+    $output['search_key'] = sanitize_text_field(trim($input['search_key'] ?? ''));
+
+    // Chỉ lưu admin_key nếu KHÔNG có hằng số override trong wp-config.php
+    if (!defined('INIT_LIVE_SEARCH_MEILI_ADMIN_KEY') || !INIT_LIVE_SEARCH_MEILI_ADMIN_KEY) {
+        $output['admin_key'] = sanitize_text_field(trim($input['admin_key'] ?? ''));
+    }
+
+    $output['timeout_ms'] = max(500, min(8000, absint($input['timeout_ms'] ?? 3000)));
+
+    return $output;
 }
 
 // Sanitize: PREDEFINED DICTIONARIES

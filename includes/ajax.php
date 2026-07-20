@@ -549,3 +549,39 @@ function init_plugin_suite_live_search_mmr_selection( array $keywords, int $limi
 
     return $selected;
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Meilisearch: Test Connection (Settings page)
+// ─────────────────────────────────────────────────────────────────────────
+add_action(
+    'wp_ajax_init_plugin_suite_live_search_meili_test',
+    'init_plugin_suite_live_search_meili_test_connection_ajax'
+);
+
+function init_plugin_suite_live_search_meili_test_connection_ajax() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Unauthorized', 403 );
+    }
+
+    $nonce = isset( $_SERVER['HTTP_X_WP_NONCE'] )
+        ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ) )
+        : '';
+
+    if ( ! wp_verify_nonce( $nonce, 'init_live_search_admin_nonce' ) ) {
+        wp_send_json_error( 'Invalid nonce', 403 );
+    }
+
+    $settings = [
+        'host'       => isset( $_POST['host'] ) ? esc_url_raw( wp_unslash( $_POST['host'] ) ) : '',
+        'index'      => isset( $_POST['index'] ) ? sanitize_text_field( wp_unslash( $_POST['index'] ) ) : '',
+        'search_key' => isset( $_POST['search_key'] ) ? sanitize_text_field( wp_unslash( $_POST['search_key'] ) ) : '',
+    ];
+
+    $result = init_plugin_suite_live_search_meili_test_connection( $settings );
+
+    if ( is_wp_error( $result ) ) {
+        wp_send_json_error( $result->get_error_message() );
+    }
+
+    wp_send_json_success( $result );
+}

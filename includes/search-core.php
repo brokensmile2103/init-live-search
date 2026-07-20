@@ -22,18 +22,33 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
         if (!$term || strlen($term) < 2) return [];
 
         $search_mode = $args['force_mode'] ?? ($options['search_mode'] ?? 'title');
-        $like = '%' . $wpdb->esc_like($term) . '%';
-        $placeholders = implode(', ', array_fill(0, count($post_types), '%s'));
 
-        $cache_key = 'init_plugin_suite_live_search_' . md5($term . serialize($post_types) . $search_mode . $limit . $paged);
-        $post_ids = ($paged === 1) ? wp_cache_get($cache_key, 'init_plugin_suite_live_search') : false;
+        // Ưu tiên Meilisearch nếu đã bật + cấu hình đủ. Trả về array (kể cả rỗng)
+        // khi thành công; false khi cần fallback về pipeline DB nội bộ bên dưới.
+        // Lưu ý: khi Meilisearch xử lý thành công, các bước match phía DB (operators
+        // +/-, ACF fields, synonym expansion, bigram fallback) sẽ KHÔNG chạy lên
+        // kết quả đó — Meilisearch tự lo relevance/typo-tolerance theo cách riêng.
+        $meili_settings = init_plugin_suite_live_search_meili_get_settings();
+        $meili_post_ids = init_plugin_suite_live_search_meili_is_enabled($meili_settings)
+            ? init_plugin_suite_live_search_meili_get_post_ids($term, $post_types, $limit, $paged, $meili_settings, $args)
+            : false;
 
-        if ($post_ids === false) {
-            $post_ids = init_plugin_suite_live_search_resolve_post_ids(
-                $term, $like, $post_types, $placeholders, $search_mode, $limit, $paged, $options, $args
-            );
-            if ($paged === 1) {
-                wp_cache_set($cache_key, $post_ids, 'init_plugin_suite_live_search', 300);
+        if (is_array($meili_post_ids)) {
+            $post_ids = $meili_post_ids;
+        } else {
+            $like = '%' . $wpdb->esc_like($term) . '%';
+            $placeholders = implode(', ', array_fill(0, count($post_types), '%s'));
+
+            $cache_key = 'init_plugin_suite_live_search_' . md5($term . serialize($post_types) . $search_mode . $limit . $paged);
+            $post_ids = ($paged === 1) ? wp_cache_get($cache_key, 'init_plugin_suite_live_search') : false;
+
+            if ($post_ids === false) {
+                $post_ids = init_plugin_suite_live_search_resolve_post_ids(
+                    $term, $like, $post_types, $placeholders, $search_mode, $limit, $paged, $options, $args
+                );
+                if ($paged === 1) {
+                    wp_cache_set($cache_key, $post_ids, 'init_plugin_suite_live_search', 300);
+                }
             }
         }
     }

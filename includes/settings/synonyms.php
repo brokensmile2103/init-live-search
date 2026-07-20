@@ -6,7 +6,10 @@ $predefined_dictionaries = get_option(INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTIO
 ?>
 
 <h2><?php esc_html_e('Synonym Configuration', 'init-live-search'); ?></h2>
-<p><?php esc_html_e('You can define custom synonyms here. This will allow search terms to be expanded using your specific site vocabulary.', 'init-live-search'); ?></p>
+
+<p class="description">
+    <?php esc_html_e('You can define custom synonyms here. This will allow search terms to be expanded using your specific site vocabulary.', 'init-live-search'); ?>
+</p>
 
 <form method="post" action="options.php" id="synonym-config-form">
     <?php settings_fields(INIT_PLUGIN_SUITE_LS_GROUP_SYNONYMS); ?>

@@ -3,7 +3,7 @@
  * Plugin Name: Init Live Search
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
  * Description: A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API.
- * Version: 1.9.2
+ * Version: 1.9.3
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-live-search
@@ -18,13 +18,15 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',                '1.9.2');
+define('INIT_PLUGIN_SUITE_LS_VERSION',                '1.9.3');
 define('INIT_PLUGIN_SUITE_LS_SLUG',                   'init-live-search');
 define('INIT_PLUGIN_SUITE_LS_GROUP_GENERAL',          'init_live_search_group_general');
 define('INIT_PLUGIN_SUITE_LS_OPTION',                 'init_plugin_suite_live_search_settings');
 define('INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION', 'init_live_search_predifined_dict');
 define('INIT_PLUGIN_SUITE_LS_GROUP_SYNONYMS',         'init_live_search_group_synonyms');
 define('INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION',         'init_plugin_suite_live_search_custom_synonyms');
+define('INIT_PLUGIN_SUITE_LS_GROUP_MEILI',            'init_live_search_group_meili');
+define('INIT_PLUGIN_SUITE_LS_MEILI_OPTION',           'init_plugin_suite_live_search_meili_settings');
 define('INIT_PLUGIN_SUITE_LS_NAMESPACE',              'initlise/v1');
 
 define('INIT_PLUGIN_SUITE_LS_URL',            plugin_dir_url(__FILE__));
@@ -284,7 +286,7 @@ function init_plugin_suite_live_search_add_settings_link($links) {
 // Includes
 if (is_dir(INIT_PLUGIN_SUITE_LS_INCLUDES_PATH)) {
     // Load internal modules (utils first, then main logic)
-    foreach (['search-core.php', 'related-ai.php', 'utils.php', 'predefined-dictionaries.php', 'rest-api.php', 'settings-page.php', 'tracking.php', 'shortcodes.php', 'hooks.php'] as $file) {
+    foreach (['meilisearch.php', 'search-core.php', 'related-ai.php', 'utils.php', 'predefined-dictionaries.php', 'rest-api.php', 'settings-page.php', 'tracking.php', 'shortcodes.php', 'hooks.php'] as $file) {
         $path = INIT_PLUGIN_SUITE_LS_INCLUDES_PATH . $file;
         if (file_exists($path)) {
             require_once $path;
@@ -297,5 +299,11 @@ if (is_dir(INIT_PLUGIN_SUITE_LS_INCLUDES_PATH)) {
         if (file_exists($admin_path)) {
             require_once $admin_path;
         }
+    }
+
+    // Load WP-CLI command (no-op outside WP-CLI context)
+    $cli_path = INIT_PLUGIN_SUITE_LS_INCLUDES_PATH . 'cli.php';
+    if (file_exists($cli_path)) {
+        require_once $cli_path;
     }
 }

@@ -1,22 +1,24 @@
 === Init Live Search – AI-Powered, Related Posts, Slash Commands ===
 Contributors: brokensmile.2103
-Tags: AI search, live search, related posts, slash commands, woocommerce
+Tags: AI search, live search, meilisearch, related posts, woocommerce
 Requires at least: 5.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.9.2
+Stable tag: 1.9.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Fast, modern live search powered by REST API — with AI-powered Related Posts Engine, slash commands, SEO-aware, ACF, Woo, and custom UI presets.
+Fast REST API live search with optional Meilisearch, AI-powered Related Posts, slash commands, ACF and WooCommerce support.
 
 == Description ==
 
-Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. Init Live Search is a modern, lightweight, and fully accessible live search solution for WordPress — now with tag-aware matching, SEO metadata support, ACF integration, WooCommerce product filters, and customizable UI presets.
+Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. Init Live Search is a modern, lightweight, and fully accessible live search solution for WordPress — now with optional **Meilisearch** integration, tag-aware matching, SEO metadata support, ACF integration, WooCommerce product filters, and customizable UI presets.
 
 It replaces the default `<input name="s">` with a clean, intuitive search modal powered entirely by the WordPress REST API. Everything loads in real-time — with zero disruption to browsing flow.
 
 Perfect for content-heavy blogs, WooCommerce stores, or even headless sites. Every interaction is fast, fluid, and designed to work across devices.
+
+Want typo-tolerant, sub-50ms relevance ranking on top of that? Connect your own self-hosted or cloud **Meilisearch** instance in a few clicks — Init Live Search will automatically prefer it for search, and just as automatically fall back to the built-in database search if it's ever unreachable. Your visitors never see a broken search box.
 
 It also brings AI-powered related posts and an advanced keyword generator — giving your visitors smarter ways to discover content.
 
@@ -25,6 +27,14 @@ This plugin is part of the [Init Plugin Suite](https://en.inithtml.com/init-plug
 GitHub repository: [https://github.com/brokensmile2103/init-live-search](https://github.com/brokensmile2103/init-live-search)
 
 == What's New in Version 1.8.x & 1.9.x ==
+
+- **Optional Meilisearch Integration**: connect your own Meilisearch server (self-hosted or cloud) as the primary search engine
+  - Typo-tolerant, relevance-ranked, sub-50ms search results straight from Meilisearch
+  - Automatic, transparent fallback to the local database search whenever Meilisearch is disabled, unreachable, or misconfigured — search availability is never compromised
+  - New **Meilisearch** settings tab: Host URL, Index Name, Search Key, Admin/Indexing Key, request timeout, and a one-click "Test Connection" button
+  - Posts are synced automatically on publish/update/trash/delete (non-blocking — won't slow down the editor)
+  - New WP-CLI command `wp init-live-search meili-reindex` for bulk-indexing or rebuilding the entire index
+  - Sensitive indexing key can be defined via the `INIT_LIVE_SEARCH_MEILI_ADMIN_KEY` constant in `wp-config.php` instead of the database, for extra security
 
 - **AI-Powered Related Posts**: brand new `[init_live_search_related_ai]` shortcode  
   - Uses multi-signal scoring (tags, series, title bigrams, same_keyword via ACF, category, views, comments, freshness)  
@@ -67,6 +77,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 Packed with everything a modern live search needs — and more:
 
 - Live search via REST API (no admin-ajax, no jQuery)
+- **NEW:** Optional Meilisearch integration — typo-tolerant, relevance-ranked external search with automatic fallback to local DB search
 - Smart tag-aware search mode (title + tag match)
 - SEO metadata support: Yoast, Rank Math, AIOSEO, SEOPress, TSF
 - ACF field matching and customizable filters
@@ -101,6 +112,7 @@ Options: `dark`, `light`, `auto`
 == Admin Settings ==
 
 - Choose post types to include in search  
+- Connect an optional Meilisearch server (Host, Index, Search/Admin keys, timeout, one-click connection test)  
 - Configure modal triggers (input focus, triple click, Ctrl+/)  
 - Enable slash commands (e.g. /recent, /tag, /id)  
 - Enable support for `+` and `-` keyword operators (must-have, must-not-have)  
@@ -122,6 +134,23 @@ Options: `dark`, `light`, `auto`
 - Option to disable all built-in CSS completely  
 - Add default UTM parameter to result links  
 - Define or auto-generate keyword suggestions   
+
+== Meilisearch Integration (Optional) ==
+
+Init Live Search works great out of the box with zero setup — the built-in database search handles everything by default. But if you want faster, typo-tolerant, relevance-ranked search at scale, you can connect your own [Meilisearch](https://www.meilisearch.com/) instance in a few minutes.
+
+**How it works:**
+
+1. Install and run Meilisearch yourself — self-hosted (a small VPS is plenty for most blogs) or via Meilisearch Cloud. This plugin does not host or manage a server for you.
+2. Go to **Settings → Init Live Search → Meilisearch**, enter your Host URL, Index Name, and a **search-only** API key, then enable the integration.
+3. Run `wp init-live-search meili-reindex` once via WP-CLI to index your existing published content.
+4. That's it — search requests are now answered by Meilisearch. New, updated, and deleted posts stay in sync automatically.
+
+**Built for safety, not lock-in:**
+
+- If Meilisearch is disabled, unconfigured, or fails to respond (timeout, wrong key, server down), the plugin **automatically and silently falls back** to the local database search — visitors never see a broken search box.
+- Your sensitive indexing key can live in `wp-config.php` (`INIT_LIVE_SEARCH_MEILI_ADMIN_KEY`) instead of the database.
+- Turn it off any time — nothing about your site's core search behavior depends on Meilisearch being present.
 
 == Keyboard Shortcuts ==
 
@@ -242,11 +271,24 @@ Fetch WooCommerce products with flexible query parameters.
 11. WooCommerce Search: product results with price, stock, sale badge  
 12. Fullscreen Style: overlay modal using `style-full.css` preset  
 13. Topbar Style: fixed top bar layout using `style-topbar.css` preset  
+14. Meilisearch Settings: connect your Host URL, Index, and API keys, with one-click connection test
 
 == Frequently Asked Questions ==
 
 = Does this plugin use jQuery? =  
 No. It's built entirely with modern Vanilla JavaScript — no jQuery, no external dependencies.
+
+= What is Meilisearch and do I need it? =  
+Meilisearch is a fast, open-source search engine known for typo-tolerant, relevance-ranked results. You don't need it — Init Live Search's built-in database search works fully on its own. Meilisearch is an optional upgrade for sites that want that extra layer of speed and fuzzy-matching quality at scale.
+
+= Does Init Live Search host Meilisearch for me? =  
+No. Meilisearch is bring-your-own-server: you install and run it yourself (self-hosted or via Meilisearch Cloud), then connect it from the plugin's settings. This keeps the plugin free and keeps you in full control of your data and infrastructure.
+
+= What happens if my Meilisearch server goes down? =  
+Nothing breaks. The plugin automatically detects the failure (or timeout) and falls back to the local database search for that request — visitors won't notice anything except perhaps a slightly less fuzzy match.
+
+= How do I index my existing posts into Meilisearch? =  
+Run `wp init-live-search meili-reindex` via WP-CLI after connecting your Meilisearch instance. New, updated, and deleted posts sync automatically after that.
 
 = Can I insert the search box anywhere on the page? =  
 Yes. Use the `[init_live_search]` shortcode to insert a search input or icon anywhere. You can also add custom classes or enable dark mode.
@@ -358,6 +400,14 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.9.3 – July 20, 2026 =
+- **Meilisearch Integration (optional)**: added a new "Meilisearch" settings tab to connect a self-hosted (bring-your-own-server) Meilisearch instance as the primary search source. When enabled and reachable, search requests are answered by Meilisearch's typo-tolerant, relevance-ranked engine; if the request fails or times out for any reason, the plugin automatically falls back to the existing local database search — search never goes down solely because of a Meilisearch outage.
+- **Auto-sync on Save/Delete**: publishing, updating, trashing, or deleting a post now automatically pushes/removes the corresponding document in the configured Meilisearch index (non-blocking, does not slow down editor saves).
+- **WP-CLI Command**: added `wp init-live-search meili-reindex` to bulk-index (or rebuild) all published posts of the enabled post types into Meilisearch.
+- **Test Connection**: added a one-click connection test on the Meilisearch settings tab.
+- **Security**: the sensitive indexing/admin API key can be defined via the `INIT_LIVE_SEARCH_MEILI_ADMIN_KEY` constant in `wp-config.php` (recommended) instead of being stored in the database.
+- **i18n**: all new UI strings use English as the source (msgid) with the `init-live-search` text domain, per WordPress.org standards; `.pot` regenerated and the Vietnamese `.po`/`.mo` translation updated with 27 new/previously-missing strings translated.
 
 = 1.9.2 – July 17, 2026 =
 - **Race Condition Fix**: search requests in the modal (`script.js`) now use `AbortController` to cancel stale in-flight requests when the user keeps typing, preventing older/slower responses from overwriting newer search results.

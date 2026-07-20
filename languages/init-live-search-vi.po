@@ -1,691 +1,1208 @@
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Init Live Search 1.7.5\n"
+"Project-Id-Version: Init Live Search 1.9.3\n"
+"Report-Msgid-Bugs-To: https://inithtml.com/plugin/init-live-search/\n"
+"POT-Creation-Date: 2026-07-20 06:08+0000\n"
+"PO-Revision-Date: 2026-07-20 06:08+0000\n"
+"Last-Translator: Init HTML <hello@inithtml.com>\n"
+"Language-Team: Vietnamese <vi@li.org>\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit-compatible (manual)\n"
 
-msgid "Init Live Search – Smart, Slash Commands, REST API"
-msgstr "Init Live Search – Tìm kiếm thông minh, Slash Commands, REST API"
-
-msgid "A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API."
-msgstr "Giải pháp tìm kiếm trực tiếp nhanh, gọn và linh hoạt cho WordPress — phát triển bằng JavaScript thuần, tích hợp sâu với REST API."
-
-msgid "Init Live Search Settings"
-msgstr "Cài đặt Init Live Search"
-
-msgid "Settings"
-msgstr "Cài đặt"
-
-msgid "Type to search..."
-msgstr "Nhập để tìm kiếm..."
-
-msgid "Loading..."
-msgstr "Đang tải..."
-
-msgid "No results found."
-msgstr "Không tìm thấy kết quả nào."
-
-msgid "Error loading results."
-msgstr "Lỗi khi tải kết quả."
-
-msgid "All"
-msgstr "Tất cả"
-
-msgid "Post Types to Include"
-msgstr "Loại nội dung cần tìm kiếm"
-
-msgid "Quick open modal triggers"
-msgstr "Phím tắt mở nhanh hộp tìm kiếm"
-
-msgid "Enable fast access to the search modal using simple actions."
-msgstr "Bật các hành động đơn giản để mở nhanh giao diện tìm kiếm."
-
-msgid "Triggers:"
-msgstr "Phím tắt:"
-
-msgid "Click anywhere on the page 3 times within 0.5 seconds"
-msgstr "Nhấp 3 lần liên tiếp vào bất kỳ vị trí nào trên trang (trong 0.5 giây)"
-
-msgid "Or press Ctrl + / (or Cmd + / on Mac)"
-msgstr "Hoặc nhấn Ctrl + / (Cmd + / trên Mac)"
-
-msgid "Trigger methods to open modal"
-msgstr "Cách để mở giao diện tìm kiếm"
-
-msgid "Attach event to input[name=\"s\"]"
-msgstr "Gắn sự kiện vào input[name=\"s\"]"
-
-msgid "Triple click anywhere on the page"
-msgstr "Nhấp chuột 3 lần liên tiếp vào trang"
-
-msgid "Press Ctrl + / (or Cmd + / on Mac)"
-msgstr "Nhấn Ctrl + / (hoặc Cmd + / trên Mac)"
-
-msgid "Select one or more methods to trigger the search modal."
-msgstr "Chọn một hoặc nhiều cách để mở hộp tìm kiếm."
-
-msgid "Debounce Time (ms)"
-msgstr "Thời gian chờ tìm kiếm (ms)"
-
-msgid "Max Results"
-msgstr "Số kết quả tối đa"
-
-msgid "Search Mode"
-msgstr "Chế độ tìm kiếm"
-
-msgid "Title Only"
-msgstr "Chỉ tiêu đề"
-
-msgid "Title and Excerpt"
-msgstr "Tiêu đề và trích đoạn"
-
-msgid "Title, Excerpt and Content"
-msgstr "Tiêu đề, trích đoạn và nội dung"
-
-msgid "Enable fallback matching?"
-msgstr "Bật khớp dự phòng?"
-
-msgid "Try trimming or using bigrams if not enough results are found."
-msgstr "Thử rút gọn hoặc sử dụng cụm từ nếu không đủ kết quả."
-
-msgid "Frontend CSS Style"
-msgstr "Kiểu giao diện CSS ở giao diện người dùng"
-
-msgid "Default (modal-style)"
-msgstr "Mặc định (kiểu modal)"
-
-msgid "Full Screen Overlay"
-msgstr "Toàn màn hình (overlay)"
-
-msgid "Top Bar"
-msgstr "Thanh trên cùng (Top Bar)"
-
-msgid "None (disable all built-in CSS, load manually)"
-msgstr "Tắt (vô hiệu hóa toàn bộ CSS mặc định, bạn tự thêm thủ công)"
-
-msgid "Choose how the frontend modal should be styled. You can disable all styles and provide your own if needed."
-msgstr "Chọn cách hiển thị modal tìm kiếm ở frontend. Bạn có thể tắt toàn bộ style và tự viết lại nếu muốn."
-
-msgid "Cache results in localStorage?"
-msgstr "Lưu kết quả vào localStorage?"
-
-msgid "Enable caching search results in localStorage to improve performance and reduce repeated requests."
-msgstr "Lưu kết quả tìm kiếm vào localStorage để tăng hiệu suất và giảm yêu cầu lặp lại."
-
-msgid "Default UTM Parameter"
-msgstr "Tham số UTM mặc định"
-
-msgid "Optional. Set a default UTM parameter to include in search-related requests. Example: utm_source=search&utm_medium=plugin"
-msgstr "Tùy chọn. Thiết lập UTM mặc định thêm vào URL tìm kiếm. Ví dụ: utm_source=search&utm_medium=plugin"
-
-msgid "Suggested Keywords"
-msgstr "Từ khóa gợi ý"
-
-msgid "Generate Automatically"
-msgstr "Tự động tạo"
-
-msgid "Enter default search keywords for suggestions, separated by commas. You can also auto-generate."
-msgstr "Nhập từ khóa mặc định (phân cách bằng dấu phẩy), hoặc dùng nút tạo tự động."
-
-msgid "Failed to generate keywords"
-msgstr "Không tạo được từ khóa"
-
-msgid "Usage Instructions"
-msgstr "Hướng dẫn sử dụng"
-
-msgid "You can change the theme using one of these two ways:"
-msgstr "Bạn có thể đổi giao diện bằng một trong hai cách sau:"
-
-msgid "Add the dark class to the modal container:"
-msgstr "Thêm class dark vào hộp tìm kiếm:"
-
-msgid "Or set the theme using a global config before the plugin initializes:"
-msgstr "Hoặc thiết lập qua cấu hình toàn cục trước khi plugin khởi động:"
-
-msgid "Other values:"
-msgstr "Giá trị khác:"
-
-msgid "light"
-msgstr "sáng"
-
-msgid "auto (default)"
-msgstr "tự động (mặc định)"
-
-msgid "Cache cleared successfully."
-msgstr "Đã xóa cache thành công."
-
-msgid "Failed to clear cache."
-msgstr "Không thể xóa cache."
-
+#: init-live-search.php:129
 msgid "Show latest posts"
 msgstr "Hiển thị bài viết mới nhất"
 
+#: init-live-search.php:133
 msgid "Show most viewed posts (all time)"
 msgstr "Hiển thị bài viết được xem nhiều nhất (mọi thời điểm)"
 
+#: init-live-search.php:134
 msgid "Show trending posts right now"
 msgstr "Hiển thị bài viết đang thịnh hành"
 
+#: init-live-search.php:135
 msgid "Show most viewed posts today"
 msgstr "Hiển thị bài viết được xem nhiều nhất hôm nay"
 
+#: init-live-search.php:136
 msgid "Show most viewed posts this week"
 msgstr "Hiển thị bài viết được xem nhiều nhất tuần này"
 
+#: init-live-search.php:137
 msgid "Show most viewed posts this month"
 msgstr "Hiển thị bài viết được xem nhiều nhất tháng này"
 
-msgid "Filter by category"
-msgstr "Lọc theo chuyên mục"
-
-msgid "Filter by tag"
-msgstr "Lọc theo thẻ"
-
-msgid "Filter by date (Y/m/d)"
-msgstr "Lọc theo ngày đăng (Y/m/d)"
-
-msgid "Go to post by ID"
-msgstr "Xem bài viết theo ID"
-
-msgid "Clear local cache"
-msgstr "Xóa cache trình duyệt"
-
-msgid "Reset search field"
-msgstr "Đặt lại ô tìm kiếm"
-
-msgid "Supported Commands:"
-msgstr "Câu lệnh hỗ trợ:"
-
-msgid "Find posts related to current page title"
-msgstr "Tìm bài viết liên quan đến tiêu đề trang hiện tại"
-
+#: init-live-search.php:141
 msgid "Show posts you recently read (local only)"
 msgstr "Hiển thị các bài bạn đã đọc gần đây (chỉ lưu cục bộ)"
 
-msgid "Open a random post"
-msgstr "Mở một bài viết ngẫu nhiên"
-
-msgid "Show list of categories"
-msgstr "Hiển thị danh sách chuyên mục"
-
-msgid "Show list of tags"
-msgstr "Hiển thị danh sách thẻ"
-
-msgid "Enable Voice Input?"
-msgstr "Bật nhập liệu bằng giọng nói?"
-
-msgid "Enable microphone input using the SpeechRecognition API (if supported)"
-msgstr "Bật nhập liệu bằng micro sử dụng SpeechRecognition API (nếu trình duyệt hỗ trợ)"
-
-msgid "Maximum number of results to display in the modal."
-msgstr "Số lượng kết quả tối đa hiển thị trong hộp tìm kiếm."
-
-msgid "Filter by date (Y, Y/m, or Y/m/d)"
-msgstr "Lọc theo ngày (Y, Y/m hoặc Y/m/d)"
-
-msgid "Enable Slash Commands?"
-msgstr "Bật Slash Command?"
-
-msgid "Allow search commands starting with \"/\" such as /recent, /id, /tag, etc."
-msgstr "Cho phép sử dụng các lệnh tìm kiếm bắt đầu bằng dấu \"/\" như /recent, /id, /tag, v.v."
-
-msgid "Max Words to Trigger Highlight Search"
-msgstr "Số từ tối đa để bật tìm kiếm khi bôi đen"
-
-msgid "Set maximum word count allowed to trigger tooltip search on text selection. Set 0 to disable."
-msgstr "Thiết lập số từ tối đa được phép để hiển thị tooltip tìm kiếm khi người dùng bôi đen văn bản. Nhập 0 để tắt chức năng này."
-
-msgid "Quick search"
-msgstr "Tìm kiếm nhanh"
-
+#: init-live-search.php:144
 msgid "Find posts related to the current page"
 msgstr "Tìm các bài viết liên quan đến trang hiện tại"
 
+#: init-live-search.php:145
 msgid "Show your favorited posts"
 msgstr "Hiển thị bài viết bạn đã đánh dấu yêu thích"
 
-msgid "Favorite list has been cleared."
-msgstr "Danh sách yêu thích đã được xóa."
-
+#: init-live-search.php:146
 msgid "Clear all favorite posts"
 msgstr "Xóa toàn bộ danh sách yêu thích"
 
-msgid "Search Triggers"
-msgstr "Cách kích hoạt tìm kiếm"
-
-msgid "Search Behavior"
-msgstr "Hành vi tìm kiếm"
-
-msgid "Performance & UX"
-msgstr "Hiệu năng & Trải nghiệm người dùng"
-
-msgid "Styling & Suggestions"
-msgstr "Giao diện & Gợi ý từ khóa"
-
-msgid "views"
-msgstr "lượt xem"
-
-msgid "Sale"
-msgstr "Sale"
-
-msgid "Sold out"
-msgstr "Hết hàng"
-
+#: init-live-search.php:150
 msgid "Search all products"
 msgstr "Tìm tất cả sản phẩm"
 
+#: init-live-search.php:151
 msgid "Show only products on sale"
 msgstr "Chỉ hiển thị sản phẩm đang giảm giá"
 
+#: init-live-search.php:152
 msgid "Show only in-stock products"
 msgstr "Chỉ hiển thị sản phẩm còn hàng"
 
+#: init-live-search.php:153
 msgid "Search product by SKU"
 msgstr "Tìm sản phẩm theo mã SKU"
 
+#: init-live-search.php:154
 msgid "Filter products by brand slug"
 msgstr "Lọc sản phẩm theo thương hiệu (slug)"
 
+#: init-live-search.php:155
 msgid "Filter products by price range"
 msgstr "Lọc sản phẩm theo phạm vi giá"
 
+#: init-live-search.php:156
 msgid "Filter products by attribute (e.g. color)"
 msgstr "Lọc sản phẩm theo thuộc tính (ví dụ: màu sắc)"
 
+#: init-live-search.php:157
 msgid "Filter products by variation value"
 msgstr "Lọc sản phẩm theo giá trị biến thể"
 
-msgid "Init Smart Tag-Aware Search"
-msgstr "Init Smart Tag-Aware Search"
-
-msgid "This mode matches against post title and tag names. Ideal for content with rich tagging."
-msgstr "Chế độ này sẽ dò theo tiêu đề và tên tag. Thích hợp cho nội dung có gắn tag kỹ lưỡng."
-
-msgid "Search in ACF Fields (Advanced)"
-msgstr "Tìm trong trường ACF (Nâng cao)"
-
-msgid "Optional. Enter comma-separated ACF field keys to include in search (e.g. company_name, project_code). If left blank, ACF fields will not be searched."
-msgstr "Không bắt buộc. Nhập các khóa trường ACF, cách nhau bằng dấu phẩy, để đưa vào tìm kiếm (ví dụ: company_name, project_code). Nếu để trống, plugin sẽ không tìm trong các trường ACF."
-
-msgid "Search in SEO Metadata?"
-msgstr "Tìm trong metadata SEO?"
-
-msgid "Include SEO Title and Meta Description (Yoast, Rank Math, TSF, etc.) in search matching."
-msgstr "Tìm kiếm trong tiêu đề SEO và mô tả meta (Yoast, Rank Math, TSF, v.v...) để cải thiện độ chính xác."
-
-msgid "Enable this to improve accuracy by searching within SEO-optimized content written by the author."
-msgstr "Bật tùy chọn này để cải thiện kết quả bằng cách tìm trong nội dung SEO mà tác giả đã tối ưu."
-
-msgid "Enable Search Analytics?"
-msgstr "Bật phân tích tìm kiếm?"
-
-msgid "Log search queries (term, result count) for analytics purposes."
-msgstr "Ghi lại các truy vấn tìm kiếm (từ khóa, số lượng kết quả) để phục vụ phân tích."
-
-msgid "When enabled, search data will be stored temporarily using transients to help analyze usage trends. No IPs or personal data are stored."
-msgstr "Khi được bật, dữ liệu tìm kiếm sẽ được lưu tạm thời bằng transient để phân tích xu hướng sử dụng. Không lưu địa chỉ IP hoặc dữ liệu cá nhân."
-
-msgid "General Settings"
-msgstr "Cài đặt chung"
-
-msgid "Analytics"
-msgstr "Phân tích dữ liệu"
-
-msgid "Search Analytics"
-msgstr "Thống kê tìm kiếm"
-
-msgid "Below is a temporary log of recent search queries. No IPs or personal data are stored."
-msgstr "Dưới đây là nhật ký tạm thời của các truy vấn tìm kiếm gần đây. Không lưu IP hay dữ liệu cá nhân."
-
-msgid "Group similar queries"
-msgstr "Gộp các truy vấn giống nhau"
-
-msgid "Clear All Logs"
-msgstr "Xóa toàn bộ nhật ký"
-
-msgid "Export CSV"
-msgstr "Xuất CSV"
-
-msgid "No data recorded yet."
-msgstr "Chưa có dữ liệu được ghi lại."
-
-msgid "Time"
-msgstr "Thời gian"
-
-msgid "Query"
-msgstr "Truy vấn"
-
-msgid "Results"
-msgstr "Kết quả"
-
-msgid "User ID"
-msgstr "ID người dùng"
-
-msgid "Source"
-msgstr "Nguồn"
-
-msgid "Default Slash Command on Modal Open"
-msgstr "Slash command mặc định khi mở hộp tìm kiếm"
-
-msgid "None (do not preload anything)"
-msgstr "Không tải trước gì cả"
-
-msgid "Default (/recent)"
-msgstr "Mặc định (/recent)"
-
-msgid "Related Posts (use /related)"
-msgstr "Bài viết liên quan (dùng /related)"
-
-msgid "Smart Detection (based on current page)"
-msgstr "Tự động nhận diện (theo trang hiện tại)"
-
-msgid "Popular Posts (use /popular)"
-msgstr "Bài viết phổ biến (dùng /popular)"
-
-msgid "Trending Posts (use /trending)"
-msgstr "Bài viết xu hướng (dùng /trending)"
-
-msgid "Continue Reading (use /read)"
-msgstr "Đọc tiếp (dùng /read)"
-
-msgid "Choose a default slash command to run automatically when the search modal opens."
-msgstr "Chọn slash command mặc định để tự động chạy khi hộp tìm kiếm được mở."
-
-msgid "“Smart Detection” automatically detects based on current page: /related for posts, /product for shop pages, taxonomy-based commands, etc."
-msgstr "“Tự động nhận diện” sẽ chọn lệnh phù hợp theo trang hiện tại: /related cho bài viết, /product cho trang cửa hàng, hoặc các lệnh dựa trên chuyên mục, thẻ, v.v."
-
-msgid "“Popular”, “Trending” and “Read” options are only available if their respective plugins are active."
-msgstr "Tuỳ chọn “Popular”, “Trending” và “Read” chỉ hiển thị nếu các plugin tương ứng đang hoạt động."
-
-msgid "Show past search keywords"
-msgstr "Hiển thị từ khóa đã tìm trước đó"
-
-msgid "Clear past search keywords"
-msgstr "Xóa toàn bộ từ khóa đã tìm trước đó"
-
-msgid "You haven't searched for anything yet."
-msgstr "Bạn chưa từng tìm kiếm gì cả."
-
-msgid "Past search keywords have been cleared."
-msgstr "Đã xoá toàn bộ lịch sử tìm kiếm."
-
-msgid "Show Excerpt in Search Results?"
-msgstr "Hiển thị đoạn trích trong kết quả tìm kiếm?"
-
-msgid "Display the post excerpt below each result item in the modal."
-msgstr "Hiển thị đoạn trích của bài viết bên dưới mỗi kết quả trong modal."
-
-msgid "If disabled, excerpt will be omitted from results to simplify the UI."
-msgstr "Nếu tắt, đoạn trích sẽ bị loại bỏ khỏi kết quả để làm giao diện gọn hơn."
-
-msgid "Enable Synonym Expansion?"
-msgstr "Bật chức năng mở rộng từ đồng nghĩa?"
-
-msgid "Allow search terms to be expanded using built-in or custom-defined synonyms."
-msgstr "Cho phép mở rộng cụm từ tìm kiếm bằng cách sử dụng từ đồng nghĩa có sẵn hoặc do bạn tự định nghĩa."
-
-msgid "Enable this only after defining useful synonym mappings. Otherwise, it will have no effect."
-msgstr "Chỉ nên bật khi bạn đã khai báo các từ đồng nghĩa phù hợp. Nếu không, tính năng này sẽ không tạo ra hiệu quả."
-
-msgid "Synonyms"
-msgstr "Từ đồng nghĩa"
-
-msgid "Synonym Configuration"
-msgstr "Cấu hình từ đồng nghĩa"
-
-msgid "You can define custom synonyms here. This will allow search terms to be expanded using your specific site vocabulary."
-msgstr "Bạn có thể định nghĩa từ đồng nghĩa tùy chỉnh tại đây. Điều này giúp mở rộng truy vấn tìm kiếm bằng từ vựng riêng của trang web."
-
-msgid "Custom Synonym Map (JSON)"
-msgstr "Bản đồ từ đồng nghĩa tùy chỉnh (JSON)"
-
-msgid "Enter a JSON object where each key maps to an array of synonyms. Example:"
-msgstr "Nhập một đối tượng JSON, mỗi khóa là một từ khóa và giá trị là mảng từ đồng nghĩa. Ví dụ:"
-
-msgid "Add or Update Synonym"
-msgstr "Thêm hoặc cập nhật từ đồng nghĩa"
-
-msgid "Keyword (e.g. reaction)"
-msgstr "Từ khóa (ví dụ: reaction)"
-
-msgid "Synonym (e.g. tương tác)"
-msgstr "Từ đồng nghĩa (ví dụ: tương tác)"
-
-msgid "Add / Update"
-msgstr "Thêm / Cập nhật"
-
-msgid "Click to insert or update a keyword → synonym pair into the JSON above."
-msgstr "Nhấn để chèn hoặc cập nhật một cặp từ khóa → từ đồng nghĩa vào JSON ở trên."
-
-msgid "Cross-site Search Domains"
-msgstr "Tên miền tìm kiếm liên site"
-
-msgid "Enter one site per line in the format: Site Name|https://example.com/"
-msgstr "Nhập mỗi dòng một site theo định dạng: Tên site|https://example.com/"
-
-msgid "When filled, your search will fetch results from these additional domains and merge them into one list."
-msgstr "Khi có dữ liệu, hệ thống sẽ lấy kết quả từ các domain này và gộp chung vào một danh sách."
-
-msgid "Each external site must also have the Init Live Search plugin installed and active."
-msgstr "Mỗi site bên ngoài cũng phải cài và kích hoạt plugin Init Live Search."
-
-msgid "Save %s%%"
-msgstr "Giảm %s%%"
-
-msgid "Save %s"
-msgstr "Giảm %s"
-
-msgid "Remaining: %d uses"
-msgstr "Còn lại: %d lượt"
-
-msgid "Unlimited uses"
-msgstr "Không giới hạn lượt"
-
-msgid "Expires on: %s"
-msgstr "Hết hạn: %s"
-
-msgid "No expiration"
-msgstr "Không giới hạn thời gian"
-
+#: init-live-search.php:158
 msgid "Show all available coupons"
 msgstr "Hiển thị tất cả mã giảm giá đang có"
 
-msgid "Copy"
-msgstr "Sao chép"
+#: init-live-search.php:164
+msgid "Open a random post"
+msgstr "Mở một bài viết ngẫu nhiên"
 
-msgid "Copied!"
-msgstr "Đã sao chép!"
+#: init-live-search.php:165
+msgid "Filter by category"
+msgstr "Lọc theo chuyên mục"
 
-msgid "Close"
-msgstr "Đóng"
+#: init-live-search.php:166
+msgid "Filter by tag"
+msgstr "Lọc theo thẻ"
 
-msgid "Shortcode Preview"
-msgstr "Xem trước Shortcode"
+#: init-live-search.php:167
+msgid "Show list of categories"
+msgstr "Hiển thị danh sách chuyên mục"
 
-msgid "Shortcode Builder"
-msgstr "Trình tạo Shortcode"
+#: init-live-search.php:168
+msgid "Show list of tags"
+msgstr "Hiển thị danh sách thẻ"
 
-msgid "Type"
-msgstr "Kiểu"
+#: init-live-search.php:169
+msgid "Filter by date (Y, Y/m, or Y/m/d)"
+msgstr "Lọc theo ngày (Y, Y/m hoặc Y/m/d)"
 
-msgid "Placeholder (input mode)"
-msgstr "Gợi ý nhập (chế độ ô nhập)"
+#: init-live-search.php:170
+msgid "Go to post by ID"
+msgstr "Xem bài viết theo ID"
 
-msgid "Search..."
-msgstr "Tìm kiếm..."
+#: init-live-search.php:171
+msgid "Show past search keywords"
+msgstr "Hiển thị từ khóa đã tìm trước đó"
 
-msgid "Label (icon mode)"
-msgstr "Nhãn (chế độ icon)"
+#: init-live-search.php:172
+msgid "Clear past search keywords"
+msgstr "Xóa toàn bộ từ khóa đã tìm trước đó"
 
-msgid "Custom CSS class"
-msgstr "Lớp CSS tùy chỉnh"
+#: init-live-search.php:173
+msgid "Clear local cache"
+msgstr "Xóa cache trình duyệt"
 
-msgid "Stroke Width"
-msgstr "Độ dày nét vẽ"
+#: init-live-search.php:174
+msgid "Reset search field"
+msgstr "Đặt lại ô tìm kiếm"
 
-msgid "Border Radius (input mode)"
-msgstr "Bo góc (chế độ ô nhập)"
+#: init-live-search.php:253
+msgid "Type to search..."
+msgstr "Nhập để tìm kiếm..."
 
-msgid "Enable + / - Search Operators?"
-msgstr "Bật toán tử tìm kiếm + / -?"
+#: init-live-search.php:254
+msgid "No results found."
+msgstr "Không tìm thấy kết quả nào."
 
-msgid "Allow using +word to force match, -word to exclude."
-msgstr "Cho phép dùng +từ để bắt buộc, -từ để loại trừ."
+#: init-live-search.php:255
+msgid "Error loading results."
+msgstr "Lỗi khi tải kết quả."
 
-msgid "Enable this if you want to support advanced users using must-have (+) and must-not-have (-) keyword operators."
-msgstr "Bật tuỳ chọn này nếu bạn muốn hỗ trợ người dùng nâng cao với toán tử bắt buộc (+) và loại trừ (-)."
+#: init-live-search.php:256
+msgid "All"
+msgstr "Tất cả"
 
+#: init-live-search.php:257
+msgid "Cache cleared successfully."
+msgstr "Đã xóa cache thành công."
+
+#: init-live-search.php:258
+msgid "Favorite list has been cleared."
+msgstr "Danh sách yêu thích đã được xóa."
+
+#: init-live-search.php:259
+msgid "Failed to clear cache."
+msgstr "Không thể xóa cache."
+
+#: init-live-search.php:260
+msgid "Quick search"
+msgstr "Tìm kiếm nhanh"
+
+#: init-live-search.php:261
+msgid "views"
+msgstr "lượt xem"
+
+#: init-live-search.php:262
+msgid "Sale"
+msgstr "Sale"
+
+#: init-live-search.php:263
+msgid "Sold out"
+msgstr "Hết hàng"
+
+#: init-live-search.php:264
+msgid "Supported Commands:"
+msgstr "Câu lệnh hỗ trợ:"
+
+#: init-live-search.php:265
+msgid "You haven't searched for anything yet."
+msgstr "Bạn chưa từng tìm kiếm gì cả."
+
+#: init-live-search.php:266
+msgid "Past search keywords have been cleared."
+msgstr "Đã xoá toàn bộ lịch sử tìm kiếm."
+
+#: init-live-search.php:281
+msgid "Settings"
+msgstr "Cài đặt"
+
+#. translators: %s is the discount percentage (e.g. 20 for 20%)
+#: includes/rest-api.php:671
+#, php-format
+msgid "Save %s%%"
+msgstr "Giảm %s%%"
+
+#. translators: %s is the monetary discount amount (e.g. $10)
+#: includes/rest-api.php:674
+#, php-format
+msgid "Save %s"
+msgstr "Giảm %s"
+
+#. translators: %d is the number of remaining uses
+#: includes/rest-api.php:681
+#, php-format
+msgid "Remaining: %d uses"
+msgstr "Còn lại: %d lượt"
+
+#: includes/rest-api.php:683
+msgid "Unlimited uses"
+msgstr "Không giới hạn lượt"
+
+#. translators: %s is the expiration date
+#: includes/rest-api.php:688
+#, php-format
+msgid "Expires on: %s"
+msgstr "Hết hạn: %s"
+
+#: includes/rest-api.php:690
+msgid "No expiration"
+msgstr "Không giới hạn thời gian"
+
+#: includes/meilisearch.php:144
+msgid "Please fill in Host, Index, and Search Key before testing."
+msgstr ""
+"Vui lòng nhập đầy đủ Host, Index và Search Key trước khi kiểm tra kết nối."
+
+#. translators: %d: HTTP status code
+#: includes/meilisearch.php:165
+#, php-format
+msgid ""
+"Meilisearch returned HTTP error %d. Please check your Host / Index / Key."
+msgstr ""
+"Meilisearch trả về mã lỗi HTTP %d. Vui lòng kiểm tra lại Host / Index / Key."
+
+#. translators: %s is the post title used as fallback alt text
+#: includes/utils.php:406
+#, php-format
 msgid "Image for: %s"
 msgstr "Ảnh minh họa cho: %s"
 
-msgid "Related Posts"
-msgstr "Bài Viết Liên Quan"
+#: includes/settings/general.php:14
+msgid "Search Triggers"
+msgstr "Cách kích hoạt tìm kiếm"
 
-msgid "Post ID (optional)"
-msgstr "ID bài viết (tùy chọn)"
+#: includes/settings/general.php:17
+msgid "Post Types to Include"
+msgstr "Loại nội dung cần tìm kiếm"
 
-msgid "Number of Posts"
-msgstr "Số lượng bài viết"
+#: includes/settings/general.php:30
+msgid "Trigger methods to open modal"
+msgstr "Cách để mở giao diện tìm kiếm"
 
-msgid "Keyword (override)"
-msgstr "Từ khóa (ghi đè)"
+#: includes/settings/general.php:35
+msgid "Attach event to input[name=\"s\"]"
+msgstr "Gắn sự kiện vào input[name=\"s\"]"
 
-msgid "Load CSS"
-msgstr "Tải CSS mặc định"
+#: includes/settings/general.php:39
+msgid "Triple click anywhere on the page"
+msgstr "Nhấp chuột 3 lần liên tiếp vào trang"
 
-msgid "Output Schema"
-msgstr "Xuất schema dữ liệu"
+#: includes/settings/general.php:43
+msgid "Press Ctrl + / (or Cmd + / on Mac)"
+msgstr "Nhấn Ctrl + / (hoặc Cmd + / trên Mac)"
 
-msgid "Template"
-msgstr "Mẫu"
+#: includes/settings/general.php:47
+msgid "Select one or more methods to trigger the search modal."
+msgstr "Chọn một hoặc nhiều cách để mở hộp tìm kiếm."
 
-msgid "Auto Insert Related Posts?"
-msgstr "Tự động chèn bài viết liên quan?"
+#: includes/settings/general.php:52
+msgid "Search Behavior"
+msgstr "Hành vi tìm kiếm"
 
-msgid "No (manual shortcode only)"
-msgstr "Không (chỉ dùng shortcode thủ công)"
+#: includes/settings/general.php:55
+msgid "Enable Slash Commands?"
+msgstr "Bật Slash Command?"
 
-msgid "After post content"
-msgstr "Sau nội dung bài viết"
+#: includes/settings/general.php:59
+msgid "Allow search commands starting with \"/\" such as /recent, /id, /tag, etc."
+msgstr ""
+"Cho phép sử dụng các lệnh tìm kiếm bắt đầu bằng dấu \"/\" như /recent, /id, "
+"/tag, v.v."
 
-msgid "Before comment form"
-msgstr "Trước form bình luận"
+#: includes/settings/general.php:64
+msgid "Cross-site Search Domains"
+msgstr "Tên miền tìm kiếm liên site"
 
-msgid "After comment form"
-msgstr "Sau form bình luận"
+#: includes/settings/general.php:68
+msgid "Enter one site per line in the format: Site Name|https://example.com/"
+msgstr "Nhập mỗi dòng một site theo định dạng: Tên site|https://example.com/"
 
-msgid "Automatically display related posts using the default shortcode layout at a predefined position in single post pages."
-msgstr "Tự động hiển thị bài viết liên quan bằng giao diện shortcode mặc định tại một vị trí cố định trên trang bài viết."
+#: includes/settings/general.php:69
+msgid ""
+"When filled, your search will fetch results from these additional domains "
+"and merge them into one list."
+msgstr ""
+"Khi có dữ liệu, hệ thống sẽ lấy kết quả từ các domain này và gộp chung vào "
+"một danh sách."
 
-msgid "Use \"No\" if you prefer inserting shortcode manually."
-msgstr "Chọn “Không” nếu bạn muốn tự chèn shortcode theo cách thủ công."
+#: includes/settings/general.php:70
+msgid ""
+"Each external site must also have the Init Live Search plugin installed and "
+"active."
+msgstr ""
+"Mỗi site bên ngoài cũng phải cài và kích hoạt plugin Init Live Search."
 
-msgid "Post Type(s)"
-msgstr "Loại bài viết"
+#: includes/settings/general.php:75
+msgid "Default Slash Command on Modal Open"
+msgstr "Slash command mặc định khi mở hộp tìm kiếm"
 
-msgid "Predefined Dictionaries"
-msgstr "Từ Điển Có Sẵn"
+#: includes/settings/general.php:82
+msgid "None (do not preload anything)"
+msgstr "Không tải trước gì cả"
 
-msgid "Select predefined synonym dictionaries"
-msgstr "Chọn từ điển đồng nghĩa có sẵn"
+#: includes/settings/general.php:83
+msgid "Default (/recent)"
+msgstr "Mặc định (/recent)"
 
-msgid "E-commerce & Shopping"
-msgstr "Thương Mại Điện Tử & Mua Sắm"
+#: includes/settings/general.php:84
+msgid "Related Posts (use /related)"
+msgstr "Bài viết liên quan (dùng /related)"
 
-msgid "Technology & IT"
-msgstr "Công Nghệ & CNTT"
+#: includes/settings/general.php:85
+msgid "Smart Detection (based on current page)"
+msgstr "Tự động nhận diện (theo trang hiện tại)"
 
-msgid "Business & Marketing"
-msgstr "Kinh Doanh & Tiếp Thị"
+#: includes/settings/general.php:89
+msgid "Popular Posts (use /popular)"
+msgstr "Bài viết phổ biến (dùng /popular)"
 
-msgid "Health & Wellness"
-msgstr "Sức Khỏe & Làm Đẹp"
+#: includes/settings/general.php:90
+msgid "Trending Posts (use /trending)"
+msgstr "Bài viết xu hướng (dùng /trending)"
 
-msgid "Travel & Tourism"
-msgstr "Du Lịch & Khách Sạn"
+#: includes/settings/general.php:94
+msgid "Continue Reading (use /read)"
+msgstr "Đọc tiếp (dùng /read)"
 
-msgid "Education & Learning"
-msgstr "Giáo Dục & Học Tập"
+#: includes/settings/general.php:108
+msgid ""
+"Choose a default slash command to run automatically when the search modal "
+"opens."
+msgstr "Chọn slash command mặc định để tự động chạy khi hộp tìm kiếm được mở."
 
-msgid "Food & Cooking"
-msgstr "Ẩm Thực & Nấu Ăn"
+#: includes/settings/general.php:109
+msgid ""
+"“Smart Detection” automatically detects based on current page: /related for "
+"posts, /product for shop pages, taxonomy-based commands, etc."
+msgstr ""
+"“Tự động nhận diện” sẽ chọn lệnh phù hợp theo trang hiện tại: /related cho "
+"bài viết, /product cho trang cửa hàng, hoặc các lệnh dựa trên chuyên mục, "
+"thẻ, v.v."
 
-msgid "Sports & Fitness"
-msgstr "Thể Thao & Thể Dục"
+#: includes/settings/general.php:110
+msgid ""
+"“Popular”, “Trending” and “Read” options are only available if their "
+"respective plugins are active."
+msgstr ""
+"Tuỳ chọn “Popular”, “Trending” và “Read” chỉ hiển thị nếu các plugin tương "
+"ứng đang hoạt động."
 
-msgid "Fashion & Style"
-msgstr "Thời Trang & Phong Cách"
-
-msgid "Entertainment & Media"
-msgstr "Giải Trí & Truyền Thông"
-
-msgid "Select topic-specific synonym dictionaries to enhance search results. Each dictionary contains hundreds of related terms and synonyms."
-msgstr "Chọn từ điển đồng nghĩa theo chủ đề để cải thiện kết quả tìm kiếm. Mỗi từ điển chứa hàng trăm thuật ngữ và từ đồng nghĩa liên quan."
-
-msgid "Note:"
-msgstr "Lưu ý:"
-
-msgid "When at least one dictionary is selected, this feature will be automatically activated."
-msgstr "Khi chọn ít nhất một từ điển, tính năng này sẽ được kích hoạt tự động."
-
-msgid "Width"
-msgstr "Độ rộng"
-
-msgid "Max Width"
-msgstr "Độ rộng tối đa"
-
-msgid "Align"
-msgstr "Canh lề"
-
-msgid "Element ID"
-msgstr "ID phần tử"
-
-msgid "ARIA Label"
-msgstr "Nhãn ARIA"
-
-msgid "Search Button (input mode)"
-msgstr "Nút tìm kiếm (chế độ input)"
-
-msgid "Input name (input mode)"
-msgstr "Tên input (chế độ input)"
-
-msgid "Auto Redirect 404 to Best Match?"
-msgstr "Tự động chuyển hướng 404 sang bài viết liên quan nhất?"
-
-msgid "When a 404 page is requested, automatically redirect to the most relevant post found by Init Live Search."
-msgstr "Khi người dùng vào trang 404, tự động chuyển hướng sang bài viết liên quan nhất được tìm thấy bởi Init Live Search."
-
-msgid "Leave unchecked to keep the default 404 behavior of your theme."
-msgstr "Bỏ chọn để giữ nguyên hành vi 404 mặc định của giao diện."
-
-msgid "Use WordPress Native Search?"
-msgstr "Dùng tìm kiếm mặc định của WordPress?"
-
-msgid "Bypass all custom search logic and use WordPress built-in WP_Query search instead."
-msgstr "Bỏ qua toàn bộ logic tìm kiếm tùy chỉnh và dùng WP_Query mặc định của WordPress."
-
-msgid "Recommended for small sites or when using third-party search plugins (e.g. SearchWP, ElasticPress) that hook into WP_Query."
-msgstr "Khuyến nghị cho site nhỏ hoặc khi dùng plugin tìm kiếm bên thứ ba (ví dụ: SearchWP, ElasticPress) có hook vào WP_Query."
-
-msgid "Use First Image as Thumbnail Fallback?"
-msgstr "Sử dụng ảnh đầu tiên làm thumbnail dự phòng?"
-
-msgid "Automatically extract the first image from post content when no featured image is available."
-msgstr "Tự động lấy ảnh đầu tiên trong nội dung bài viết khi không có ảnh đại diện."
-
-msgid "Useful for older posts or sites that do not consistently use featured images."
-msgstr "Hữu ích cho các bài viết cũ hoặc website không sử dụng ảnh đại diện một cách đồng nhất."
-
+#: includes/settings/general.php:115
 msgid "Only run /related on Single pages?"
 msgstr "Chỉ chạy /related trên trang Single?"
 
+#: includes/settings/general.php:119
 msgid "Only execute the /related command when viewing a single post page."
-msgstr "Chỉ tự động chạy lệnh /related khi đang xem trang bài viết đơn lẻ (single post)."
+msgstr ""
+"Chỉ tự động chạy lệnh /related khi đang xem trang bài viết đơn lẻ (single "
+"post)."
 
+#: includes/settings/general.php:124
 msgid "Exclude /related on pages with these slug keywords"
 msgstr "Không chạy /related ở các trang có slug chứa từ khóa sau"
 
-msgid "Enter one keyword per line. If the current page slug contains any of these keywords, /related will not auto-run."
-msgstr "Nhập mỗi từ khóa một dòng. Nếu slug của trang hiện tại chứa bất kỳ từ khóa này, /related sẽ không tự động chạy."
+#: includes/settings/general.php:128
+msgid ""
+"Enter one keyword per line. If the current page slug contains any of these "
+"keywords, /related will not auto-run."
+msgstr ""
+"Nhập mỗi từ khóa một dòng. Nếu slug của trang hiện tại chứa bất kỳ từ khóa "
+"này, /related sẽ không tự động chạy."
+
+#: includes/settings/general.php:133
+msgid "Use WordPress Native Search?"
+msgstr "Dùng tìm kiếm mặc định của WordPress?"
+
+#: includes/settings/general.php:137
+msgid ""
+"Bypass all custom search logic and use WordPress built-in WP_Query search "
+"instead."
+msgstr ""
+"Bỏ qua toàn bộ logic tìm kiếm tùy chỉnh và dùng WP_Query mặc định của "
+"WordPress."
+
+#: includes/settings/general.php:139
+msgid ""
+"Recommended for small sites or when using third-party search plugins (e.g. "
+"SearchWP, ElasticPress) that hook into WP_Query."
+msgstr ""
+"Khuyến nghị cho site nhỏ hoặc khi dùng plugin tìm kiếm bên thứ ba (ví dụ: "
+"SearchWP, ElasticPress) có hook vào WP_Query."
+
+#: includes/settings/general.php:143
+msgid "Search Mode"
+msgstr "Chế độ tìm kiếm"
+
+#: includes/settings/general.php:148
+msgid "Title Only"
+msgstr "Chỉ tiêu đề"
+
+#: includes/settings/general.php:152
+msgid "Init Smart Tag-Aware Search"
+msgstr "Init Smart Tag-Aware Search"
+
+#: includes/settings/general.php:154
+msgid ""
+"This mode matches against post title and tag names. Ideal for content with "
+"rich tagging."
+msgstr ""
+"Chế độ này sẽ dò theo tiêu đề và tên tag. Thích hợp cho nội dung có gắn tag "
+"kỹ lưỡng."
+
+#: includes/settings/general.php:157
+msgid "Title and Excerpt"
+msgstr "Tiêu đề và trích đoạn"
+
+#: includes/settings/general.php:161
+msgid "Title, Excerpt and Content"
+msgstr "Tiêu đề, trích đoạn và nội dung"
+
+#: includes/settings/general.php:167
+msgid "Enable + / - Search Operators?"
+msgstr "Bật toán tử tìm kiếm + / -?"
+
+#: includes/settings/general.php:171
+msgid "Allow using +word to force match, -word to exclude."
+msgstr "Cho phép dùng +từ để bắt buộc, -từ để loại trừ."
+
+#: includes/settings/general.php:173
+msgid ""
+"Enable this if you want to support advanced users using must-have (+) and "
+"must-not-have (-) keyword operators."
+msgstr ""
+"Bật tuỳ chọn này nếu bạn muốn hỗ trợ người dùng nâng cao với toán tử bắt "
+"buộc (+) và loại trừ (-)."
+
+#: includes/settings/general.php:177
+msgid "Show Excerpt in Search Results?"
+msgstr "Hiển thị đoạn trích trong kết quả tìm kiếm?"
+
+#: includes/settings/general.php:181
+msgid "Display the post excerpt below each result item in the modal."
+msgstr "Hiển thị đoạn trích của bài viết bên dưới mỗi kết quả trong modal."
+
+#: includes/settings/general.php:183
+msgid "If disabled, excerpt will be omitted from results to simplify the UI."
+msgstr ""
+"Nếu tắt, đoạn trích sẽ bị loại bỏ khỏi kết quả để làm giao diện gọn hơn."
+
+#: includes/settings/general.php:187
+msgid "Use First Image as Thumbnail Fallback?"
+msgstr "Sử dụng ảnh đầu tiên làm thumbnail dự phòng?"
+
+#: includes/settings/general.php:196
+msgid ""
+"Automatically extract the first image from post content when no featured "
+"image is available."
+msgstr ""
+"Tự động lấy ảnh đầu tiên trong nội dung bài viết khi không có ảnh đại diện."
+
+#: includes/settings/general.php:200
+msgid ""
+"Useful for older posts or sites that do not consistently use featured "
+"images."
+msgstr ""
+"Hữu ích cho các bài viết cũ hoặc website không sử dụng ảnh đại diện một cách"
+" đồng nhất."
+
+#: includes/settings/general.php:205
+msgid "Search in ACF Fields (Advanced)"
+msgstr "Tìm trong trường ACF (Nâng cao)"
+
+#: includes/settings/general.php:208
+msgid ""
+"Optional. Enter comma-separated ACF field keys to include in search (e.g. "
+"company_name, project_code). If left blank, ACF fields will not be searched."
+msgstr ""
+"Không bắt buộc. Nhập các khóa trường ACF, cách nhau bằng dấu phẩy, để đưa "
+"vào tìm kiếm (ví dụ: company_name, project_code). Nếu để trống, plugin sẽ "
+"không tìm trong các trường ACF."
+
+#: includes/settings/general.php:212
+msgid "Search in SEO Metadata?"
+msgstr "Tìm trong metadata SEO?"
+
+#: includes/settings/general.php:216
+msgid ""
+"Include SEO Title and Meta Description (Yoast, Rank Math, TSF, etc.) in "
+"search matching."
+msgstr ""
+"Tìm kiếm trong tiêu đề SEO và mô tả meta (Yoast, Rank Math, TSF, v.v...) để "
+"cải thiện độ chính xác."
+
+#: includes/settings/general.php:218
+msgid ""
+"Enable this to improve accuracy by searching within SEO-optimized content "
+"written by the author."
+msgstr ""
+"Bật tùy chọn này để cải thiện kết quả bằng cách tìm trong nội dung SEO mà "
+"tác giả đã tối ưu."
+
+#: includes/settings/general.php:222
+msgid "Enable Synonym Expansion?"
+msgstr "Bật chức năng mở rộng từ đồng nghĩa?"
+
+#: includes/settings/general.php:226
+msgid ""
+"Allow search terms to be expanded using built-in or custom-defined synonyms."
+msgstr ""
+"Cho phép mở rộng cụm từ tìm kiếm bằng cách sử dụng từ đồng nghĩa có sẵn hoặc"
+" do bạn tự định nghĩa."
+
+#: includes/settings/general.php:229
+msgid ""
+"Enable this only after defining useful synonym mappings. Otherwise, it will "
+"have no effect."
+msgstr ""
+"Chỉ nên bật khi bạn đã khai báo các từ đồng nghĩa phù hợp. Nếu không, tính "
+"năng này sẽ không tạo ra hiệu quả."
+
+#: includes/settings/general.php:234
+msgid "Enable fallback matching?"
+msgstr "Bật khớp dự phòng?"
+
+#: includes/settings/general.php:238
+msgid "Try trimming or using bigrams if not enough results are found."
+msgstr "Thử rút gọn hoặc sử dụng cụm từ nếu không đủ kết quả."
+
+#: includes/settings/general.php:243
+msgid "Enable Search Analytics?"
+msgstr "Bật phân tích tìm kiếm?"
+
+#: includes/settings/general.php:247
+msgid "Log search queries (term, result count) for analytics purposes."
+msgstr ""
+"Ghi lại các truy vấn tìm kiếm (từ khóa, số lượng kết quả) để phục vụ phân "
+"tích."
+
+#: includes/settings/general.php:249
+msgid ""
+"When enabled, search data will be stored temporarily using transients to "
+"help analyze usage trends. No IPs or personal data are stored."
+msgstr ""
+"Khi được bật, dữ liệu tìm kiếm sẽ được lưu tạm thời bằng transient để phân "
+"tích xu hướng sử dụng. Không lưu địa chỉ IP hoặc dữ liệu cá nhân."
+
+#: includes/settings/general.php:253
+msgid "Auto Redirect 404 to Best Match?"
+msgstr "Tự động chuyển hướng 404 sang bài viết liên quan nhất?"
+
+#: includes/settings/general.php:262
+msgid ""
+"When a 404 page is requested, automatically redirect to the most relevant "
+"post found by Init Live Search."
+msgstr ""
+"Khi người dùng vào trang 404, tự động chuyển hướng sang bài viết liên quan "
+"nhất được tìm thấy bởi Init Live Search."
+
+#: includes/settings/general.php:265
+msgid "Leave unchecked to keep the default 404 behavior of your theme."
+msgstr "Bỏ chọn để giữ nguyên hành vi 404 mặc định của giao diện."
+
+#: includes/settings/general.php:270
+msgid "Performance & UX"
+msgstr "Hiệu năng & Trải nghiệm người dùng"
+
+#: includes/settings/general.php:273
+msgid "Debounce Time (ms)"
+msgstr "Thời gian chờ tìm kiếm (ms)"
+
+#: includes/settings/general.php:279
+msgid "Max Results"
+msgstr "Số kết quả tối đa"
+
+#: includes/settings/general.php:282
+msgid "Maximum number of results to display in the modal."
+msgstr "Số lượng kết quả tối đa hiển thị trong hộp tìm kiếm."
+
+#: includes/settings/general.php:286
+msgid "Max Words to Trigger Highlight Search"
+msgstr "Số từ tối đa để bật tìm kiếm khi bôi đen"
+
+#: includes/settings/general.php:289
+msgid ""
+"Set maximum word count allowed to trigger tooltip search on text selection. "
+"Set 0 to disable."
+msgstr ""
+"Thiết lập số từ tối đa được phép để hiển thị tooltip tìm kiếm khi người dùng"
+" bôi đen văn bản. Nhập 0 để tắt chức năng này."
+
+#: includes/settings/general.php:293
+msgid "Enable Voice Input?"
+msgstr "Bật nhập liệu bằng giọng nói?"
+
+#: includes/settings/general.php:297
+msgid "Enable microphone input using the SpeechRecognition API (if supported)"
+msgstr ""
+"Bật nhập liệu bằng micro sử dụng SpeechRecognition API (nếu trình duyệt hỗ "
+"trợ)"
+
+#: includes/settings/general.php:302
+msgid "Cache results in localStorage?"
+msgstr "Lưu kết quả vào localStorage?"
+
+#: includes/settings/general.php:306
+msgid ""
+"Enable caching search results in localStorage to improve performance and "
+"reduce repeated requests."
+msgstr ""
+"Lưu kết quả tìm kiếm vào localStorage để tăng hiệu suất và giảm yêu cầu lặp "
+"lại."
+
+#: includes/settings/general.php:311
+msgid "Styling & Suggestions"
+msgstr "Giao diện & Gợi ý từ khóa"
+
+#: includes/settings/general.php:314
+msgid "Frontend CSS Style"
+msgstr "Kiểu giao diện CSS ở giao diện người dùng"
+
+#: includes/settings/general.php:319
+msgid "Default (modal-style)"
+msgstr "Mặc định (kiểu modal)"
+
+#: includes/settings/general.php:323
+msgid "Full Screen Overlay"
+msgstr "Toàn màn hình (overlay)"
+
+#: includes/settings/general.php:327
+msgid "Top Bar"
+msgstr "Thanh trên cùng (Top Bar)"
+
+#: includes/settings/general.php:331
+msgid "None (disable all built-in CSS, load manually)"
+msgstr "Tắt (vô hiệu hóa toàn bộ CSS mặc định, bạn tự thêm thủ công)"
+
+#: includes/settings/general.php:335
+msgid ""
+"Choose how the frontend modal should be styled. You can disable all styles "
+"and provide your own if needed."
+msgstr ""
+"Chọn cách hiển thị modal tìm kiếm ở frontend. Bạn có thể tắt toàn bộ style "
+"và tự viết lại nếu muốn."
+
+#: includes/settings/general.php:340
+msgid "Auto Insert Related Posts?"
+msgstr "Tự động chèn bài viết liên quan?"
+
+#: includes/settings/general.php:345
+msgid "No (manual shortcode only)"
+msgstr "Không (chỉ dùng shortcode thủ công)"
+
+#: includes/settings/general.php:349
+msgid "After post content"
+msgstr "Sau nội dung bài viết"
+
+#: includes/settings/general.php:353
+msgid "Before comment form"
+msgstr "Trước form bình luận"
+
+#: includes/settings/general.php:357
+msgid "After comment form"
+msgstr "Sau form bình luận"
+
+#: includes/settings/general.php:361
+msgid ""
+"Automatically display related posts using the default shortcode layout at a "
+"predefined position in single post pages."
+msgstr ""
+"Tự động hiển thị bài viết liên quan bằng giao diện shortcode mặc định tại "
+"một vị trí cố định trên trang bài viết."
+
+#: includes/settings/general.php:362
+msgid "Use \"No\" if you prefer inserting shortcode manually."
+msgstr "Chọn “Không” nếu bạn muốn tự chèn shortcode theo cách thủ công."
+
+#: includes/settings/general.php:367
+msgid "Default UTM Parameter"
+msgstr "Tham số UTM mặc định"
+
+#: includes/settings/general.php:370
+msgid ""
+"Optional. Set a default UTM parameter to include in search-related requests."
+" Example: utm_source=search&utm_medium=plugin"
+msgstr ""
+"Tùy chọn. Thiết lập UTM mặc định thêm vào URL tìm kiếm. Ví dụ: "
+"utm_source=search&utm_medium=plugin"
+
+#: includes/settings/general.php:374
+msgid "Suggested Keywords"
+msgstr "Từ khóa gợi ý"
+
+#: includes/settings/general.php:377
+msgid "Generate Automatically"
+msgstr "Tự động tạo"
+
+#: includes/settings/general.php:378
+msgid ""
+"Enter default search keywords for suggestions, separated by commas. You can "
+"also auto-generate."
+msgstr ""
+"Nhập từ khóa mặc định (phân cách bằng dấu phẩy), hoặc dùng nút tạo tự động."
+
+#: includes/settings/general.php:386
+msgid "Usage Instructions"
+msgstr "Hướng dẫn sử dụng"
+
+#: includes/settings/general.php:388
+msgid "You can change the theme using one of these two ways:"
+msgstr "Bạn có thể đổi giao diện bằng một trong hai cách sau:"
+
+#: includes/settings/general.php:391
+msgid "Add the dark class to the modal container:"
+msgstr "Thêm class dark vào hộp tìm kiếm:"
+
+#: includes/settings/general.php:395
+msgid "Or set the theme using a global config before the plugin initializes:"
+msgstr "Hoặc thiết lập qua cấu hình toàn cục trước khi plugin khởi động:"
+
+#: includes/settings/general.php:398
+msgid "Other values:"
+msgstr "Giá trị khác:"
+
+#: includes/settings/meilisearch.php:12
+msgid ""
+"Meilisearch is an optional, bring-your-own-server feature. You install and "
+"run Meilisearch yourself, then paste the connection details below. If the "
+"connection fails or is disabled, the plugin automatically falls back to the "
+"built-in local database search — your search never stops working just "
+"because Meilisearch has an issue."
+msgstr ""
+"Meilisearch là tính năng tùy chọn, bạn tự cài đặt và vận hành máy chủ "
+"Meilisearch của riêng mình, sau đó dán thông tin kết nối vào bên dưới. Nếu "
+"kết nối thất bại hoặc bị tắt, plugin sẽ tự động chuyển về tìm kiếm nội bộ "
+"trên database — việc tìm kiếm của bạn không bao giờ ngừng hoạt động chỉ vì "
+"Meilisearch gặp sự cố."
+
+#: includes/settings/meilisearch.php:17
+msgid "Connection"
+msgstr "Kết nối"
+
+#: includes/settings/meilisearch.php:20
+msgid "Enable Meilisearch"
+msgstr "Bật Meilisearch"
+
+#: includes/settings/meilisearch.php:24
+msgid ""
+"Use Meilisearch as the primary search source (falls back to the database "
+"automatically on error)."
+msgstr ""
+"Dùng Meilisearch làm nguồn tìm kiếm chính (tự động chuyển về database nếu có"
+" lỗi)."
+
+#: includes/settings/meilisearch.php:29
+msgid "Host URL"
+msgstr "Host URL"
+
+#: includes/settings/meilisearch.php:35
+msgid "The full URL to your Meilisearch server (HTTPS recommended)."
+msgstr "URL đầy đủ tới máy chủ Meilisearch của bạn (khuyến nghị dùng HTTPS)."
+
+#: includes/settings/meilisearch.php:39
+msgid "Index Name"
+msgstr "Tên Index"
+
+#: includes/settings/meilisearch.php:48
+msgid "Search API Key"
+msgstr "Search API Key"
+
+#: includes/settings/meilisearch.php:53
+msgid ""
+"Use a key scoped to the \"search\" action only — this key is sent with every"
+" search request, so never use your master key here."
+msgstr ""
+"Chỉ dùng key có quyền \"search\" — key này được gửi kèm mọi request tìm "
+"kiếm, tuyệt đối không dùng master key ở đây."
+
+#: includes/settings/meilisearch.php:57
+msgid "Admin / Indexing Key"
+msgstr "Admin / Indexing Key"
+
+#: includes/settings/meilisearch.php:61
+msgid ""
+"Currently defined via the INIT_LIVE_SEARCH_MEILI_ADMIN_KEY constant in wp-"
+"config.php (this takes priority over any value entered here)."
+msgstr ""
+"Đang được định nghĩa qua hằng số INIT_LIVE_SEARCH_MEILI_ADMIN_KEY trong wp-"
+"config.php (ưu tiên hơn bất kỳ giá trị nào nhập ở đây)."
+
+#: includes/settings/meilisearch.php:68
+msgid ""
+"A key with document add/delete permissions, used to automatically sync posts"
+" when you publish, update, or delete them. Recommended: define this via the "
+"INIT_LIVE_SEARCH_MEILI_ADMIN_KEY constant in wp-config.php instead of "
+"storing it here for better security."
+msgstr ""
+"Key có quyền thêm/xóa document, dùng để tự động đồng bộ bài viết khi bạn "
+"đăng, sửa hoặc xóa. Khuyến nghị: định nghĩa key này qua hằng số "
+"INIT_LIVE_SEARCH_MEILI_ADMIN_KEY trong wp-config.php thay vì lưu ở đây để "
+"bảo mật tốt hơn."
+
+#: includes/settings/meilisearch.php:74
+msgid "Request Timeout (ms)"
+msgstr "Thời gian chờ tối đa (ms)"
+
+#: includes/settings/meilisearch.php:79
+msgid ""
+"If Meilisearch does not respond within this time, the plugin automatically "
+"falls back to the database search."
+msgstr ""
+"Nếu Meilisearch không phản hồi trong khoảng thời gian này, plugin sẽ tự động"
+" chuyển về tìm kiếm database."
+
+#: includes/settings/meilisearch.php:86
+msgid "Test Connection"
+msgstr "Kiểm tra kết nối"
+
+#: includes/settings/meilisearch.php:98
+msgid "Reindexing"
+msgstr "Lập chỉ mục lại"
+
+#: includes/settings/meilisearch.php:100
+msgid ""
+"New, updated, or deleted posts are synced to Meilisearch automatically. To "
+"index all existing content for the first time (or to rebuild the index), run"
+" the following WP-CLI command on your server:"
+msgstr ""
+"Bài viết mới, được sửa, hoặc bị xóa sẽ tự động đồng bộ sang Meilisearch. Để "
+"lập chỉ mục toàn bộ nội dung hiện có lần đầu tiên (hoặc xây dựng lại index),"
+" chạy lệnh WP-CLI sau trên server của bạn:"
+
+#: includes/settings/meilisearch.php:109
+msgid "Testing..."
+msgstr "Đang kiểm tra..."
+
+#: includes/settings/meilisearch.php:128
+msgid "Connected successfully"
+msgstr "Kết nối thành công"
+
+#: includes/settings/meilisearch.php:129
+msgid "documents"
+msgstr "tài liệu"
+
+#: includes/settings/meilisearch.php:132
+msgid "Connection failed"
+msgstr "Kết nối thất bại"
+
+#: includes/settings/meilisearch.php:137
+msgid "Unknown error"
+msgstr "Lỗi không xác định"
+
+#: includes/settings/analytics.php:31
+msgid "Search Analytics"
+msgstr "Thống kê tìm kiếm"
+
+#: includes/settings/analytics.php:34
+msgid ""
+"Below is a temporary log of recent search queries. No IPs or personal data "
+"are stored."
+msgstr ""
+"Dưới đây là nhật ký tạm thời của các truy vấn tìm kiếm gần đây. Không lưu IP"
+" hay dữ liệu cá nhân."
+
+#: includes/settings/analytics.php:42
+msgid "Group similar queries"
+msgstr "Gộp các truy vấn giống nhau"
+
+#: includes/settings/analytics.php:45
+msgid "Clear All Logs"
+msgstr "Xóa toàn bộ nhật ký"
+
+#: includes/settings/analytics.php:46
+msgid "Export CSV"
+msgstr "Xuất CSV"
+
+#: includes/settings/analytics.php:70
+msgid "No data recorded yet."
+msgstr "Chưa có dữ liệu được ghi lại."
+
+#: includes/settings/analytics.php:76
+msgid "Time"
+msgstr "Thời gian"
+
+#: includes/settings/analytics.php:77
+msgid "Query"
+msgstr "Truy vấn"
+
+#: includes/settings/analytics.php:78
+msgid "Results"
+msgstr "Kết quả"
+
+#: includes/settings/synonyms.php:8
+msgid "Synonym Configuration"
+msgstr "Cấu hình từ đồng nghĩa"
+
+#: includes/settings/synonyms.php:9
+msgid ""
+"You can define custom synonyms here. This will allow search terms to be "
+"expanded using your specific site vocabulary."
+msgstr ""
+"Bạn có thể định nghĩa từ đồng nghĩa tùy chỉnh tại đây. Điều này giúp mở rộng"
+" truy vấn tìm kiếm bằng từ vựng riêng của trang web."
+
+#: includes/settings/synonyms.php:17
+msgid "Predefined Dictionaries"
+msgstr "Từ Điển Có Sẵn"
+
+#: includes/settings/synonyms.php:21
+msgid "Select predefined synonym dictionaries"
+msgstr "Chọn từ điển đồng nghĩa có sẵn"
+
+#: includes/settings/synonyms.php:30
+msgid "E-commerce & Shopping"
+msgstr "Thương Mại Điện Tử & Mua Sắm"
+
+#: includes/settings/synonyms.php:39
+msgid "Technology & IT"
+msgstr "Công Nghệ & CNTT"
+
+#: includes/settings/synonyms.php:48
+msgid "Business & Marketing"
+msgstr "Kinh Doanh & Tiếp Thị"
+
+#: includes/settings/synonyms.php:57
+msgid "Health & Wellness"
+msgstr "Sức Khỏe & Làm Đẹp"
+
+#: includes/settings/synonyms.php:66
+msgid "Travel & Tourism"
+msgstr "Du Lịch & Khách Sạn"
+
+#: includes/settings/synonyms.php:75
+msgid "Education & Learning"
+msgstr "Giáo Dục & Học Tập"
+
+#: includes/settings/synonyms.php:84
+msgid "Food & Cooking"
+msgstr "Ẩm Thực & Nấu Ăn"
+
+#: includes/settings/synonyms.php:93
+msgid "Sports & Fitness"
+msgstr "Thể Thao & Thể Dục"
+
+#: includes/settings/synonyms.php:102
+msgid "Fashion & Style"
+msgstr "Thời Trang & Phong Cách"
+
+#: includes/settings/synonyms.php:111
+msgid "Entertainment & Media"
+msgstr "Giải Trí & Truyền Thông"
+
+#: includes/settings/synonyms.php:115
+msgid ""
+"Select topic-specific synonym dictionaries to enhance search results. Each "
+"dictionary contains hundreds of related terms and synonyms."
+msgstr ""
+"Chọn từ điển đồng nghĩa theo chủ đề để cải thiện kết quả tìm kiếm. Mỗi từ "
+"điển chứa hàng trăm thuật ngữ và từ đồng nghĩa liên quan."
+
+#: includes/settings/synonyms.php:116
+msgid "Note:"
+msgstr "Lưu ý:"
+
+#: includes/settings/synonyms.php:117
+msgid ""
+"When at least one dictionary is selected, this feature will be automatically"
+" activated."
+msgstr ""
+"Khi chọn ít nhất một từ điển, tính năng này sẽ được kích hoạt tự động."
+
+#: includes/settings/synonyms.php:127
+msgid "Custom Synonym Map (JSON)"
+msgstr "Bản đồ từ đồng nghĩa tùy chỉnh (JSON)"
+
+#: includes/settings/synonyms.php:135
+msgid ""
+"Enter a JSON object where each key maps to an array of synonyms. Example:"
+msgstr ""
+"Nhập một đối tượng JSON, mỗi khóa là một từ khóa và giá trị là mảng từ đồng "
+"nghĩa. Ví dụ:"
+
+#: includes/settings/synonyms.php:141
+msgid "Add or Update Synonym"
+msgstr "Thêm hoặc cập nhật từ đồng nghĩa"
+
+#: includes/settings/synonyms.php:143
+msgid "Keyword (e.g. reaction)"
+msgstr "Từ khóa (ví dụ: reaction)"
+
+#: includes/settings/synonyms.php:144
+msgid "Synonym (e.g. tương tác)"
+msgstr "Từ đồng nghĩa (ví dụ: tương tác)"
+
+#: includes/settings/synonyms.php:145
+msgid "Add / Update"
+msgstr "Thêm / Cập nhật"
+
+#: includes/settings/synonyms.php:146
+msgid ""
+"Click to insert or update a keyword → synonym pair into the JSON above."
+msgstr ""
+"Nhấn để chèn hoặc cập nhật một cặp từ khóa → từ đồng nghĩa vào JSON ở trên."
+
+#: includes/settings-page.php:36 includes/settings-page.php:68
+msgid "Init Live Search Settings"
+msgstr "Cài đặt Init Live Search"
+
+#: includes/settings-page.php:37 includes/shortcodes.php:245
+msgid "Init Live Search"
+msgstr "Init Live Search"
+
+#: includes/settings-page.php:61
+msgid "General Settings"
+msgstr "Cài đặt chung"
+
+#: includes/general.php:9
+msgid "Configure how the search modal is triggered, how matching and fallback behave, and how results are displayed on the frontend."
+msgstr "Cấu hình cách kích hoạt modal tìm kiếm, cách khớp từ khóa và fallback hoạt động, cùng cách hiển thị kết quả ở giao diện người dùng."
+
+#: includes/settings-page.php:62
+msgid "Synonyms"
+msgstr "Từ đồng nghĩa"
+
+#: includes/settings-page.php:63
+msgid "Analytics"
+msgstr "Phân tích dữ liệu"
+
+#: includes/settings-page.php:64
+msgid "Meilisearch"
+msgstr "Meilisearch"
+
+#: includes/settings-page.php:86
+msgid "Invalid tab."
+msgstr "Tab không hợp lệ."
+
+#: includes/shortcodes.php:240
+msgid "Copy"
+msgstr "Sao chép"
+
+#: includes/shortcodes.php:241
+msgid "Copied!"
+msgstr "Đã sao chép!"
+
+#: includes/shortcodes.php:242
+msgid "Close"
+msgstr "Đóng"
+
+#: includes/shortcodes.php:243
+msgid "Shortcode Preview"
+msgstr "Xem trước Shortcode"
+
+#: includes/shortcodes.php:244
+msgid "Shortcode Builder"
+msgstr "Trình tạo Shortcode"
+
+#: includes/shortcodes.php:246
+msgid "Type"
+msgstr "Kiểu"
+
+#: includes/shortcodes.php:247
+msgid "Placeholder (input mode)"
+msgstr "Gợi ý nhập (chế độ ô nhập)"
+
+#: includes/shortcodes.php:248
+msgid "Search..."
+msgstr "Tìm kiếm..."
+
+#: includes/shortcodes.php:249
+msgid "Label (icon mode)"
+msgstr "Nhãn (chế độ icon)"
+
+#: includes/shortcodes.php:250
+msgid "Custom CSS class"
+msgstr "Lớp CSS tùy chỉnh"
+
+#: includes/shortcodes.php:251
+msgid "Stroke Width"
+msgstr "Độ dày nét vẽ"
+
+#: includes/shortcodes.php:252
+msgid "Border Radius (input mode)"
+msgstr "Bo góc (chế độ ô nhập)"
+
+#: includes/shortcodes.php:253
+msgid "Related Posts"
+msgstr "Bài Viết Liên Quan"
+
+#: includes/shortcodes.php:254
+msgid "Post ID (optional)"
+msgstr "ID bài viết (tùy chọn)"
+
+#: includes/shortcodes.php:255
+msgid "Number of Posts"
+msgstr "Số lượng bài viết"
+
+#: includes/shortcodes.php:256
+msgid "Post Type(s)"
+msgstr "Loại bài viết"
+
+#: includes/shortcodes.php:257
+msgid "Keyword (override)"
+msgstr "Từ khóa (ghi đè)"
+
+#: includes/shortcodes.php:258
+msgid "Template"
+msgstr "Mẫu"
+
+#: includes/shortcodes.php:259
+msgid "Load CSS"
+msgstr "Tải CSS mặc định"
+
+#: includes/shortcodes.php:260
+msgid "Output Schema"
+msgstr "Xuất schema dữ liệu"
+
+#: includes/shortcodes.php:261
+msgid "Width"
+msgstr "Độ rộng"
+
+#: includes/shortcodes.php:262
+msgid "Max Width"
+msgstr "Độ rộng tối đa"
+
+#: includes/shortcodes.php:263
+msgid "Align"
+msgstr "Canh lề"
+
+#: includes/shortcodes.php:264
+msgid "Element ID"
+msgstr "ID phần tử"
+
+#: includes/shortcodes.php:265
+msgid "ARIA Label"
+msgstr "Nhãn ARIA"
+
+#: includes/shortcodes.php:266
+msgid "Search Button (input mode)"
+msgstr "Nút tìm kiếm (chế độ input)"
+
+#: includes/shortcodes.php:267
+msgid "Input name (input mode)"
+msgstr "Tên input (chế độ input)"
+
+#~ msgid "Init Live Search – Smart, Slash Commands, REST API"
+#~ msgstr "Init Live Search – Tìm kiếm thông minh, Slash Commands, REST API"
+
+#~ msgid ""
+#~ "A fast, lightweight, and extensible live search modal for WordPress. Built "
+#~ "with Vanilla JS and powered by the REST API."
+#~ msgstr ""
+#~ "Giải pháp tìm kiếm trực tiếp nhanh, gọn và linh hoạt cho WordPress — phát "
+#~ "triển bằng JavaScript thuần, tích hợp sâu với REST API."
+
+#~ msgid "Loading..."
+#~ msgstr "Đang tải..."
+
+#~ msgid "Quick open modal triggers"
+#~ msgstr "Phím tắt mở nhanh hộp tìm kiếm"
+
+#~ msgid "Enable fast access to the search modal using simple actions."
+#~ msgstr "Bật các hành động đơn giản để mở nhanh giao diện tìm kiếm."
+
+#~ msgid "Triggers:"
+#~ msgstr "Phím tắt:"
+
+#~ msgid "Click anywhere on the page 3 times within 0.5 seconds"
+#~ msgstr ""
+#~ "Nhấp 3 lần liên tiếp vào bất kỳ vị trí nào trên trang (trong 0.5 giây)"
+
+#~ msgid "Or press Ctrl + / (or Cmd + / on Mac)"
+#~ msgstr "Hoặc nhấn Ctrl + / (Cmd + / trên Mac)"
+
+#~ msgid "Failed to generate keywords"
+#~ msgstr "Không tạo được từ khóa"
+
+#~ msgid "light"
+#~ msgstr "sáng"
+
+#~ msgid "auto (default)"
+#~ msgstr "tự động (mặc định)"
+
+#~ msgid "Filter by date (Y/m/d)"
+#~ msgstr "Lọc theo ngày đăng (Y/m/d)"
+
+#~ msgid "Find posts related to current page title"
+#~ msgstr "Tìm bài viết liên quan đến tiêu đề trang hiện tại"
+
+#~ msgid "User ID"
+#~ msgstr "ID người dùng"
+
+#~ msgid "Source"
+#~ msgstr "Nguồn"

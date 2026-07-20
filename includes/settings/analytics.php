@@ -30,7 +30,7 @@ usort($all_logs, fn($a, $b) => strcmp($b['time'], $a['time']));
 
 <h2><?php esc_html_e('Search Analytics', 'init-live-search'); ?></h2>
 
-<p>
+<p class="description">
     <?php esc_html_e('Below is a temporary log of recent search queries. No IPs or personal data are stored.', 'init-live-search'); ?>
 </p>
 

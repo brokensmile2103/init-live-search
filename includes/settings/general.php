@@ -6,6 +6,12 @@ $post_types = get_post_types(['public' => true], 'objects');
 unset($post_types['attachment']);
 ?>
 
+<h2><?php esc_html_e('General Settings', 'init-live-search'); ?></h2>
+
+<p class="description">
+    <?php esc_html_e('Configure how the search modal is triggered, how matching and fallback behave, and how results are displayed on the frontend.', 'init-live-search'); ?>
+</p>
+
 <form method="post" action="options.php">
     <?php settings_fields(INIT_PLUGIN_SUITE_LS_GROUP_GENERAL); ?>
 
