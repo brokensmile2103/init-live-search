@@ -82,15 +82,6 @@ Init Live Search works great out of the box with zero setup — the built-in dat
 - The sensitive indexing/admin key can be defined via the `INIT_LIVE_SEARCH_MEILI_ADMIN_KEY` constant in `wp-config.php` instead of the database.
 - Turn it off any time — core search behavior never depends on Meilisearch being present.
 
-Want to include additional post types (e.g. custom post types not shown in the settings checkboxes)? Use the `init_plugin_suite_live_search_post_types` filter — it's applied consistently across search, the auto-sync hook, and the reindex command:
-
-```php
-add_filter('init_plugin_suite_live_search_post_types', function ($post_types) {
-    $post_types[] = 'glossary';
-    return array_unique($post_types);
-});
-```
-
 ## Slash Command Examples
 
 | Command           | Description                                  |
