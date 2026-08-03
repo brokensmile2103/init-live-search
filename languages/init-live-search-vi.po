@@ -1199,10 +1199,6 @@ msgid "FULLTEXT search index could not be enabled: your MySQL/MariaDB server doe
 msgstr "Không thể bật FULLTEXT search index: máy chủ MySQL/MariaDB của bạn không hỗ trợ FULLTEXT index của InnoDB trên bảng này. Plugin sẽ tiếp tục dùng tìm kiếm database tiêu chuẩn."
 
 #: includes/meilisearch.php
-msgid "Meilisearch is disabled or not fully configured."
-msgstr "Meilisearch đang tắt hoặc chưa cấu hình đầy đủ."
-
-#: includes/meilisearch.php
 msgid "Missing Admin/Indexing Key, Host, or Index."
 msgstr "Thiếu Admin/Indexing Key, Host, hoặc Index."
 
@@ -1212,16 +1208,20 @@ msgid "HTTP error %d from Meilisearch."
 msgstr "Meilisearch trả về lỗi HTTP %d."
 
 #: includes/ajax.php
-msgid "Meilisearch is not enabled or not fully configured (Host / Index / Search Key)."
-msgstr "Meilisearch chưa được bật hoặc chưa cấu hình đầy đủ (Host / Index / Search Key)."
+msgid "Missing Host or Index. Fill these in under Settings > Init Live Search > Meilisearch — enabling \"Use Meilisearch as the primary search source\" is not required to build the index."
+msgstr "Thiếu Host hoặc Index. Điền vào ở Settings > Init Live Search > Meilisearch — không cần bật \"Use Meilisearch as the primary search source\" để lập chỉ mục."
 
 #: includes/ajax.php
 msgid "Missing Admin/Indexing Key."
 msgstr "Thiếu Admin/Indexing Key."
 
 #: includes/settings/meilisearch.php
-msgid "New, updated, or deleted posts are synced to Meilisearch automatically. To index all existing content for the first time (or to rebuild the index), either click the button below (runs in the background, no server access needed) or run it yourself via WP-CLI."
-msgstr "Bài viết mới, cập nhật, hoặc bị xoá sẽ tự động đồng bộ sang Meilisearch. Để lập chỉ mục toàn bộ nội dung hiện có lần đầu (hoặc build lại), bạn có thể bấm nút bên dưới (chạy nền, không cần quyền truy cập server) hoặc tự chạy qua WP-CLI."
+msgid "New, updated, or deleted posts are synced to Meilisearch automatically while \"Enable Meilisearch\" above is checked. To index all existing content for the first time (or to rebuild the index), either click the button below (runs in the background, no server access needed) or run it yourself via WP-CLI."
+msgstr "Bài viết mới, cập nhật, hoặc bị xoá sẽ tự động đồng bộ sang Meilisearch khi checkbox \"Enable Meilisearch\" ở trên đang bật. Để lập chỉ mục toàn bộ nội dung hiện có lần đầu (hoặc build lại), bạn có thể bấm nút bên dưới (chạy nền, không cần quyền truy cập server) hoặc tự chạy qua WP-CLI."
+
+#: includes/settings/meilisearch.php
+msgid "Reindexing only needs Host and Index below — you can build or rebuild the index while \"Enable Meilisearch\" is still unchecked, e.g. to prepare a new index while the current search source keeps running. Just remember auto-sync on save/delete only starts once the checkbox above is enabled, so re-run Reindex Now (or enable the checkbox) to pick up anything edited in the meantime."
+msgstr "Lập chỉ mục chỉ cần Host và Index bên dưới — bạn có thể build hoặc build lại index ngay cả khi \"Enable Meilisearch\" chưa được bật, ví dụ để chuẩn bị 1 index mới trong khi nguồn tìm kiếm hiện tại vẫn đang chạy. Chỉ cần nhớ tính năng tự đồng bộ khi lưu/xoá bài chỉ bắt đầu khi checkbox ở trên được bật, nên hãy chạy lại Reindex Now (hoặc bật checkbox) để cập nhật những gì đã sửa trong lúc đó."
 
 #: includes/settings/meilisearch.php
 msgid "Reindex Now"
@@ -1239,6 +1239,12 @@ msgstr "Tiến trình lập chỉ mục nền đã dừng do lỗi lặp lại: 
 #: includes/settings/meilisearch.php
 msgid "Or run it manually any time via WP-CLI:"
 msgstr "Hoặc chạy tay bất cứ lúc nào qua WP-CLI:"
+
+#. translators: %1$d: number of skipped posts, %2$s: comma-separated post IDs
+#: includes/settings/meilisearch.php
+#: includes/settings-page.php
+msgid "%1$d post(s) were too large to send to Meilisearch even individually and were skipped (post IDs: %2$s). Increase the payload size limit on Meilisearch (or any reverse proxy in front of it), or shorten these posts, then run Reindex Now again."
+msgstr "%1$d bài viết quá lớn để gửi lên Meilisearch dù đã gửi riêng lẻ nên đã bị bỏ qua (ID bài viết: %2$s). Hãy tăng giới hạn dung lượng payload trên Meilisearch (hoặc trên reverse proxy phía trước, nếu có), hoặc rút ngắn nội dung các bài viết này, rồi chạy lại Reindex Now."
 
 #: includes/settings-page.php
 msgid "Started — reindexing in the background…"
@@ -1263,6 +1269,10 @@ msgstr "Chạy lại bước kiểm tra khả năng hỗ trợ — hữu ích n�
 #: includes/settings/general.php
 msgid "Background indexing isn't running right now — WP-Cron may be disabled on this site (DISABLE_WP_CRON)."
 msgstr "Tiến trình lập chỉ mục nền hiện không chạy — có thể site đã tắt WP-Cron (DISABLE_WP_CRON)."
+
+#: includes/settings/general.php
+msgid "Settings saved. Checking indexing status…"
+msgstr "Đã lưu cài đặt. Đang kiểm tra trạng thái lập chỉ mục…"
 
 #: includes/settings/general.php
 msgid "Run Now"

@@ -40,6 +40,25 @@ function init_plugin_suite_live_search_meili_is_enabled( $settings = null ) {
     return ! empty( $settings['host'] ) && ! empty( $settings['index'] ) && ! empty( $settings['search_key'] );
 }
 
+// Kiểm tra CÓ ĐỦ Host/Index để lập chỉ mục hay không — KHÔNG đòi hỏi checkbox
+// "Dùng Meilisearch làm nguồn tìm kiếm chính" phải bật.
+//
+// Lý do tách riêng khỏi is_enabled(): việc BUILD/REBUILD index (Reindex Now,
+// WP-CLI, cron nền) là một hành động độc lập với việc CÓ ĐANG DÙNG Meilisearch
+// để trả kết quả search hay không. Một cách dùng rất phổ biến: chuẩn bị/thử
+// nghiệm index mới trong khi search live vẫn đang chạy nguồn cũ (DB/FULLTEXT),
+// chỉ bật checkbox "làm nguồn chính" sau khi đã kiểm tra index mới ổn. Nếu bắt
+// buộc phải bật checkbox mới cho reindex chạy thì không thể chuẩn bị trước
+// được — đây chính là nguyên nhân "Reindex Now" báo lỗi "not enabled" dù
+// Host/Index/Key đã điền đủ.
+function init_plugin_suite_live_search_meili_is_configured( $settings = null ) {
+    if ( $settings === null ) {
+        $settings = init_plugin_suite_live_search_meili_get_settings();
+    }
+
+    return ! empty( $settings['host'] ) && ! empty( $settings['index'] );
+}
+
 // Admin/indexing key ưu tiên lấy từ hằng số trong wp-config.php (an toàn hơn lưu DB).
 // define('INIT_LIVE_SEARCH_MEILI_ADMIN_KEY', '...'); trong wp-config.php.
 function init_plugin_suite_live_search_meili_get_admin_key( $settings ) {
@@ -311,6 +330,7 @@ add_action( INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK, 'init_plugin_suite_live_search
 // Khởi động (hoặc khởi động lại từ đầu) tiến trình reindex nền.
 function init_plugin_suite_live_search_meili_cron_start() {
     delete_option( 'init_plugin_suite_live_search_meili_cron_state' );
+    delete_option( 'init_plugin_suite_live_search_meili_cron_skipped' );
     update_option( 'init_plugin_suite_live_search_meili_cron_last_error', '', false );
 
     if ( ! wp_next_scheduled( INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK ) ) {
@@ -331,21 +351,132 @@ function init_plugin_suite_live_search_meili_cron_stop( $error_message ) {
     wp_clear_scheduled_hook( INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK );
 }
 
+// "Đang chạy hay không" — dùng cho UI (Settings > Meilisearch + AJAX polling).
+// Cùng lý do với init_plugin_suite_live_search_fulltext_cron_is_active():
+// wp-cron.php unschedule 1 event TRƯỚC KHI gọi callback, nên chỉ dựa vào
+// wp_next_scheduled() sẽ báo sai "đã dừng" trong lúc 1 batch đang thực sự
+// gửi document lên Meilisearch — ảnh hưởng trực tiếp tới JS polling (dừng
+// polling ngay khi thấy running=false dù chỉ là false-negative tạm thời).
+function init_plugin_suite_live_search_meili_cron_is_active() {
+    if ( get_transient( 'init_plugin_suite_live_search_meili_cron_lock' ) ) {
+        return true;
+    }
+
+    $next = wp_next_scheduled( INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK );
+    if ( ! $next ) {
+        return false;
+    }
+
+    $grace = (int) apply_filters( 'init_plugin_suite_live_search_meili_cron_stall_grace', 60 );
+
+    return $next > ( time() - $grace );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Gửi 1 lô document lên Meilisearch, TỰ ĐỘNG chia nhỏ và gửi lại nếu server
+// (hoặc 1 reverse proxy phía trước, vd Nginx client_max_body_size) trả về
+// HTTP 413 Payload Too Large.
+//
+// Lý do cần: kích thước JSON của 1 batch phụ thuộc vào NỘI DUNG bài viết
+// (title/excerpt/content), không phải chỉ số lượng bài. Cùng batch_size=200
+// nhưng site có bài viết dài/nhiều ảnh embed base64... có thể tạo payload
+// vài chục MB trong khi site khác chỉ vài trăm KB. Một giới hạn batch_size
+// cố định vì vậy không thể vừa an toàn cho mọi site — nên thay vì chỉ báo
+// lỗi 413 và dừng hẳn (3 lần liên tiếp chắc chắn fail giống hệt nhau vì
+// nguyên nhân không phải tạm thời), hàm này tự chia đôi batch và thử lại,
+// hội tụ rất nhanh (vd 200 → 100 → 50 → 25 → 13 → 7 → 4 → 2 → 1 chỉ mất tối
+// đa 8 lượt gọi) về kích thước server chấp nhận được.
+//
+// Nếu THẬM CHÍ 1 document đơn lẻ vẫn bị 413 (post quá dài để tự nó vượt giới
+// hạn payload), document đó được BỎ QUA (không chặn cả tiến trình reindex vì
+// 1 bài quá khổ) và ID được ghi nhận lại để báo cho admin biết.
+//
+// @return array{sent:int,skipped:int[],error:string} error rỗng nghĩa là
+//         không có lỗi "cứng" (network/auth/5xx...) — chỉ có thể có vài ID
+//         bị skip vì quá khổ, không tính là lỗi để dừng tiến trình.
+function init_plugin_suite_live_search_meili_send_documents( $endpoint, $admin_key, $documents, $timeout = 15, $depth = 0 ) {
+    if ( empty( $documents ) ) {
+        return [
+            'sent'    => 0,
+            'skipped' => [],
+            'error'   => '',
+        ];
+    }
+
+    $response = wp_remote_post(
+        $endpoint,
+        [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $admin_key,
+                'Content-Type'  => 'application/json',
+            ],
+            'body'    => wp_json_encode( $documents ),
+            'timeout' => $timeout,
+        ]
+    );
+
+    if ( is_wp_error( $response ) ) {
+        return [
+            'sent'    => 0,
+            'skipped' => [],
+            'error'   => $response->get_error_message(),
+        ];
+    }
+
+    $code = wp_remote_retrieve_response_code( $response );
+
+    if ( $code >= 200 && $code < 300 ) {
+        return [
+            'sent'    => count( $documents ),
+            'skipped' => [],
+            'error'   => '',
+        ];
+    }
+
+    if ( 413 === $code && count( $documents ) > 1 && $depth < 10 ) {
+        $mid    = (int) ceil( count( $documents ) / 2 );
+        $first  = array_slice( $documents, 0, $mid );
+        $second = array_slice( $documents, $mid );
+
+        $result_a = init_plugin_suite_live_search_meili_send_documents( $endpoint, $admin_key, $first, $timeout, $depth + 1 );
+        $result_b = init_plugin_suite_live_search_meili_send_documents( $endpoint, $admin_key, $second, $timeout, $depth + 1 );
+
+        return [
+            'sent'    => $result_a['sent'] + $result_b['sent'],
+            'skipped' => array_merge( $result_a['skipped'], $result_b['skipped'] ),
+            'error'   => '' !== $result_a['error'] ? $result_a['error'] : $result_b['error'],
+        ];
+    }
+
+    if ( 413 === $code ) {
+        // Không chia nhỏ được nữa (chỉ còn 1 document, hoặc đã chạm giới hạn
+        // đệ quy) mà vẫn 413 — bỏ qua đúng document này, không chặn cả batch.
+        return [
+            'sent'    => 0,
+            'skipped' => [ isset( $documents[0]['id'] ) ? (int) $documents[0]['id'] : 0 ],
+            'error'   => '',
+        ];
+    }
+
+    return [
+        'sent'    => 0,
+        'skipped' => [],
+        /* translators: %d: HTTP status code */
+        'error'   => sprintf( __( 'HTTP error %d from Meilisearch.', 'init-live-search' ), $code ),
+    ];
+}
+
 function init_plugin_suite_live_search_meili_cron_run_batch() {
     // Chặn 2 lượt chạy chồng nhau (không bắt buộc để đúng tuyệt đối — chỉ để
     // tránh gửi trùng document lãng phí trong trường hợp hiếm gặp).
     if ( get_transient( 'init_plugin_suite_live_search_meili_cron_lock' ) ) {
         return;
     }
-    set_transient( 'init_plugin_suite_live_search_meili_cron_lock', 1, 30 );
+    // TTL 60s: cùng lý do với FULLTEXT — batch lớn/host chậm có thể mất hơn
+    // 30 giây, transient hết hạn giữa chừng sẽ khiến cron_is_active() báo sai.
+    set_transient( 'init_plugin_suite_live_search_meili_cron_lock', 1, 60 );
 
     $settings = init_plugin_suite_live_search_meili_get_settings();
-
-    if ( ! init_plugin_suite_live_search_meili_is_enabled( $settings ) ) {
-        init_plugin_suite_live_search_meili_cron_stop( __( 'Meilisearch is disabled or not fully configured.', 'init-live-search' ) );
-        delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
-        return;
-    }
 
     $admin_key = init_plugin_suite_live_search_meili_get_admin_key( $settings );
     $host      = untrailingslashit( trim( $settings['host'] ?? '' ) );
@@ -394,61 +525,58 @@ function init_plugin_suite_live_search_meili_cron_run_batch() {
         $documents[] = init_plugin_suite_live_search_meili_build_document( $post );
     }
 
-    $response = wp_remote_post(
+    $result = init_plugin_suite_live_search_meili_send_documents(
         $host . '/indexes/' . rawurlencode( $index ) . '/documents',
-        [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $admin_key,
-                'Content-Type'  => 'application/json',
-            ],
-            'body'    => wp_json_encode( $documents ),
-            'timeout' => 15,
-        ]
+        $admin_key,
+        $documents,
+        15
     );
 
-    $ok = false;
-    if ( ! is_wp_error( $response ) ) {
-        $code = wp_remote_retrieve_response_code( $response );
-        $ok   = ( $code >= 200 && $code < 300 );
-    }
-
-    if ( ! $ok ) {
+    if ( '' !== $result['error'] ) {
         $state['errors'] = ( $state['errors'] ?? 0 ) + 1;
 
         // 3 lỗi liên tiếp -> dừng hẳn, không spam vô hạn vào server của người dùng.
+        // (413 không rơi vào nhánh này nữa — send_documents() đã tự chia nhỏ
+        // và xử lý 413 ở mức document, xem hàm đó để biết chi tiết.)
         if ( $state['errors'] >= 3 ) {
-            $error_message = is_wp_error( $response )
-                ? $response->get_error_message()
-                /* translators: %d: HTTP status code */
-                : sprintf( __( 'HTTP error %d from Meilisearch.', 'init-live-search' ), wp_remote_retrieve_response_code( $response ) );
-
-            init_plugin_suite_live_search_meili_cron_stop( $error_message );
+            init_plugin_suite_live_search_meili_cron_stop( $result['error'] );
             delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
             return;
         }
 
         // Thử lại đúng batch này sau 5 giây (không tăng $state['paged']).
         update_option( 'init_plugin_suite_live_search_meili_cron_state', $state, false );
-        delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
 
         if ( ! wp_next_scheduled( INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK ) ) {
             wp_schedule_single_event( time() + 5, INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK );
         }
+
+        delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
         return;
     }
 
     $state['errors'] = 0;
-    $state['total'] += count( $documents );
+    $state['total'] += $result['sent'];
+
+    if ( ! empty( $result['skipped'] ) ) {
+        $existing_skipped = get_option( 'init_plugin_suite_live_search_meili_cron_skipped', [] );
+        $existing_skipped = is_array( $existing_skipped ) ? $existing_skipped : [];
+        $state['skipped'] = array_values( array_unique( array_merge( $existing_skipped, $result['skipped'] ) ) );
+        update_option( 'init_plugin_suite_live_search_meili_cron_skipped', $state['skipped'], false );
+    }
 
     if ( count( $query->posts ) === $batch_size ) {
-        // Còn bài viết chưa xử lý — hẹn đợt kế tiếp sau 5 giây.
+        // Còn bài viết chưa xử lý — hẹn đợt kế tiếp sau 5 giây. Schedule
+        // TRƯỚC khi xoá lock để tránh khoảnh khắc cả 2 tín hiệu cùng "trống"
+        // (xem giải thích ở init_plugin_suite_live_search_fulltext_cron_run_batch()).
         $state['paged']++;
         update_option( 'init_plugin_suite_live_search_meili_cron_state', $state, false );
-        delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
 
         if ( ! wp_next_scheduled( INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK ) ) {
             wp_schedule_single_event( time() + 5, INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK );
         }
+
+        delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
     } else {
         init_plugin_suite_live_search_meili_cron_finish( $state['total'] );
         delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );

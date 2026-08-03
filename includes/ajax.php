@@ -608,8 +608,8 @@ function init_plugin_suite_live_search_meili_start_reindex_ajax() {
     }
 
     $settings = init_plugin_suite_live_search_meili_get_settings();
-    if ( ! init_plugin_suite_live_search_meili_is_enabled( $settings ) ) {
-        wp_send_json_error( __( 'Meilisearch is not enabled or not fully configured (Host / Index / Search Key).', 'init-live-search' ) );
+    if ( ! init_plugin_suite_live_search_meili_is_configured( $settings ) ) {
+        wp_send_json_error( __( 'Missing Host or Index. Fill these in under Settings > Init Live Search > Meilisearch — enabling "Use Meilisearch as the primary search source" is not required to build the index.', 'init-live-search' ) );
     }
 
     $admin_key = init_plugin_suite_live_search_meili_get_admin_key( $settings );
@@ -644,12 +644,15 @@ function init_plugin_suite_live_search_meili_reindex_status_ajax() {
         wp_send_json_error( 'Invalid nonce', 403 );
     }
 
-    $state = get_option( 'init_plugin_suite_live_search_meili_cron_state', false );
+    $state   = get_option( 'init_plugin_suite_live_search_meili_cron_state', false );
+    $skipped = get_option( 'init_plugin_suite_live_search_meili_cron_skipped', [] );
 
     wp_send_json_success( [
-        'running'    => (bool) wp_next_scheduled( INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK ),
+        'running'    => function_exists( 'init_plugin_suite_live_search_meili_cron_is_active' )
+            && init_plugin_suite_live_search_meili_cron_is_active(),
         'total'      => is_array( $state ) ? (int) ( $state['total'] ?? 0 ) : 0,
         'last_error' => get_option( 'init_plugin_suite_live_search_meili_cron_last_error', '' ),
         'indexed_at' => get_option( 'init_plugin_suite_live_search_meili_indexed', '' ),
+        'skipped'    => is_array( $skipped ) ? array_values( $skipped ) : [],
     ] );
 }

@@ -183,6 +183,19 @@ unset($post_types['attachment']);
                 $fulltext_unsupported = $fulltext_checked && !$fulltext_supported;
                 $fulltext_indexed_at = get_option('init_plugin_suite_live_search_fulltext_indexed', '');
                 $fulltext_indexed = (bool) $fulltext_indexed_at;
+
+                // WordPress luôn thêm ?settings-updated=true vào URL redirect ngay
+                // sau khi Settings API lưu xong (options.php). Đây là request ĐẦU
+                // TIÊN load lại trang sau khi bấm Save — quá sớm để khẳng định
+                // WP-Cron đã kịp nhận và chạy batch đầu tiên hay chưa (còn tuỳ
+                // host/độ trễ mạng), nên cố đoán "đang chạy" hay "không chạy" lúc
+                // này dễ ra kết quả sai. Thay vào đó hiển thị 1 dòng trạng thái
+                // trung lập; lần load kế tiếp (tự nhiên, không ép reload) sẽ dùng
+                // is_active() để hiển thị đúng trạng thái thật.
+                // phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only display state (WP core's own settings-updated redirect flag), not a state-changing action.
+                $fulltext_just_saved = isset( $_GET['settings-updated'] )
+                    && 'true' === sanitize_text_field( wp_unslash( $_GET['settings-updated'] ) );
+                // phpcs:enable WordPress.Security.NonceVerification.Recommended
                 ?>
                 <label>
                     <input type="checkbox" name="init_plugin_suite_live_search_settings[use_fulltext_index]" value="1"
@@ -203,31 +216,38 @@ unset($post_types['attachment']);
                         </a>
                         <span class="description"><?php esc_html_e('Runs the capability check again — useful if this was a temporary server issue.', 'init-live-search'); ?></span>
                     </p>
-                <?php elseif (!empty($options['use_fulltext_index']) && !$fulltext_indexed) :
-                    $fulltext_cron_running = (bool) wp_next_scheduled('init_plugin_suite_live_search_fulltext_cron_batch');
-                    ?>
-                    <?php if ($fulltext_cron_running) : ?>
-                        <p class="description">
-                            <?php esc_html_e('Building the index automatically in the background (about 300 posts every 5 seconds) — no action needed. Progress relies on WP-Cron, so it advances fastest on sites with regular visitor traffic.', 'init-live-search'); ?>
+                <?php elseif (!empty($options['use_fulltext_index']) && !$fulltext_indexed) : ?>
+                    <?php if ($fulltext_just_saved) : ?>
+                        <p class="description" id="init-ls-fulltext-just-saved">
+                            <?php esc_html_e('Settings saved. Checking indexing status…', 'init-live-search'); ?>
                         </p>
-                        <p class="description">
-                            <?php esc_html_e('You can run this manually any time via WP-CLI:', 'init-live-search'); ?><br>
-                            <code>wp init-live-search fulltext-reindex</code>
-                        </p>
-                    <?php else : ?>
-                        <p class="description" style="color:#d63638;">
-                            <?php esc_html_e("Background indexing isn't running right now — WP-Cron may be disabled on this site (DISABLE_WP_CRON).", 'init-live-search'); ?>
-                        </p>
-                        <p>
-                            <a class="button button-primary" href="<?php echo esc_url(wp_nonce_url(add_query_arg('init_ls_force_fulltext', '1'), 'init_ls_force_fulltext')); ?>">
-                                <?php esc_html_e('Run Now', 'init-live-search'); ?>
-                            </a>
-                            <span class="description"><?php esc_html_e('Processes a batch immediately (up to ~20 seconds), bypassing WP-Cron entirely. Click again if it isn\'t finished after one click.', 'init-live-search'); ?></span>
-                        </p>
-                        <p class="description">
-                            <?php esc_html_e('Or run it manually via WP-CLI:', 'init-live-search'); ?><br>
-                            <code>wp init-live-search fulltext-reindex</code>
-                        </p>
+                    <?php else :
+                        $fulltext_cron_running = function_exists('init_plugin_suite_live_search_fulltext_cron_is_active')
+                            && init_plugin_suite_live_search_fulltext_cron_is_active();
+                        ?>
+                        <?php if ($fulltext_cron_running) : ?>
+                            <p class="description">
+                                <?php esc_html_e('Building the index automatically in the background (about 300 posts every 5 seconds) — no action needed. Progress relies on WP-Cron, so it advances fastest on sites with regular visitor traffic.', 'init-live-search'); ?>
+                            </p>
+                            <p class="description">
+                                <?php esc_html_e('You can run this manually any time via WP-CLI:', 'init-live-search'); ?><br>
+                                <code>wp init-live-search fulltext-reindex</code>
+                            </p>
+                        <?php else : ?>
+                            <p class="description" style="color:#d63638;">
+                                <?php esc_html_e("Background indexing isn't running right now — WP-Cron may be disabled on this site (DISABLE_WP_CRON).", 'init-live-search'); ?>
+                            </p>
+                            <p>
+                                <a class="button button-primary" href="<?php echo esc_url(wp_nonce_url(add_query_arg('init_ls_force_fulltext', '1'), 'init_ls_force_fulltext')); ?>">
+                                    <?php esc_html_e('Run Now', 'init-live-search'); ?>
+                                </a>
+                                <span class="description"><?php esc_html_e('Processes a batch immediately (up to ~20 seconds), bypassing WP-Cron entirely. Click again if it isn\'t finished after one click.', 'init-live-search'); ?></span>
+                            </p>
+                            <p class="description">
+                                <?php esc_html_e('Or run it manually via WP-CLI:', 'init-live-search'); ?><br>
+                                <code>wp init-live-search fulltext-reindex</code>
+                            </p>
+                        <?php endif; ?>
                     <?php endif; ?>
                 <?php elseif ($fulltext_indexed) : ?>
                     <p class="description">

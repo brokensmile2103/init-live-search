@@ -99,7 +99,10 @@ $admin_key_from_constant = defined( 'INIT_LIVE_SEARCH_MEILI_ADMIN_KEY' ) && INIT
 
 <h2><?php esc_html_e( 'Reindexing', 'init-live-search' ); ?></h2>
 <p class="description" style="max-width: 700px;">
-    <?php esc_html_e( 'New, updated, or deleted posts are synced to Meilisearch automatically. To index all existing content for the first time (or to rebuild the index), either click the button below (runs in the background, no server access needed) or run it yourself via WP-CLI.', 'init-live-search' ); ?>
+    <?php esc_html_e( 'New, updated, or deleted posts are synced to Meilisearch automatically while "Enable Meilisearch" above is checked. To index all existing content for the first time (or to rebuild the index), either click the button below (runs in the background, no server access needed) or run it yourself via WP-CLI.', 'init-live-search' ); ?>
+</p>
+<p class="description" style="max-width: 700px;">
+    <?php esc_html_e( 'Reindexing only needs Host and Index below — you can build or rebuild the index while "Enable Meilisearch" is still unchecked, e.g. to prepare a new index while the current search source keeps running. Just remember auto-sync on save/delete only starts once the checkbox above is enabled, so re-run Reindex Now (or enable the checkbox) to pick up anything edited in the meantime.', 'init-live-search' ); ?>
 </p>
 
 <p>
@@ -109,9 +112,12 @@ $admin_key_from_constant = defined( 'INIT_LIVE_SEARCH_MEILI_ADMIN_KEY' ) && INIT
 </p>
 
 <?php
-$meili_running     = (bool) wp_next_scheduled( 'init_plugin_suite_live_search_meili_cron_batch' );
-$meili_last_error  = get_option( 'init_plugin_suite_live_search_meili_cron_last_error', '' );
-$meili_indexed_at  = get_option( 'init_plugin_suite_live_search_meili_indexed', '' );
+$meili_running    = function_exists( 'init_plugin_suite_live_search_meili_cron_is_active' )
+    && init_plugin_suite_live_search_meili_cron_is_active();
+$meili_last_error = get_option( 'init_plugin_suite_live_search_meili_cron_last_error', '' );
+$meili_indexed_at = get_option( 'init_plugin_suite_live_search_meili_indexed', '' );
+$meili_skipped    = get_option( 'init_plugin_suite_live_search_meili_cron_skipped', [] );
+$meili_skipped    = is_array( $meili_skipped ) ? $meili_skipped : [];
 ?>
 
 <div id="init-ls-meili-reindex-status" style="max-width: 700px;" data-running="<?php echo $meili_running ? '1' : '0'; ?>">
@@ -136,6 +142,18 @@ $meili_indexed_at  = get_option( 'init_plugin_suite_live_search_meili_indexed', 
                 /* translators: %s: date/time the index was last built */
                 esc_html__( 'Index last built: %s.', 'init-live-search' ),
                 esc_html( $meili_indexed_at )
+            );
+            ?>
+        </p>
+    <?php endif; ?>
+    <?php if ( ! $meili_running && ! empty( $meili_skipped ) ) : ?>
+        <p class="description" style="color:#dba617;">
+            <?php
+            printf(
+                /* translators: %1$d: number of skipped posts, %2$s: comma-separated post IDs */
+                esc_html__( '%1$d post(s) were too large to send to Meilisearch even individually and were skipped (post IDs: %2$s). Increase the payload size limit on Meilisearch (or any reverse proxy in front of it), or shorten these posts, then run Reindex Now again.', 'init-live-search' ),
+                count( $meili_skipped ),
+                esc_html( implode( ', ', array_map( 'absint', $meili_skipped ) ) )
             );
             ?>
         </p>

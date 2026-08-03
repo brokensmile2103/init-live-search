@@ -282,6 +282,8 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
             'meiliReindexing'       => __('Reindexing in the background (about 200 posts every 5 seconds)…', 'init-live-search'),
             'meiliReindexStopped'   => __('Background reindex stopped after repeated errors:', 'init-live-search'),
             'meiliIndexLastBuilt'   => __('Index last built:', 'init-live-search'),
+            /* translators: %1$d: number of skipped posts, %2$s: comma-separated post IDs */
+            'meiliSkippedWarning'   => __('%1$d post(s) were too large to send to Meilisearch even individually and were skipped (post IDs: %2$s). Increase the payload size limit on Meilisearch (or any reverse proxy in front of it), or shorten these posts, then run Reindex Now again.', 'init-live-search'),
         ],
     ]);
 });

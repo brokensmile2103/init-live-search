@@ -4,15 +4,15 @@ Tags: AI search, live search, meilisearch, related posts, woocommerce
 Requires at least: 5.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.9.5
+Stable tag: 1.9.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Fast REST API live search with optional Meilisearch, AI-powered Related Posts, slash commands, ACF and WooCommerce support.
+Fast REST API live search with optional FULLTEXT index, Meilisearch, AI-powered Related Posts, slash commands, ACF and WooCommerce support.
 
 == Description ==
 
-Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. Init Live Search is a modern, lightweight, and fully accessible live search solution for WordPress — now with optional **Meilisearch** integration, tag-aware matching, SEO metadata support, ACF integration, WooCommerce product filters, and customizable UI presets.
+Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. Init Live Search is a modern, lightweight, and fully accessible live search solution for WordPress — now with an optional **MySQL FULLTEXT search index**, optional **Meilisearch** integration, tag-aware matching, SEO metadata support, ACF integration, WooCommerce product filters, and customizable UI presets.
 
 It replaces the default `<input name="s">` with a clean, intuitive search modal powered entirely by the WordPress REST API. Everything loads in real-time — with zero disruption to browsing flow.
 
@@ -28,12 +28,14 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 
 == What's New in Version 1.8.x & 1.9.x ==
 
+- **Optional FULLTEXT Search Index (1.9.5)**: opt-in MySQL FULLTEXT-indexed table for Title/Excerpt/Content, replacing slow `LIKE '%term%'` scans on large sites. Off by default, auto-builds in the background via WP-Cron once enabled (no SSH/WP-CLI needed), with `wp init-live-search fulltext-reindex` available for a manual/faster build. See "FULLTEXT Search Index" below for details.
+
 - **Optional Meilisearch Integration**: connect your own Meilisearch server (self-hosted or cloud) as the primary search engine
   - Typo-tolerant, relevance-ranked, sub-50ms search results straight from Meilisearch
   - Automatic, transparent fallback to the local database search whenever Meilisearch is disabled, unreachable, or misconfigured — search availability is never compromised
-  - New **Meilisearch** settings tab: Host URL, Index Name, Search Key, Admin/Indexing Key, request timeout, and a one-click "Test Connection" button
+  - New **Meilisearch** settings tab: Host URL, Index Name, Search Key, Admin/Indexing Key, request timeout, one-click "Test Connection", and (1.9.5) a one-click **"Reindex Now"** button for sites without WP-CLI/SSH access
   - Posts are synced automatically on publish/update/trash/delete (non-blocking — won't slow down the editor)
-  - New WP-CLI command `wp init-live-search meili-reindex` for bulk-indexing or rebuilding the entire index
+  - WP-CLI command `wp init-live-search meili-reindex` for bulk-indexing or rebuilding the entire index
   - Sensitive indexing key can be defined via the `INIT_LIVE_SEARCH_MEILI_ADMIN_KEY` constant in `wp-config.php` instead of the database, for extra security
 
 - **AI-Powered Related Posts**: brand new `[init_live_search_related_ai]` shortcode  
@@ -77,6 +79,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-live-search](https:/
 Packed with everything a modern live search needs — and more:
 
 - Live search via REST API (no admin-ajax, no jQuery)
+- **NEW:** Optional MySQL FULLTEXT search index — faster Title/Excerpt/Content matching than `LIKE` queries on the built-in database search, auto-builds in the background
 - **NEW:** Optional Meilisearch integration — typo-tolerant, relevance-ranked external search with automatic fallback to local DB search
 - Smart tag-aware search mode (title + tag match)
 - SEO metadata support: Yoast, Rank Math, AIOSEO, SEOPress, TSF
@@ -112,7 +115,8 @@ Options: `dark`, `light`, `auto`
 == Admin Settings ==
 
 - Choose post types to include in search  
-- Connect an optional Meilisearch server (Host, Index, Search/Admin keys, timeout, one-click connection test)  
+- Enable an optional MySQL FULLTEXT search index for faster Title/Excerpt/Content matching, with automatic background indexing  
+- Connect an optional Meilisearch server (Host, Index, Search/Admin keys, timeout, one-click connection test, one-click Reindex Now)  
 - Configure modal triggers (input focus, triple click, Ctrl+/)  
 - Enable slash commands (e.g. /recent, /tag, /id)  
 - Enable support for `+` and `-` keyword operators (must-have, must-not-have)  
@@ -135,6 +139,12 @@ Options: `dark`, `light`, `auto`
 - Add default UTM parameter to result links  
 - Define or auto-generate keyword suggestions   
 
+== FULLTEXT Search Index (Optional) ==
+
+The built-in database search normally uses `LIKE '%term%'` queries, which can't use a regular index and get slow on sites with a large number of posts. Tick **FULLTEXT Search Index** (Settings → Init Live Search → General) to sync Title/Excerpt/Content into a dedicated indexed table (your `wp_posts` table is untouched) and match with MySQL's `MATCH() AGAINST()` instead.
+
+Once enabled, the index builds itself automatically in the background via WP-Cron — no SSH/WP-CLI needed — or you can speed things up with `wp init-live-search fulltext-reindex`. If your server doesn't support FULLTEXT, or the index isn't built yet, the plugin simply keeps using the standard LIKE-based search — nothing ever breaks. Tag search, SEO metadata, ACF fields, synonyms, and the `+`/`-` operators all keep working the same either way.
+
 == Meilisearch Integration (Optional) ==
 
 Init Live Search works great out of the box with zero setup — the built-in database search handles everything by default. But if you want faster, typo-tolerant, relevance-ranked search at scale, you can connect your own [Meilisearch](https://www.meilisearch.com/) instance in a few minutes.
@@ -143,12 +153,13 @@ Init Live Search works great out of the box with zero setup — the built-in dat
 
 1. Install and run Meilisearch yourself — self-hosted (a small VPS is plenty for most blogs) or via Meilisearch Cloud. This plugin does not host or manage a server for you.
 2. Go to **Settings → Init Live Search → Meilisearch**, enter your Host URL, Index Name, and a **search-only** API key, then enable the integration.
-3. Run `wp init-live-search meili-reindex` once via WP-CLI to index your existing published content.
+3. Index your existing published content either by running `wp init-live-search meili-reindex` via WP-CLI, or by clicking the **"Reindex Now"** button right on the Meilisearch settings tab (handy if you don't have WP-CLI/SSH access) — it runs in the background (~200 posts every 5 seconds) with a live progress status.
 4. That's it — search requests are now answered by Meilisearch. New, updated, and deleted posts stay in sync automatically.
 
 **Built for safety, not lock-in:**
 
 - If Meilisearch is disabled, unconfigured, or fails to respond (timeout, wrong key, server down), the plugin **automatically and silently falls back** to the local database search — visitors never see a broken search box.
+- Reindexing (via the button or WP-CLI) is always manual-only, and auto-stops with a clear error after 3 consecutive failed batches instead of retrying forever.
 - Your sensitive indexing key can live in `wp-config.php` (`INIT_LIVE_SEARCH_MEILI_ADMIN_KEY`) instead of the database.
 - Turn it off any time — nothing about your site's core search behavior depends on Meilisearch being present.
 
@@ -278,6 +289,9 @@ Fetch WooCommerce products with flexible query parameters.
 = Does this plugin use jQuery? =  
 No. It's built entirely with modern Vanilla JavaScript — no jQuery, no external dependencies.
 
+= What is the FULLTEXT search index and do I need SSH/WP-CLI for it? =  
+It's an optional speed-up for the built-in database search — matches Title/Excerpt/Content via a MySQL FULLTEXT index instead of slow `LIKE '%term%'` scans, worth it once your content library grows. No SSH/WP-CLI needed: once enabled in settings, it builds itself in the background via WP-Cron (WP-CLI's `fulltext-reindex` is just an optional faster alternative).
+
 = What is Meilisearch and do I need it? =  
 Meilisearch is a fast, open-source search engine known for typo-tolerant, relevance-ranked results. You don't need it — Init Live Search's built-in database search works fully on its own. Meilisearch is an optional upgrade for sites that want that extra layer of speed and fuzzy-matching quality at scale.
 
@@ -288,7 +302,7 @@ No. Meilisearch is bring-your-own-server: you install and run it yourself (self-
 Nothing breaks. The plugin automatically detects the failure (or timeout) and falls back to the local database search for that request — visitors won't notice anything except perhaps a slightly less fuzzy match.
 
 = How do I index my existing posts into Meilisearch? =  
-Run `wp init-live-search meili-reindex` via WP-CLI after connecting your Meilisearch instance. New, updated, and deleted posts sync automatically after that.
+Either run `wp init-live-search meili-reindex` via WP-CLI, or click the **"Reindex Now"** button on the Meilisearch settings tab if you don't have WP-CLI/SSH access — it indexes in the background with a live progress status. New, updated, and deleted posts sync automatically after that.
 
 = Can I insert the search box anywhere on the page? =  
 Yes. Use the `[init_live_search]` shortcode to insert a search input or icon anywhere. You can also add custom classes or enable dark mode.
@@ -401,7 +415,13 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 
 == Changelog ==
 
-= 1.9.5 =
+= 1.9.6 – August 03, 2026 =
+- **Fixed: FULLTEXT background indexing showed a false "not running" error.** Right after enabling the checkbox, the status could briefly (and misleadingly) report that WP-Cron wasn't running — even though it was, mid-batch — because WP-Cron unschedules an event *before* running it, so a plain `wp_next_scheduled()` check could catch it in that gap. Status detection now also checks whether a batch is actively processing, and the page load immediately after clicking Save shows a neutral "Checking indexing status…" message instead of guessing right or wrong — it's simply too early to know at that point.
+- **Fixed: Meilisearch reindex could fail outright with `HTTP error 413 from Meilisearch`.** A batch's JSON payload size depends on post content, not just post count, so a fixed batch size that works on one site can exceed Meilisearch's (or a reverse proxy's) payload size limit on another. The background reindex, the "Reindex Now" button, and `wp init-live-search meili-reindex` now automatically split an oversized batch and retry with smaller payloads; if a single post is still too large on its own, it's skipped (with a warning listing the post ID) instead of blocking the entire reindex.
+- **Fixed**: the Meilisearch reindex progress indicator (Settings page + live polling) could stop early on the same kind of false "not running" signal described above, requiring a manual refresh to show accurate progress.
+- **Changed: reindexing no longer requires "Enable Meilisearch" to be checked.** The "Reindex Now" button, the background cron job, and `wp init-live-search meili-reindex` now only need Host and Index to be filled in — useful for building or testing a new index while the current search source (database or an existing Meilisearch index) keeps running, without switching it live first. Auto-sync on save/delete still only starts once the checkbox is enabled, as before.
+
+= 1.9.5 – August 03, 2026 =
 - **Performance**: fixed N+1 queries when building search/related-posts result lists — post, postmeta, and term caches for the whole batch are now primed in one shot before rendering, instead of running fresh queries per result.
 - **New: FULLTEXT Search Index (opt-in)**: added an optional MySQL FULLTEXT-indexed table as a faster alternative to `LIKE '%term%'` for Title/Excerpt/Content matching on the standard database search pipeline — a major speed-up on sites with a large number of posts.
 - **Safety**: the FULLTEXT index is off by default and only takes effect once the server's support is confirmed and the index has been fully built; until then the plugin transparently keeps using the existing LIKE-based search.
@@ -445,65 +465,6 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 - **Host Validation**: external image URLs are validated against the current site host/subdomain by default to prevent unwanted third-party hotlinks.
 - **Developer Extensibility**: introduced new filter `init_plugin_suite_live_search_allow_fallback_image_host` for customizing allowed fallback image hosts.
 - **Settings Integration**: added full admin setting, sanitization flow, and translation support for the new thumbnail fallback feature.
-
-= 1.8.9 – February 25, 2026 =
-- **Keyword Generator v3**: fully redesigned scoring pipeline for higher accuracy across diverse site types
-- **Title-only source**: removed excerpt from input — cleaner signal, no auto-generated noise, consistent across all WordPress sites
-- **NPMI fix**: corrected probability base so unigram and n-gram probabilities use a unified token count — eliminates score inflation from the previous implementation
-- **Trigram support**: generator now produces both bigrams and trigrams, surfacing longer, more specific keyword phrases
-- **Cross-document frequency penalty**: phrases appearing in more than 60% of posts are down-ranked — prevents generic terms from dominating results on content-heavy sites
-- **MMR selection**: replaced random shuffling with Maximal Marginal Relevance — final 15 keywords are guaranteed to be both high-scoring and semantically diverse
-- **Expanded stop-word lists**: broader coverage for Vietnamese and English, including common post-title filler words
-
-= 1.8.8 – February 23, 2026 =
-- **Native Search Mode**: added new option "Use WordPress Native Search?" — bypasses all custom logic and delegates to WP_Query's built-in `s` parameter for a simpler, lightweight search experience.
-- **Third-party Compatibility**: native mode automatically benefits from search plugins (e.g. SearchWP, ElasticPress) that hook into WP_Query, with zero extra configuration.
-- **Settings UX**: options incompatible with native mode (Search Mode, Fallback, Synonym, SEO Fields, ACF, Operators) are visually dimmed and non-interactive when the option is enabled.
-- **Sanitization**: `use_native_search` is properly sanitized and persisted via the existing settings flow.
-
-= 1.8.7 – December 11, 2025 =
-- **404 Smart Redirect**: added new option "Auto Redirect 404 to Best Match" — automatically redirects 404 pages to the most relevant post determined by Init Live Search.
-- **Post Type Awareness**: redirect engine now respects the plugin's "Post Types to Include" setting and works seamlessly with multiple post types.
-- **Unified Resolver**: 404 redirect now uses `init_plugin_suite_live_search_resolve_post_types()` and the filter `init_plugin_suite_live_search_post_types` for consistent, extensible post-type handling.
-- **Safety & Accuracy**: redirect only triggers on valid, published posts and prevents unexpected loops or mismatches across post types.
-- **Code Quality**: improved sanitization of `$_SERVER['REQUEST_URI']` (unslash + sanitize), removed unsafe patterns, standardized function prefixes, and ensured PHPCS compliance.
-
-= 1.8.6 – November 09, 2025 =
-- **Shortcode Enhancement**: `[init_live_search]` now supports new attributes:
-  `width`, `max_width`, `align`, `id`, `name`, `aria_label`, `button` (show/hide), and improved `radius`.
-- **Security / Code Quality**: escaped dynamic attributes, removed unsafe inline output, and improved PHPCS compliance.
-- **SQL Safety**: converted `LIMIT` values to `%d` and applied scoped PHPCS ignores for dynamic placeholder lists.
-
-= 1.8.5 – October 15, 2025 =
-- **Fix**: `.ils-cart-btn` now consistently redirects to the **product page** for *all* WooCommerce product types (simple, variable, grouped, etc.) instead of calling the AJAX `add_to_cart` endpoint that returned a JSON response
-- **UX Consistency**: ensures identical "View Product" behavior across all product types in live search results
-- **Thanks**: special thanks to **m0n0brands** for reporting and confirming the issue
-
-= 1.8.4 – September 17, 2025 =
-- **Dev Filter**: `init_plugin_suite_live_search_post_types` – allow themes/plugins to modify or enforce post type list  
-- **Example Use Case**: ensure a custom post type (e.g. `manga`) is always included in search results without affecting plugin settings  
-- **Code Quality**: standardized return handling with `array_values(array_unique())` for consistent output
-
-= 1.8.3 – August 30, 2025 =
-- **Fix**: `/coupon` REST endpoint – prevent 500 errors on expired or limited coupons  
-- **Code Quality**: added PHPCS ignores for complex SQL queries (placeholders, interpolated vars, direct queries)  
-- **Stability**: improved parameter checks and reduced false positives from PHPCS  
-
-= 1.8.2 – August 26, 2025 =
-- **AI Related Posts Engine v2**: dual signals (recency + time_gap), smarter diversification (MMR), safer cache versioning
-- **Performance**: pre-cache posts & terms, deduplication, optimized scoring loop
-- **Dev Filters**: new controls for recency, gap decay, MMR λ, and final candidate selection
-
-= 1.8.1 – August 26, 2025 =
-- **AI-Powered Related Posts**: new `[init_live_search_related_ai]` shortcode with multi-signal scoring (tags, series, categories, etc.)
-- **Extensible API**: inject candidates, extend signals, adjust weights, override scores
-- **Performance**: pre-cached post data, unified template rendering
-
-= 1.8.0 – August 16, 2025 =
-- **Keyword Generator Upgrade**: BM25 + NPMI + Log-Likelihood Ratio for high-quality bigrams
-- **Bigram-Only Focus**: stricter filtering, Unicode-safe, excludes noise terms
-- **Resilience**: fallback mode ensures at least 15 keywords per request
-- **Performance**: memory-efficient scoring, optimized regex, robust error handling
 
 View full changelog (all versions): [Init Live Search – Changelog](https://en.inithtml.com/plugin/init-live-search/)
 

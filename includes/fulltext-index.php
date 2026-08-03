@@ -452,6 +452,39 @@ function init_plugin_suite_live_search_fulltext_maybe_start_cron( $old_value, $v
 
 add_action( INIT_PLUGIN_SUITE_LS_FULLTEXT_CRON_HOOK, 'init_plugin_suite_live_search_fulltext_cron_run_batch' );
 
+// ─────────────────────────────────────────────────────────────────────────
+// "Đang chạy hay không" — dùng cho UI (Settings > General).
+//
+// CHỈ dựa vào wp_next_scheduled() là không đủ: khi wp-cron.php tới giờ chạy
+// 1 event, nó UNSCHEDULE event đó TRƯỚC KHI gọi callback (để callback tự
+// schedule lại lượt kế tiếp nếu cần). Nghĩa là trong suốt thời gian 1 batch
+// đang thực sự xử lý (WP_Query + upsert cho tới 300 bài, có thể mất vài giây
+// trên host chậm), wp_next_scheduled() trả về false dù cron KHÔNG hề đứng
+// yên — chỉ là đang ở giữa 2 lượt. Nếu admin load lại trang đúng lúc đó, họ
+// sẽ thấy báo lỗi "không chạy" gây hiểu lầm dù mọi thứ vẫn ổn (F5 lại sau đó
+// thì đã xong hoặc đã lên lịch lại, nên trông như "tự khỏi").
+//
+// Vì vậy: coi là "đang chạy" khi (a) đang thực sự xử lý 1 batch (transient
+// lock còn hiệu lực), HOẶC (b) có lịch trong "grace window" gần đây (chưa
+// hoặc mới vừa tới giờ, đang chờ pseudo-cron nhận request tiếp theo để chạy).
+// Chỉ khi ĐÃ QUÁ HẠN LÂU mà event vẫn còn nằm trong hàng đợi — nghĩa là
+// pseudo-cron chưa từng có cơ hội chạy nó — mới thực sự coi là "không chạy"
+// và hiển thị nút "Run Now".
+function init_plugin_suite_live_search_fulltext_cron_is_active() {
+    if ( get_transient( 'init_plugin_suite_live_search_fulltext_cron_lock' ) ) {
+        return true;
+    }
+
+    $next = wp_next_scheduled( INIT_PLUGIN_SUITE_LS_FULLTEXT_CRON_HOOK );
+    if ( ! $next ) {
+        return false;
+    }
+
+    $grace = (int) apply_filters( 'init_plugin_suite_live_search_fulltext_cron_stall_grace', 60 );
+
+    return $next > ( time() - $grace );
+}
+
 // "Run Now" — link thủ công ở Settings > General, chạy trực tiếp trong chính
 // request admin đó (KHÔNG qua WP-Cron/pseudo-cron), dành cho site tắt hẳn
 // WP-Cron (define('DISABLE_WP_CRON', true)) hoặc pseudo-cron vì lý do gì đó
@@ -502,7 +535,12 @@ function init_plugin_suite_live_search_fulltext_cron_run_batch() {
     if ( get_transient( 'init_plugin_suite_live_search_fulltext_cron_lock' ) ) {
         return;
     }
-    set_transient( 'init_plugin_suite_live_search_fulltext_cron_lock', 1, 30 );
+    // TTL 60s (không phải 30s): batch tới 300 bài trên host chậm/nội dung
+    // nặng có thể mất hơn 30 giây để xử lý xong, nên transient hết hạn giữa
+    // chừng sẽ khiến is_active() trả về sai (báo "không chạy" trong khi vẫn
+    // đang chạy). Chỉ là cận trên an toàn — không ảnh hưởng gì tới việc
+    // release lock (đã tự giải phóng ngay khi hàm return) hay batch_size.
+    set_transient( 'init_plugin_suite_live_search_fulltext_cron_lock', 1, 60 );
 
     $options = get_option( INIT_PLUGIN_SUITE_LS_OPTION, [] );
     if ( empty( $options['use_fulltext_index'] ) || ! init_plugin_suite_live_search_fulltext_is_supported() ) {
@@ -544,14 +582,19 @@ function init_plugin_suite_live_search_fulltext_cron_run_batch() {
     $state['total'] += count( $query->posts );
 
     if ( count( $query->posts ) === $batch_size ) {
-        // Còn bài viết chưa xử lý — hẹn đợt kế tiếp sau 5 giây.
+        // Còn bài viết chưa xử lý — hẹn đợt kế tiếp sau 5 giây. Schedule
+        // TRƯỚC khi xoá lock (không phải sau) để không có khoảnh khắc nào
+        // cả 2 tín hiệu (lock + wp_next_scheduled) cùng "trống" — is_active()
+        // nhờ vậy luôn thấy ít nhất 1 tín hiệu đúng, kể cả khi UI đọc đúng
+        // lúc giao nhau giữa 2 lượt batch.
         $state['paged']++;
         update_option( 'init_plugin_suite_live_search_fulltext_cron_state', $state, false );
-        delete_transient( 'init_plugin_suite_live_search_fulltext_cron_lock' );
 
         if ( ! wp_next_scheduled( INIT_PLUGIN_SUITE_LS_FULLTEXT_CRON_HOOK ) ) {
             wp_schedule_single_event( time() + 5, INIT_PLUGIN_SUITE_LS_FULLTEXT_CRON_HOOK );
         }
+
+        delete_transient( 'init_plugin_suite_live_search_fulltext_cron_lock' );
     } else {
         // Hết bài viết để xử lý — hoàn tất.
         update_option( 'init_plugin_suite_live_search_fulltext_indexed', current_time( 'mysql' ), false );

@@ -1028,10 +1028,6 @@ msgid "FULLTEXT search index could not be enabled: your MySQL/MariaDB server doe
 msgstr ""
 
 #: includes/meilisearch.php
-msgid "Meilisearch is disabled or not fully configured."
-msgstr ""
-
-#: includes/meilisearch.php
 msgid "Missing Admin/Indexing Key, Host, or Index."
 msgstr ""
 
@@ -1041,7 +1037,7 @@ msgid "HTTP error %d from Meilisearch."
 msgstr ""
 
 #: includes/ajax.php
-msgid "Meilisearch is not enabled or not fully configured (Host / Index / Search Key)."
+msgid "Missing Host or Index. Fill these in under Settings > Init Live Search > Meilisearch — enabling \"Use Meilisearch as the primary search source\" is not required to build the index."
 msgstr ""
 
 #: includes/ajax.php
@@ -1049,7 +1045,11 @@ msgid "Missing Admin/Indexing Key."
 msgstr ""
 
 #: includes/settings/meilisearch.php
-msgid "New, updated, or deleted posts are synced to Meilisearch automatically. To index all existing content for the first time (or to rebuild the index), either click the button below (runs in the background, no server access needed) or run it yourself via WP-CLI."
+msgid "New, updated, or deleted posts are synced to Meilisearch automatically while \"Enable Meilisearch\" above is checked. To index all existing content for the first time (or to rebuild the index), either click the button below (runs in the background, no server access needed) or run it yourself via WP-CLI."
+msgstr ""
+
+#: includes/settings/meilisearch.php
+msgid "Reindexing only needs Host and Index below — you can build or rebuild the index while \"Enable Meilisearch\" is still unchecked, e.g. to prepare a new index while the current search source keeps running. Just remember auto-sync on save/delete only starts once the checkbox above is enabled, so re-run Reindex Now (or enable the checkbox) to pick up anything edited in the meantime."
 msgstr ""
 
 #: includes/settings/meilisearch.php
@@ -1067,6 +1067,12 @@ msgstr ""
 
 #: includes/settings/meilisearch.php
 msgid "Or run it manually any time via WP-CLI:"
+msgstr ""
+
+#. translators: %1$d: number of skipped posts, %2$s: comma-separated post IDs
+#: includes/settings/meilisearch.php
+#: includes/settings-page.php
+msgid "%1$d post(s) were too large to send to Meilisearch even individually and were skipped (post IDs: %2$s). Increase the payload size limit on Meilisearch (or any reverse proxy in front of it), or shorten these posts, then run Reindex Now again."
 msgstr ""
 
 #: includes/settings-page.php
@@ -1091,6 +1097,10 @@ msgstr ""
 
 #: includes/settings/general.php
 msgid "Background indexing isn't running right now — WP-Cron may be disabled on this site (DISABLE_WP_CRON)."
+msgstr ""
+
+#: includes/settings/general.php
+msgid "Settings saved. Checking indexing status…"
 msgstr ""
 
 #: includes/settings/general.php

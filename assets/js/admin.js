@@ -114,22 +114,33 @@ document.addEventListener('DOMContentLoaded', function () {
         let meiliPollTimer = null;
 
         function renderMeiliStatus(data) {
+            let html = '';
+
             if (data.running) {
                 let text = i18n.meiliReindexing || 'Reindexing in the background…';
                 if (data.total) {
                     text += ' (' + data.total + ')';
                 }
-                meiliStatusEl.innerHTML = '<p class="description">' + text + '</p>';
+                html = '<p class="description">' + text + '</p>';
             } else if (data.last_error) {
-                meiliStatusEl.innerHTML = '<p class="description" style="color:#d63638;">' +
+                html = '<p class="description" style="color:#d63638;">' +
                     (i18n.meiliReindexStopped || 'Background reindex stopped after repeated errors:') +
                     ' ' + data.last_error + '</p>';
             } else if (data.indexed_at) {
-                meiliStatusEl.innerHTML = '<p class="description">' +
+                html = '<p class="description">' +
                     (i18n.meiliIndexLastBuilt || 'Index last built:') + ' ' + data.indexed_at + '.</p>';
-            } else {
-                meiliStatusEl.innerHTML = '';
             }
+
+            if (!data.running && Array.isArray(data.skipped) && data.skipped.length) {
+                const template = i18n.meiliSkippedWarning ||
+                    '%1$d post(s) were too large to send to Meilisearch even individually and were skipped (post IDs: %2$s).';
+                const message = template
+                    .replace('%1$d', data.skipped.length)
+                    .replace('%2$s', data.skipped.join(', '));
+                html += '<p class="description" style="color:#dba617;">' + message + '</p>';
+            }
+
+            meiliStatusEl.innerHTML = html;
         }
 
         function stopMeiliPolling() {

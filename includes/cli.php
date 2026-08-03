@@ -32,8 +32,8 @@ class Init_Plugin_Suite_Live_Search_CLI {
     public function meili_reindex( $args, $assoc_args ) {
         $settings = get_option( INIT_PLUGIN_SUITE_LS_MEILI_OPTION, [] );
 
-        if ( ! init_plugin_suite_live_search_meili_is_enabled( $settings ) ) {
-            WP_CLI::error( 'Meilisearch is not enabled or not fully configured (Host / Index / Search Key) under Settings > Init Live Search > Meilisearch.' );
+        if ( ! init_plugin_suite_live_search_meili_is_configured( $settings ) ) {
+            WP_CLI::error( 'Missing Host or Index under Settings > Init Live Search > Meilisearch. Enabling "Use Meilisearch as the primary search source" is not required to build the index.' );
         }
 
         $admin_key = init_plugin_suite_live_search_meili_get_admin_key( $settings );
@@ -55,6 +55,7 @@ class Init_Plugin_Suite_Live_Search_CLI {
         $batch_size = isset( $assoc_args['batch-size'] ) ? max( 1, (int) $assoc_args['batch-size'] ) : 200;
         $paged      = 1;
         $total      = 0;
+        $skipped    = [];
 
         WP_CLI::log( sprintf( 'Starting reindex of post types [%s] to Meilisearch (%s/indexes/%s)...', implode( ', ', $allowed_types ), $host, $index ) );
 
@@ -78,34 +79,37 @@ class Init_Plugin_Suite_Live_Search_CLI {
                 $documents[] = init_plugin_suite_live_search_meili_build_document( $post );
             }
 
-            $response = wp_remote_post(
+            // send_documents() tự chia nhỏ batch và thử lại khi gặp HTTP 413
+            // (Payload Too Large) — batch-size ở CLI chỉ là số bài/lần QUERY,
+            // không nhất thiết là số document/lần GỬI thực tế lên Meilisearch.
+            $result = init_plugin_suite_live_search_meili_send_documents(
                 $host . '/indexes/' . rawurlencode( $index ) . '/documents',
-                [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . $admin_key,
-                        'Content-Type'  => 'application/json',
-                    ],
-                    'body'    => wp_json_encode( $documents ),
-                    'timeout' => 30,
-                ]
+                $admin_key,
+                $documents,
+                30
             );
 
-            if ( is_wp_error( $response ) ) {
-                WP_CLI::warning( sprintf( 'Batch %d error: %s', $paged, $response->get_error_message() ) );
+            $total += $result['sent'];
+
+            if ( '' !== $result['error'] ) {
+                WP_CLI::warning( sprintf( 'Batch %d error: %s', $paged, $result['error'] ) );
             } else {
-                $code = wp_remote_retrieve_response_code( $response );
-                if ( $code >= 200 && $code < 300 ) {
-                    $total += count( $documents );
-                    WP_CLI::log( sprintf( 'Batch %d: sent %d posts (HTTP %d)', $paged, count( $documents ), $code ) );
-                } else {
-                    WP_CLI::warning( sprintf( 'Batch %d failed, HTTP %d: %s', $paged, $code, wp_remote_retrieve_body( $response ) ) );
-                }
+                WP_CLI::log( sprintf( 'Batch %d: sent %d posts', $paged, $result['sent'] ) );
+            }
+
+            if ( ! empty( $result['skipped'] ) ) {
+                $skipped = array_values( array_unique( array_merge( $skipped, $result['skipped'] ) ) );
+                WP_CLI::warning( sprintf( 'Batch %d: post(s) too large even individually, skipped: %s', $paged, implode( ', ', $result['skipped'] ) ) );
             }
 
             $paged++;
             usleep( 200000 );
 
         } while ( count( $query->posts ) === $batch_size );
+
+        if ( ! empty( $skipped ) ) {
+            WP_CLI::warning( sprintf( 'Done with warnings. %d post(s) skipped (too large for Meilisearch): %s', count( $skipped ), implode( ', ', $skipped ) ) );
+        }
 
         WP_CLI::success( sprintf( 'Done. Total posts indexed: %d.', $total ) );
     }
