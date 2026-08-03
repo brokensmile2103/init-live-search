@@ -4,7 +4,7 @@
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.9.4-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v1.9.5-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -23,6 +23,7 @@ Want typo-tolerant, sub-50ms relevance ranking on top of that? Connect your own 
 - **Optional Meilisearch Integration**: connect your own Meilisearch server (self-hosted or cloud) as the primary search engine, with automatic, transparent fallback to the local database search whenever it's disabled, unreachable, or misconfigured
 - **Auto-sync to Meilisearch**: posts are pushed/removed from the index automatically on publish, update, trash, and delete (non-blocking)
 - **WP-CLI Reindex Command**: `wp init-live-search meili-reindex` for bulk-indexing or rebuilding the entire index
+- **FULLTEXT Search Index**: a MySQL FULLTEXT-indexed table can now be used for Title/Excerpt/Content matching on the standard database search pipeline instead of `LIKE '%term%'` queries — a major speed-up on sites with a large number of posts. Off by default; the plugin automatically detects server support and transparently keeps using the existing LIKE-based search until it's confirmed and built
 - **Cross-site Search**: fetch & merge results from other Init Live Search-powered sites  
 - **No CORS or Auth Setup**: just enter `Site Name|https://example.com` — it works instantly  
 - **Auto Labeling**: results from external sources are tagged (e.g. "Init Docs")  
@@ -46,6 +47,7 @@ Want typo-tolerant, sub-50ms relevance ranking on top of that? Connect your own 
 - Clean modal search interface (`Ctrl + /`, triple-click, or `data-ils`)
 - Powered by WordPress REST API — no `admin-ajax`, no jQuery
 - **Optional Meilisearch integration**: typo-tolerant, relevance-ranked external search with automatic fallback to local DB search
+- **Optional FULLTEXT search index**: MySQL FULLTEXT-backed matching for the local database search pipeline on large sites, with automatic background indexing via WP-Cron
 - **Cross-site Search**: query multiple domains seamlessly
 - **Search in SEO Metadata** — support Yoast, Rank Math, AIOSEO, TSF, SEOPress
 - **Weighted Ranking** — control priority via filters (e.g. title > SEO > tags)
@@ -62,6 +64,26 @@ Want typo-tolerant, sub-50ms relevance ranking on top of that? Connect your own 
 - Built-in **Analytics**: log search terms (no personal data)
 - Developer-ready: filters, JS events, REST-first architecture
 
+## FULLTEXT Search Index (Optional)
+
+On sites with a large number of posts, the default database search (`LIKE '%term%'`) can't use an index — every search runs a full table scan. If you don't want to run an external service like Meilisearch, you can instead switch the local database search pipeline to use a MySQL FULLTEXT index.
+
+**Setup:**
+
+1. Go to **Settings → Init Live Search → General** and enable **FULLTEXT Search Index**. The plugin checks your server's support automatically and won't let you enable it if InnoDB FULLTEXT indexes aren't available.
+2. That's it — the index builds itself automatically in the background via WP-Cron (no server access needed). Progress is shown right on the Settings page.
+3. Prefer to build it yourself, or need it to go faster? Run:
+   ```bash
+   wp init-live-search fulltext-reindex
+   ```
+   or click **Run Now** on the Settings page if WP-Cron is disabled on your site.
+
+**Built for safety:**
+
+- Off by default — existing sites are completely unaffected until you turn it on.
+- Until the index is fully built, the plugin keeps using the existing LIKE-based search automatically — search results are never empty or broken mid-build.
+- Tag, SEO metadata, ACF field search, synonym expansion, and the `+`/`-` operators are unaffected and keep working exactly as before.
+
 ## Meilisearch Integration (Optional)
 
 Init Live Search works great out of the box with zero setup — the built-in database search handles everything by default. If you want faster, typo-tolerant, relevance-ranked search at scale, connect your own Meilisearch instance in a few minutes.
@@ -70,7 +92,7 @@ Init Live Search works great out of the box with zero setup — the built-in dat
 
 1. Install and run Meilisearch yourself — self-hosted or via [Meilisearch Cloud](https://www.meilisearch.com/cloud). This plugin does not host or manage a server for you.
 2. Go to **Settings → Init Live Search → Meilisearch**, enter your Host URL, Index Name, and a **search-only** API key, then enable the integration.
-3. Index your existing content:
+3. Index your existing content — click **Reindex Now** on the Settings page (runs in the background, no server access needed), or run it yourself:
    ```bash
    wp init-live-search meili-reindex
    ```
@@ -81,6 +103,7 @@ Init Live Search works great out of the box with zero setup — the built-in dat
 - If Meilisearch is disabled, unconfigured, or fails to respond, the plugin automatically and silently falls back to the local database search — visitors never see a broken search box.
 - The sensitive indexing/admin key can be defined via the `INIT_LIVE_SEARCH_MEILI_ADMIN_KEY` constant in `wp-config.php` instead of the database.
 - Turn it off any time — core search behavior never depends on Meilisearch being present.
+- Unlike the FULLTEXT index above, background reindexing never starts on its own — Meilisearch is a server you own (and may pay for), so it only runs when you explicitly click **Reindex Now** or use WP-CLI.
 
 ## Slash Command Examples
 
