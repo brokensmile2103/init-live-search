@@ -288,3 +288,169 @@ function init_plugin_suite_live_search_meili_handle_delete( $post_id ) {
     init_plugin_suite_live_search_meili_remove_document( $post_id, $settings );
 }
 add_action( 'before_delete_post', 'init_plugin_suite_live_search_meili_handle_delete' );
+
+// ─────────────────────────────────────────────────────────────────────────
+// Background reindex via WP-Cron — "Reindex Now" button (Settings > Meilisearch).
+//
+// Khác với FULLTEXT index (bảng DB nội bộ, miễn phí, nên tự động chạy ngay
+// khi bật là hợp lý), Meilisearch là SERVER BÊN NGOÀI do người dùng tự host
+// hoặc trả tiền theo document/operation. Vì vậy tiến trình này CHỦ ĐỘNG
+// KHÔNG tự chạy khi lưu Settings — chỉ khởi động khi admin bấm nút
+// "Reindex Now", tránh phát sinh request/tiền bất ngờ ngoài ý muốn.
+//
+// Vẫn dùng đúng cơ chế "batch nhỏ, lặp mỗi 5 giây tới khi xong" như FULLTEXT
+// để không cần WP-CLI/SSH, nhưng có thêm đếm lỗi liên tiếp: lỗi 3 lần liền
+// (network, sai key, server quá tải...) thì tự dừng hẳn và báo lỗi rõ ràng,
+// thay vì spam vô hạn vào server của người dùng.
+// ─────────────────────────────────────────────────────────────────────────
+
+define( 'INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK', 'init_plugin_suite_live_search_meili_cron_batch' );
+
+add_action( INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK, 'init_plugin_suite_live_search_meili_cron_run_batch' );
+
+// Khởi động (hoặc khởi động lại từ đầu) tiến trình reindex nền.
+function init_plugin_suite_live_search_meili_cron_start() {
+    delete_option( 'init_plugin_suite_live_search_meili_cron_state' );
+    update_option( 'init_plugin_suite_live_search_meili_cron_last_error', '', false );
+
+    if ( ! wp_next_scheduled( INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK ) ) {
+        wp_schedule_single_event( time(), INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK );
+    }
+}
+
+function init_plugin_suite_live_search_meili_cron_finish( $total ) {
+    update_option( 'init_plugin_suite_live_search_meili_indexed', current_time( 'mysql' ), false );
+    update_option( 'init_plugin_suite_live_search_meili_cron_last_error', '', false );
+    delete_option( 'init_plugin_suite_live_search_meili_cron_state' );
+}
+
+// Dừng hẳn tiến trình + lưu lý do lỗi để hiển thị cho admin.
+function init_plugin_suite_live_search_meili_cron_stop( $error_message ) {
+    update_option( 'init_plugin_suite_live_search_meili_cron_last_error', sanitize_text_field( $error_message ), false );
+    delete_option( 'init_plugin_suite_live_search_meili_cron_state' );
+    wp_clear_scheduled_hook( INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK );
+}
+
+function init_plugin_suite_live_search_meili_cron_run_batch() {
+    // Chặn 2 lượt chạy chồng nhau (không bắt buộc để đúng tuyệt đối — chỉ để
+    // tránh gửi trùng document lãng phí trong trường hợp hiếm gặp).
+    if ( get_transient( 'init_plugin_suite_live_search_meili_cron_lock' ) ) {
+        return;
+    }
+    set_transient( 'init_plugin_suite_live_search_meili_cron_lock', 1, 30 );
+
+    $settings = init_plugin_suite_live_search_meili_get_settings();
+
+    if ( ! init_plugin_suite_live_search_meili_is_enabled( $settings ) ) {
+        init_plugin_suite_live_search_meili_cron_stop( __( 'Meilisearch is disabled or not fully configured.', 'init-live-search' ) );
+        delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
+        return;
+    }
+
+    $admin_key = init_plugin_suite_live_search_meili_get_admin_key( $settings );
+    $host      = untrailingslashit( trim( $settings['host'] ?? '' ) );
+    $index     = trim( $settings['index'] ?? '' );
+
+    if ( ! $admin_key || ! $host || ! $index ) {
+        init_plugin_suite_live_search_meili_cron_stop( __( 'Missing Admin/Indexing Key, Host, or Index.', 'init-live-search' ) );
+        delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
+        return;
+    }
+
+    $options       = get_option( INIT_PLUGIN_SUITE_LS_OPTION, [] );
+    $allowed_types = apply_filters(
+        'init_plugin_suite_live_search_post_types',
+        ! empty( $options['post_types'] ) ? (array) $options['post_types'] : [ 'post' ],
+        $options,
+        []
+    );
+
+    $batch_size = (int) apply_filters( 'init_plugin_suite_live_search_meili_cron_batch_size', 200 );
+
+    $state = get_option( 'init_plugin_suite_live_search_meili_cron_state', false );
+    if ( ! is_array( $state ) || empty( $state['paged'] ) ) {
+        $state = [ 'paged' => 1, 'total' => 0, 'errors' => 0 ];
+    }
+
+    $query = new WP_Query( [
+        'post_type'      => $allowed_types,
+        'post_status'    => 'publish',
+        'posts_per_page' => $batch_size,
+        'paged'          => $state['paged'],
+        'orderby'        => 'ID',
+        'order'          => 'ASC',
+        'no_found_rows'  => true,
+    ] );
+
+    // Hết bài để xử lý — hoàn tất.
+    if ( empty( $query->posts ) ) {
+        init_plugin_suite_live_search_meili_cron_finish( $state['total'] );
+        delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
+        return;
+    }
+
+    $documents = [];
+    foreach ( $query->posts as $post ) {
+        $documents[] = init_plugin_suite_live_search_meili_build_document( $post );
+    }
+
+    $response = wp_remote_post(
+        $host . '/indexes/' . rawurlencode( $index ) . '/documents',
+        [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $admin_key,
+                'Content-Type'  => 'application/json',
+            ],
+            'body'    => wp_json_encode( $documents ),
+            'timeout' => 15,
+        ]
+    );
+
+    $ok = false;
+    if ( ! is_wp_error( $response ) ) {
+        $code = wp_remote_retrieve_response_code( $response );
+        $ok   = ( $code >= 200 && $code < 300 );
+    }
+
+    if ( ! $ok ) {
+        $state['errors'] = ( $state['errors'] ?? 0 ) + 1;
+
+        // 3 lỗi liên tiếp -> dừng hẳn, không spam vô hạn vào server của người dùng.
+        if ( $state['errors'] >= 3 ) {
+            $error_message = is_wp_error( $response )
+                ? $response->get_error_message()
+                /* translators: %d: HTTP status code */
+                : sprintf( __( 'HTTP error %d from Meilisearch.', 'init-live-search' ), wp_remote_retrieve_response_code( $response ) );
+
+            init_plugin_suite_live_search_meili_cron_stop( $error_message );
+            delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
+            return;
+        }
+
+        // Thử lại đúng batch này sau 5 giây (không tăng $state['paged']).
+        update_option( 'init_plugin_suite_live_search_meili_cron_state', $state, false );
+        delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
+
+        if ( ! wp_next_scheduled( INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK ) ) {
+            wp_schedule_single_event( time() + 5, INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK );
+        }
+        return;
+    }
+
+    $state['errors'] = 0;
+    $state['total'] += count( $documents );
+
+    if ( count( $query->posts ) === $batch_size ) {
+        // Còn bài viết chưa xử lý — hẹn đợt kế tiếp sau 5 giây.
+        $state['paged']++;
+        update_option( 'init_plugin_suite_live_search_meili_cron_state', $state, false );
+        delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
+
+        if ( ! wp_next_scheduled( INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK ) ) {
+            wp_schedule_single_event( time() + 5, INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK );
+        }
+    } else {
+        init_plugin_suite_live_search_meili_cron_finish( $state['total'] );
+        delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
+    }
+}

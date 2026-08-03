@@ -1161,15 +1161,119 @@ msgstr "Nút tìm kiếm (chế độ input)"
 msgid "Input name (input mode)"
 msgstr "Tên input (chế độ input)"
 
+#: includes/settings/general.php
+msgid "FULLTEXT Search Index"
+msgstr "FULLTEXT Search Index"
+
+#: includes/settings/general.php
+msgid "Use a MySQL FULLTEXT index for Title/Excerpt/Content matching instead of LIKE queries."
+msgstr "Dùng FULLTEXT index của MySQL để khớp Tiêu đề/Trích dẫn/Nội dung thay cho truy vấn LIKE."
+
+#: includes/settings/general.php
+msgid "Recommended for large sites (many thousands of posts) on the standard database search pipeline — significantly faster than LIKE, with no external service required. Tag, SEO metadata, and ACF field matching are unaffected and keep working as before."
+msgstr "Khuyên dùng cho site lớn (hàng nghìn bài viết trở lên) đang chạy pipeline tìm kiếm database chuẩn — nhanh hơn đáng kể so với LIKE, không cần dịch vụ ngoài. Tìm theo Thẻ (tag), SEO metadata và trường ACF không bị ảnh hưởng, vẫn hoạt động như cũ."
+
+#: includes/settings/general.php
+msgid "Not available: your MySQL/MariaDB server does not appear to support InnoDB FULLTEXT indexes on this table."
+msgstr "Không khả dụng: máy chủ MySQL/MariaDB của bạn có vẻ không hỗ trợ FULLTEXT index của InnoDB trên bảng này."
+
+#: includes/settings/general.php
+msgid "Building the index automatically in the background (about 300 posts every 5 seconds) — no action needed. Progress relies on WP-Cron, so it advances fastest on sites with regular visitor traffic."
+msgstr "Đang tự động xây dựng chỉ mục ở nền (khoảng 300 bài mỗi 5 giây) — không cần làm gì thêm. Tiến độ phụ thuộc vào WP-Cron, nên sẽ chạy nhanh hơn trên site có lượt truy cập đều đặn."
+
+#: includes/settings/general.php
+msgid "You can run this manually any time via WP-CLI:"
+msgstr "Bạn cũng có thể chạy tay bất cứ lúc nào qua WP-CLI:"
+
+#: includes/settings/general.php
+msgid "Background indexing isn't running right now (WP-Cron may be disabled on this site). Save this page again to retry automatically, or run it manually via WP-CLI:"
+msgstr "Tiến trình lập chỉ mục nền hiện không chạy (có thể do site đã tắt WP-Cron). Hãy lưu lại trang này để thử chạy lại tự động, hoặc chạy tay qua WP-CLI:"
+
+#. translators: %s: date/time the index was last built
+#: includes/settings/general.php
+msgid "Index last built: %s."
+msgstr "Lần build chỉ mục gần nhất: %s."
+
+#: includes/settings-page.php
+msgid "FULLTEXT search index could not be enabled: your MySQL/MariaDB server does not support InnoDB FULLTEXT indexes on this table. The plugin will keep using the standard database search."
+msgstr "Không thể bật FULLTEXT search index: máy chủ MySQL/MariaDB của bạn không hỗ trợ FULLTEXT index của InnoDB trên bảng này. Plugin sẽ tiếp tục dùng tìm kiếm database tiêu chuẩn."
+
+#: includes/meilisearch.php
+msgid "Meilisearch is disabled or not fully configured."
+msgstr "Meilisearch đang tắt hoặc chưa cấu hình đầy đủ."
+
+#: includes/meilisearch.php
+msgid "Missing Admin/Indexing Key, Host, or Index."
+msgstr "Thiếu Admin/Indexing Key, Host, hoặc Index."
+
+#. translators: %d: HTTP status code
+#: includes/meilisearch.php
+msgid "HTTP error %d from Meilisearch."
+msgstr "Meilisearch trả về lỗi HTTP %d."
+
+#: includes/ajax.php
+msgid "Meilisearch is not enabled or not fully configured (Host / Index / Search Key)."
+msgstr "Meilisearch chưa được bật hoặc chưa cấu hình đầy đủ (Host / Index / Search Key)."
+
+#: includes/ajax.php
+msgid "Missing Admin/Indexing Key."
+msgstr "Thiếu Admin/Indexing Key."
+
+#: includes/settings/meilisearch.php
+msgid "New, updated, or deleted posts are synced to Meilisearch automatically. To index all existing content for the first time (or to rebuild the index), either click the button below (runs in the background, no server access needed) or run it yourself via WP-CLI."
+msgstr "Bài viết mới, cập nhật, hoặc bị xoá sẽ tự động đồng bộ sang Meilisearch. Để lập chỉ mục toàn bộ nội dung hiện có lần đầu (hoặc build lại), bạn có thể bấm nút bên dưới (chạy nền, không cần quyền truy cập server) hoặc tự chạy qua WP-CLI."
+
+#: includes/settings/meilisearch.php
+msgid "Reindex Now"
+msgstr "Lập Chỉ Mục Ngay"
+
+#: includes/settings/meilisearch.php
+msgid "Reindexing in the background (about 200 posts every 5 seconds)…"
+msgstr "Đang lập chỉ mục ở nền (khoảng 200 bài mỗi 5 giây)…"
+
+#. translators: %s: error message returned by Meilisearch or the HTTP request
+#: includes/settings/meilisearch.php
+msgid "Background reindex stopped after repeated errors: %s"
+msgstr "Tiến trình lập chỉ mục nền đã dừng do lỗi lặp lại: %s"
+
+#: includes/settings/meilisearch.php
+msgid "Or run it manually any time via WP-CLI:"
+msgstr "Hoặc chạy tay bất cứ lúc nào qua WP-CLI:"
+
+#: includes/settings-page.php
+msgid "Started — reindexing in the background…"
+msgstr "Đã bắt đầu — đang lập chỉ mục ở nền…"
+
+#: includes/settings-page.php
+msgid "Background reindex stopped after repeated errors:"
+msgstr "Tiến trình lập chỉ mục nền đã dừng do lỗi lặp lại:"
+
+#: includes/settings-page.php
+msgid "Index last built:"
+msgstr "Lần build chỉ mục gần nhất:"
+
+#: includes/settings/general.php
+msgid "Re-check support"
+msgstr "Kiểm tra lại"
+
+#: includes/settings/general.php
+msgid "Runs the capability check again — useful if this was a temporary server issue."
+msgstr "Chạy lại bước kiểm tra khả năng hỗ trợ — hữu ích nếu lần trước server gặp sự cố tạm thời."
+
+#: includes/settings/general.php
+msgid "Background indexing isn't running right now — WP-Cron may be disabled on this site (DISABLE_WP_CRON)."
+msgstr "Tiến trình lập chỉ mục nền hiện không chạy — có thể site đã tắt WP-Cron (DISABLE_WP_CRON)."
+
+#: includes/settings/general.php
+msgid "Run Now"
+msgstr "Chạy Ngay"
+
+#: includes/settings/general.php
+msgid "Processes a batch immediately (up to ~20 seconds), bypassing WP-Cron entirely. Click again if it isn't finished after one click."
+msgstr "Xử lý ngay 1 đợt (tối đa ~20 giây), không phụ thuộc WP-Cron. Nếu bấm 1 lần chưa xong, bấm lại thêm lần nữa."
+
 #~ msgid "Init Live Search – Smart, Slash Commands, REST API"
 #~ msgstr "Init Live Search – Tìm kiếm thông minh, Slash Commands, REST API"
-
-#~ msgid ""
-#~ "A fast, lightweight, and extensible live search modal for WordPress. Built "
-#~ "with Vanilla JS and powered by the REST API."
-#~ msgstr ""
-#~ "Giải pháp tìm kiếm trực tiếp nhanh, gọn và linh hoạt cho WordPress — phát "
-#~ "triển bằng JavaScript thuần, tích hợp sâu với REST API."
 
 #~ msgid "Loading..."
 #~ msgstr "Đang tải..."

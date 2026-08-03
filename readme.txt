@@ -4,7 +4,7 @@ Tags: AI search, live search, meilisearch, related posts, woocommerce
 Requires at least: 5.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.9.4
+Stable tag: 1.9.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -400,6 +400,17 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 1.9.5 =
+- **Performance**: fixed N+1 queries when building search/related-posts result lists — post, postmeta, and term caches for the whole batch are now primed in one shot before rendering, instead of running fresh queries per result.
+- **New: FULLTEXT Search Index (opt-in)**: added an optional MySQL FULLTEXT-indexed table as a faster alternative to `LIKE '%term%'` for Title/Excerpt/Content matching on the standard database search pipeline — a major speed-up on sites with a large number of posts.
+- **Safety**: the FULLTEXT index is off by default and only takes effect once the server's support is confirmed and the index has been fully built; until then the plugin transparently keeps using the existing LIKE-based search.
+- **Auto-indexing**: once enabled, the FULLTEXT index builds itself automatically in the background via WP-Cron (~300 posts every 5 seconds) — no SSH/WP-CLI access required.
+- **WP-CLI**: added `wp init-live-search fulltext-reindex` to build or rebuild the FULLTEXT index manually/faster.
+- **Unaffected**: Tag, SEO metadata, ACF field search, synonym expansion, and the +/- operators are untouched by the FULLTEXT index change and continue to work exactly as before.
+- **Meilisearch: "Reindex Now" button**: added to the Meilisearch settings tab so sites without WP-CLI/SSH access can build or rebuild the index too — runs in the background (~200 posts every 5 seconds) with a live progress status.
+- **Meilisearch: error backoff**: the background reindex automatically stops with a clear error message after 3 consecutive failed batches, instead of retrying forever against an external server.
+- **Meilisearch: manual-only by design**: unlike the FULLTEXT index, background reindexing never starts on its own — Meilisearch is a user-owned, potentially paid external service, so it only runs when explicitly started via the button or `wp init-live-search meili-reindex`.
 
 = 1.9.4 – July 20, 2026 =
 - **Fixed**: the Search API Key and Admin/Indexing Key fields on the Meilisearch settings tab could be silently autofilled by the browser's saved password manager, risking accidental exposure of an unrelated saved password if the form was submitted without checking. These fields are now correctly excluded from autofill.

@@ -585,3 +585,71 @@ function init_plugin_suite_live_search_meili_test_connection_ajax() {
 
     wp_send_json_success( $result );
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Meilisearch: Reindex Now button (starts the background WP-Cron batch job)
+// ─────────────────────────────────────────────────────────────────────────
+add_action(
+    'wp_ajax_init_plugin_suite_live_search_meili_start_reindex',
+    'init_plugin_suite_live_search_meili_start_reindex_ajax'
+);
+
+function init_plugin_suite_live_search_meili_start_reindex_ajax() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Unauthorized', 403 );
+    }
+
+    $nonce = isset( $_SERVER['HTTP_X_WP_NONCE'] )
+        ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ) )
+        : '';
+
+    if ( ! wp_verify_nonce( $nonce, 'init_live_search_admin_nonce' ) ) {
+        wp_send_json_error( 'Invalid nonce', 403 );
+    }
+
+    $settings = init_plugin_suite_live_search_meili_get_settings();
+    if ( ! init_plugin_suite_live_search_meili_is_enabled( $settings ) ) {
+        wp_send_json_error( __( 'Meilisearch is not enabled or not fully configured (Host / Index / Search Key).', 'init-live-search' ) );
+    }
+
+    $admin_key = init_plugin_suite_live_search_meili_get_admin_key( $settings );
+    if ( ! $admin_key ) {
+        wp_send_json_error( __( 'Missing Admin/Indexing Key.', 'init-live-search' ) );
+    }
+
+    init_plugin_suite_live_search_meili_cron_start();
+
+    wp_send_json_success( [ 'started' => true ] );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Meilisearch: Reindex progress polling (used by the Settings page while a
+// background reindex is running, to update the status text without a reload)
+// ─────────────────────────────────────────────────────────────────────────
+add_action(
+    'wp_ajax_init_plugin_suite_live_search_meili_reindex_status',
+    'init_plugin_suite_live_search_meili_reindex_status_ajax'
+);
+
+function init_plugin_suite_live_search_meili_reindex_status_ajax() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Unauthorized', 403 );
+    }
+
+    $nonce = isset( $_SERVER['HTTP_X_WP_NONCE'] )
+        ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ) )
+        : '';
+
+    if ( ! wp_verify_nonce( $nonce, 'init_live_search_admin_nonce' ) ) {
+        wp_send_json_error( 'Invalid nonce', 403 );
+    }
+
+    $state = get_option( 'init_plugin_suite_live_search_meili_cron_state', false );
+
+    wp_send_json_success( [
+        'running'    => (bool) wp_next_scheduled( INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK ),
+        'total'      => is_array( $state ) ? (int) ( $state['total'] ?? 0 ) : 0,
+        'last_error' => get_option( 'init_plugin_suite_live_search_meili_cron_last_error', '' ),
+        'indexed_at' => get_option( 'init_plugin_suite_live_search_meili_indexed', '' ),
+    ] );
+}

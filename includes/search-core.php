@@ -359,6 +359,16 @@ function init_plugin_suite_live_search_get_post_ids_by_mode($wpdb, $term, $like,
 
 // Get post IDs where the title matches the search term
 function init_plugin_suite_live_search_get_ids_by_title($wpdb, $term, $like, $post_types, $placeholders, $limit) {
+    // Ưu tiên FULLTEXT index nội bộ (nếu admin đã bật + server hỗ trợ + đã reindex).
+    // Trả false khi không áp dụng được (tắt, chưa reindex, hoặc term toàn từ quá ngắn)
+    // -> rơi xuống pipeline LIKE gốc bên dưới, không đổi hành vi mặc định.
+    if (function_exists('init_plugin_suite_live_search_fulltext_get_ids_by_title')) {
+        $ft_ids = init_plugin_suite_live_search_fulltext_get_ids_by_title($wpdb, $term, $post_types, $limit);
+        if ($ft_ids !== false) {
+            return $ft_ids;
+        }
+    }
+
     // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
     return $wpdb->get_col($wpdb->prepare(
@@ -377,6 +387,13 @@ function init_plugin_suite_live_search_get_ids_by_title($wpdb, $term, $like, $po
 
 // Get post IDs where the excerpt matches the search term
 function init_plugin_suite_live_search_get_ids_by_excerpt($wpdb, $term, $like, $post_types, $placeholders, $limit) {
+    if (function_exists('init_plugin_suite_live_search_fulltext_get_ids_by_excerpt')) {
+        $ft_ids = init_plugin_suite_live_search_fulltext_get_ids_by_excerpt($wpdb, $term, $post_types, $limit);
+        if ($ft_ids !== false) {
+            return $ft_ids;
+        }
+    }
+
     // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
     return $wpdb->get_col($wpdb->prepare(
@@ -395,6 +412,13 @@ function init_plugin_suite_live_search_get_ids_by_excerpt($wpdb, $term, $like, $
 
 // Get post IDs where the content matches the search term
 function init_plugin_suite_live_search_get_ids_by_content($wpdb, $term, $like, $post_types, $placeholders, $limit) {
+    if (function_exists('init_plugin_suite_live_search_fulltext_get_ids_by_content')) {
+        $ft_ids = init_plugin_suite_live_search_fulltext_get_ids_by_content($wpdb, $term, $post_types, $limit);
+        if ($ft_ids !== false) {
+            return $ft_ids;
+        }
+    }
+
     // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
     return $wpdb->get_col($wpdb->prepare(

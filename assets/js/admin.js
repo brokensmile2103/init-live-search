@@ -104,4 +104,93 @@ document.addEventListener('DOMContentLoaded', function () {
                 .finally(() => { meiliTestBtn.disabled = false; });
         });
     }
+
+    // === Meilisearch: Reindex Now + background progress polling ===
+    const meiliReindexBtn = document.getElementById('init-ls-meili-reindex-now');
+    const meiliStatusEl = document.getElementById('init-ls-meili-reindex-status');
+
+    if (meiliReindexBtn && meiliStatusEl) {
+        const i18n = init_plugin_suite_live_search_ajax.i18n || {};
+        let meiliPollTimer = null;
+
+        function renderMeiliStatus(data) {
+            if (data.running) {
+                let text = i18n.meiliReindexing || 'Reindexing in the background…';
+                if (data.total) {
+                    text += ' (' + data.total + ')';
+                }
+                meiliStatusEl.innerHTML = '<p class="description">' + text + '</p>';
+            } else if (data.last_error) {
+                meiliStatusEl.innerHTML = '<p class="description" style="color:#d63638;">' +
+                    (i18n.meiliReindexStopped || 'Background reindex stopped after repeated errors:') +
+                    ' ' + data.last_error + '</p>';
+            } else if (data.indexed_at) {
+                meiliStatusEl.innerHTML = '<p class="description">' +
+                    (i18n.meiliIndexLastBuilt || 'Index last built:') + ' ' + data.indexed_at + '.</p>';
+            } else {
+                meiliStatusEl.innerHTML = '';
+            }
+        }
+
+        function stopMeiliPolling() {
+            if (meiliPollTimer) {
+                clearInterval(meiliPollTimer);
+                meiliPollTimer = null;
+            }
+            meiliReindexBtn.disabled = false;
+        }
+
+        function pollMeiliStatus() {
+            fetch(init_plugin_suite_live_search_ajax.ajaxurl + '?action=init_plugin_suite_live_search_meili_reindex_status', {
+                headers: { 'X-WP-Nonce': init_plugin_suite_live_search_ajax.nonce }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) return;
+                    renderMeiliStatus(data.data);
+                    if (!data.data.running) {
+                        stopMeiliPolling();
+                    }
+                })
+                .catch(() => {});
+        }
+
+        meiliReindexBtn.addEventListener('click', function () {
+            meiliReindexBtn.disabled = true;
+            meiliStatusEl.innerHTML = '<p class="description">' + (i18n.meiliReindexStarted || 'Started…') + '</p>';
+
+            fetch(init_plugin_suite_live_search_ajax.ajaxurl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-WP-Nonce': init_plugin_suite_live_search_ajax.nonce
+                },
+                body: new URLSearchParams({ action: 'init_plugin_suite_live_search_meili_start_reindex' })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (!meiliPollTimer) {
+                            meiliPollTimer = setInterval(pollMeiliStatus, 4000);
+                        }
+                        pollMeiliStatus();
+                    } else {
+                        meiliReindexBtn.disabled = false;
+                        meiliStatusEl.innerHTML = '<p class="description" style="color:#d63638;">' +
+                            (typeof data.data === 'string' && data.data ? data.data : (i18n.meiliUnknownError || 'Unknown error')) +
+                            '</p>';
+                    }
+                })
+                .catch(() => {
+                    meiliReindexBtn.disabled = false;
+                });
+        });
+
+        // Nếu tiến trình đang chạy sẵn từ trước khi load trang (vd admin rời
+        // trang rồi quay lại) — tự resume polling, không cần bấm lại nút.
+        if (meiliStatusEl.dataset.running === '1') {
+            meiliReindexBtn.disabled = true;
+            meiliPollTimer = setInterval(pollMeiliStatus, 4000);
+        }
+    }
 });

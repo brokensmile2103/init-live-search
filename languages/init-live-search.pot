@@ -989,3 +989,114 @@ msgstr ""
 #: includes/shortcodes.php:267
 msgid "Input name (input mode)"
 msgstr ""
+
+#: includes/settings/general.php
+msgid "FULLTEXT Search Index"
+msgstr ""
+
+#: includes/settings/general.php
+msgid "Use a MySQL FULLTEXT index for Title/Excerpt/Content matching instead of LIKE queries."
+msgstr ""
+
+#: includes/settings/general.php
+msgid "Recommended for large sites (many thousands of posts) on the standard database search pipeline — significantly faster than LIKE, with no external service required. Tag, SEO metadata, and ACF field matching are unaffected and keep working as before."
+msgstr ""
+
+#: includes/settings/general.php
+msgid "Not available: your MySQL/MariaDB server does not appear to support InnoDB FULLTEXT indexes on this table."
+msgstr ""
+
+#: includes/settings/general.php
+msgid "Building the index automatically in the background (about 300 posts every 5 seconds) — no action needed. Progress relies on WP-Cron, so it advances fastest on sites with regular visitor traffic."
+msgstr ""
+
+#: includes/settings/general.php
+msgid "You can run this manually any time via WP-CLI:"
+msgstr ""
+
+#: includes/settings/general.php
+msgid "Background indexing isn't running right now (WP-Cron may be disabled on this site). Save this page again to retry automatically, or run it manually via WP-CLI:"
+msgstr ""
+
+#. translators: %s: date/time the index was last built
+#: includes/settings/general.php
+msgid "Index last built: %s."
+msgstr ""
+
+#: includes/settings-page.php
+msgid "FULLTEXT search index could not be enabled: your MySQL/MariaDB server does not support InnoDB FULLTEXT indexes on this table. The plugin will keep using the standard database search."
+msgstr ""
+
+#: includes/meilisearch.php
+msgid "Meilisearch is disabled or not fully configured."
+msgstr ""
+
+#: includes/meilisearch.php
+msgid "Missing Admin/Indexing Key, Host, or Index."
+msgstr ""
+
+#. translators: %d: HTTP status code
+#: includes/meilisearch.php
+msgid "HTTP error %d from Meilisearch."
+msgstr ""
+
+#: includes/ajax.php
+msgid "Meilisearch is not enabled or not fully configured (Host / Index / Search Key)."
+msgstr ""
+
+#: includes/ajax.php
+msgid "Missing Admin/Indexing Key."
+msgstr ""
+
+#: includes/settings/meilisearch.php
+msgid "New, updated, or deleted posts are synced to Meilisearch automatically. To index all existing content for the first time (or to rebuild the index), either click the button below (runs in the background, no server access needed) or run it yourself via WP-CLI."
+msgstr ""
+
+#: includes/settings/meilisearch.php
+msgid "Reindex Now"
+msgstr ""
+
+#: includes/settings/meilisearch.php
+msgid "Reindexing in the background (about 200 posts every 5 seconds)…"
+msgstr ""
+
+#. translators: %s: error message returned by Meilisearch or the HTTP request
+#: includes/settings/meilisearch.php
+msgid "Background reindex stopped after repeated errors: %s"
+msgstr ""
+
+#: includes/settings/meilisearch.php
+msgid "Or run it manually any time via WP-CLI:"
+msgstr ""
+
+#: includes/settings-page.php
+msgid "Started — reindexing in the background…"
+msgstr ""
+
+#: includes/settings-page.php
+msgid "Background reindex stopped after repeated errors:"
+msgstr ""
+
+#: includes/settings-page.php
+msgid "Index last built:"
+msgstr ""
+
+#: includes/settings/general.php
+msgid "Re-check support"
+msgstr ""
+
+#: includes/settings/general.php
+msgid "Runs the capability check again — useful if this was a temporary server issue."
+msgstr ""
+
+#: includes/settings/general.php
+msgid "Background indexing isn't running right now — WP-Cron may be disabled on this site (DISABLE_WP_CRON)."
+msgstr ""
+
+#: includes/settings/general.php
+msgid "Run Now"
+msgstr ""
+
+#: includes/settings/general.php
+msgid "Processes a batch immediately (up to ~20 seconds), bypassing WP-Cron entirely. Click again if it isn't finished after one click."
+msgstr ""

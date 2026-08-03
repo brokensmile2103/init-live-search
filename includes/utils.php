@@ -293,9 +293,45 @@ function init_plugin_suite_live_search_build_result_item($post_id, $term = '', $
     return apply_filters('init_plugin_suite_live_search_result_item', $item, $post_id, $term, $args);
 }
 
+// Warm the post/meta/term object caches for a batch of IDs in one shot.
+// Without this, build_result_item() below triggers its own DB query per post
+// per lookup (get_post_thumbnail_id, get_the_terms, get_post_field...) any
+// time the object cache is cold — classic N+1. This mirrors what WP_Query
+// itself does internally (_prime_post_caches) before looping over results.
+function init_plugin_suite_live_search_prime_result_caches($post_ids) {
+    if (empty($post_ids) || !function_exists('_prime_post_caches')) return;
+
+    $post_ids = array_values(array_unique(array_map('absint', $post_ids)));
+    $post_ids = array_filter($post_ids);
+    if (empty($post_ids)) return;
+
+    // Primes: post row cache (get_post_field/get_post_type/...), postmeta
+    // cache (get_post_thumbnail_id, ACF-less meta reads...), and term cache
+    // (get_the_terms) for every taxonomy registered on the involved post types.
+    _prime_post_caches($post_ids, true, true);
+
+    // Thumbnails are attachment posts of their own — prime those too so
+    // wp_get_attachment_image_url()/wp_get_attachment_image_src() (used per
+    // result) don't each trigger a fresh query for the attachment row/meta.
+    $thumb_ids = [];
+    foreach ($post_ids as $post_id) {
+        $thumb_id = get_post_thumbnail_id($post_id);
+        if ($thumb_id) {
+            $thumb_ids[] = $thumb_id;
+        }
+    }
+
+    if (!empty($thumb_ids)) {
+        _prime_post_caches(array_values(array_unique($thumb_ids)), false, true);
+    }
+}
+
 // Build full list of results from post IDs.
 function init_plugin_suite_live_search_build_result_list($post_ids, $args = [], $term = '', $keywords = [], $default_thumb = '') {
     if (!is_array($post_ids)) return [];
+    if (empty($post_ids)) return [];
+
+    init_plugin_suite_live_search_prime_result_caches($post_ids);
 
     $exclude = !empty($args['exclude']) ? (int)$args['exclude'] : null;
     $results = [];

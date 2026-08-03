@@ -99,6 +99,50 @@ $admin_key_from_constant = defined( 'INIT_LIVE_SEARCH_MEILI_ADMIN_KEY' ) && INIT
 
 <h2><?php esc_html_e( 'Reindexing', 'init-live-search' ); ?></h2>
 <p class="description" style="max-width: 700px;">
-    <?php esc_html_e( 'New, updated, or deleted posts are synced to Meilisearch automatically. To index all existing content for the first time (or to rebuild the index), run the following WP-CLI command on your server:', 'init-live-search' ); ?>
+    <?php esc_html_e( 'New, updated, or deleted posts are synced to Meilisearch automatically. To index all existing content for the first time (or to rebuild the index), either click the button below (runs in the background, no server access needed) or run it yourself via WP-CLI.', 'init-live-search' ); ?>
 </p>
-<pre style="background:#f0f0f1; padding: 10px 14px; max-width: 700px; overflow-x: auto;">wp init-live-search meili-reindex</pre>
+
+<p>
+    <button type="button" class="button button-primary" id="init-ls-meili-reindex-now">
+        <?php esc_html_e( 'Reindex Now', 'init-live-search' ); ?>
+    </button>
+</p>
+
+<?php
+$meili_running     = (bool) wp_next_scheduled( 'init_plugin_suite_live_search_meili_cron_batch' );
+$meili_last_error  = get_option( 'init_plugin_suite_live_search_meili_cron_last_error', '' );
+$meili_indexed_at  = get_option( 'init_plugin_suite_live_search_meili_indexed', '' );
+?>
+
+<div id="init-ls-meili-reindex-status" style="max-width: 700px;" data-running="<?php echo $meili_running ? '1' : '0'; ?>">
+    <?php if ( $meili_running ) : ?>
+        <p class="description">
+            <?php esc_html_e( 'Reindexing in the background (about 200 posts every 5 seconds)…', 'init-live-search' ); ?>
+        </p>
+    <?php elseif ( $meili_last_error ) : ?>
+        <p class="description" style="color:#d63638;">
+            <?php
+            printf(
+                /* translators: %s: error message returned by Meilisearch or the HTTP request */
+                esc_html__( 'Background reindex stopped after repeated errors: %s', 'init-live-search' ),
+                esc_html( $meili_last_error )
+            );
+            ?>
+        </p>
+    <?php elseif ( $meili_indexed_at ) : ?>
+        <p class="description">
+            <?php
+            printf(
+                /* translators: %s: date/time the index was last built */
+                esc_html__( 'Index last built: %s.', 'init-live-search' ),
+                esc_html( $meili_indexed_at )
+            );
+            ?>
+        </p>
+    <?php endif; ?>
+</div>
+
+<p class="description" style="max-width: 700px;">
+    <?php esc_html_e( 'Or run it manually any time via WP-CLI:', 'init-live-search' ); ?><br>
+    <code>wp init-live-search meili-reindex</code>
+</p>

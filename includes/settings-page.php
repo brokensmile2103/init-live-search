@@ -133,6 +133,27 @@ function init_plugin_suite_live_search_sanitize_settings($input) {
     $output['auto_redirect_404'] = !empty($input['auto_redirect_404']) ? '1' : '0';
     $output['use_native_search'] = !empty($input['use_native_search']) ? '1' : '0';
 
+    $fulltext_requested = !empty($input['use_fulltext_index']);
+    if ($fulltext_requested) {
+        // Lazy creation: bảng phụ + capability check chỉ chạy đúng lần đầu
+        // admin thật sự bật checkbox này (được gate sẵn bởi schema version
+        // bên trong, nên các lần lưu Settings sau không tốn thêm gì).
+        if (function_exists('init_plugin_suite_live_search_fulltext_maybe_upgrade')) {
+            init_plugin_suite_live_search_fulltext_maybe_upgrade();
+        }
+
+        if (!function_exists('init_plugin_suite_live_search_fulltext_is_supported') || !init_plugin_suite_live_search_fulltext_is_supported()) {
+            $fulltext_requested = false;
+            add_settings_error(
+                INIT_PLUGIN_SUITE_LS_OPTION,
+                'init_ls_fulltext_unsupported',
+                __('FULLTEXT search index could not be enabled: your MySQL/MariaDB server does not support InnoDB FULLTEXT indexes on this table. The plugin will keep using the standard database search.', 'init-live-search'),
+                'error'
+            );
+        }
+    }
+    $output['use_fulltext_index'] = $fulltext_requested ? '1' : '0';
+
     $allowed_insert_positions = ['none', 'after_content', 'before_comment', 'after_comment'];
     $output['related_auto_insert'] = in_array($input['related_auto_insert'] ?? 'none', $allowed_insert_positions, true)
         ? $input['related_auto_insert']
@@ -257,6 +278,10 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
             'meiliDocuments'        => __('documents', 'init-live-search'),
             'meiliConnectionFailed' => __('Connection failed', 'init-live-search'),
             'meiliUnknownError'     => __('Unknown error', 'init-live-search'),
+            'meiliReindexStarted'   => __('Started — reindexing in the background…', 'init-live-search'),
+            'meiliReindexing'       => __('Reindexing in the background (about 200 posts every 5 seconds)…', 'init-live-search'),
+            'meiliReindexStopped'   => __('Background reindex stopped after repeated errors:', 'init-live-search'),
+            'meiliIndexLastBuilt'   => __('Index last built:', 'init-live-search'),
         ],
     ]);
 });

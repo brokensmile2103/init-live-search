@@ -12,6 +12,8 @@ unset($post_types['attachment']);
     <?php esc_html_e('Configure how the search modal is triggered, how matching and fallback behave, and how results are displayed on the frontend.', 'init-live-search'); ?>
 </p>
 
+<?php settings_errors(INIT_PLUGIN_SUITE_LS_OPTION); ?>
+
 <form method="post" action="options.php">
     <?php settings_fields(INIT_PLUGIN_SUITE_LS_GROUP_GENERAL); ?>
 
@@ -167,6 +169,81 @@ unset($post_types['attachment']);
                         <?php esc_html_e('Title, Excerpt and Content', 'init-live-search'); ?>
                     </label>
                 </fieldset>
+            </td>
+        </tr>
+        <tr data-native-locked="1">
+            <th scope="row"><?php esc_html_e('FULLTEXT Search Index', 'init-live-search'); ?></th>
+            <td>
+                <?php
+                $fulltext_checked = function_exists('init_plugin_suite_live_search_fulltext_capability_checked')
+                    && init_plugin_suite_live_search_fulltext_capability_checked();
+                $fulltext_supported = $fulltext_checked
+                    && function_exists('init_plugin_suite_live_search_fulltext_is_supported')
+                    && init_plugin_suite_live_search_fulltext_is_supported();
+                $fulltext_unsupported = $fulltext_checked && !$fulltext_supported;
+                $fulltext_indexed_at = get_option('init_plugin_suite_live_search_fulltext_indexed', '');
+                $fulltext_indexed = (bool) $fulltext_indexed_at;
+                ?>
+                <label>
+                    <input type="checkbox" name="init_plugin_suite_live_search_settings[use_fulltext_index]" value="1"
+                        <?php checked(!empty($options['use_fulltext_index'])); ?>
+                        <?php disabled($fulltext_unsupported); ?>>
+                    <?php esc_html_e('Use a MySQL FULLTEXT index for Title/Excerpt/Content matching instead of LIKE queries.', 'init-live-search'); ?>
+                </label>
+                <p class="description">
+                    <?php esc_html_e('Recommended for large sites (many thousands of posts) on the standard database search pipeline — significantly faster than LIKE, with no external service required. Tag, SEO metadata, and ACF field matching are unaffected and keep working as before.', 'init-live-search'); ?>
+                </p>
+                <?php if ($fulltext_unsupported) : ?>
+                    <p class="description" style="color:#d63638;">
+                        <?php esc_html_e('Not available: your MySQL/MariaDB server does not appear to support InnoDB FULLTEXT indexes on this table.', 'init-live-search'); ?>
+                    </p>
+                    <p>
+                        <a class="button button-secondary" href="<?php echo esc_url(wp_nonce_url(add_query_arg('init_ls_recheck_fulltext', '1'), 'init_ls_recheck_fulltext')); ?>">
+                            <?php esc_html_e('Re-check support', 'init-live-search'); ?>
+                        </a>
+                        <span class="description"><?php esc_html_e('Runs the capability check again — useful if this was a temporary server issue.', 'init-live-search'); ?></span>
+                    </p>
+                <?php elseif (!empty($options['use_fulltext_index']) && !$fulltext_indexed) :
+                    $fulltext_cron_running = (bool) wp_next_scheduled('init_plugin_suite_live_search_fulltext_cron_batch');
+                    ?>
+                    <?php if ($fulltext_cron_running) : ?>
+                        <p class="description">
+                            <?php esc_html_e('Building the index automatically in the background (about 300 posts every 5 seconds) — no action needed. Progress relies on WP-Cron, so it advances fastest on sites with regular visitor traffic.', 'init-live-search'); ?>
+                        </p>
+                        <p class="description">
+                            <?php esc_html_e('You can run this manually any time via WP-CLI:', 'init-live-search'); ?><br>
+                            <code>wp init-live-search fulltext-reindex</code>
+                        </p>
+                    <?php else : ?>
+                        <p class="description" style="color:#d63638;">
+                            <?php esc_html_e("Background indexing isn't running right now — WP-Cron may be disabled on this site (DISABLE_WP_CRON).", 'init-live-search'); ?>
+                        </p>
+                        <p>
+                            <a class="button button-primary" href="<?php echo esc_url(wp_nonce_url(add_query_arg('init_ls_force_fulltext', '1'), 'init_ls_force_fulltext')); ?>">
+                                <?php esc_html_e('Run Now', 'init-live-search'); ?>
+                            </a>
+                            <span class="description"><?php esc_html_e('Processes a batch immediately (up to ~20 seconds), bypassing WP-Cron entirely. Click again if it isn\'t finished after one click.', 'init-live-search'); ?></span>
+                        </p>
+                        <p class="description">
+                            <?php esc_html_e('Or run it manually via WP-CLI:', 'init-live-search'); ?><br>
+                            <code>wp init-live-search fulltext-reindex</code>
+                        </p>
+                    <?php endif; ?>
+                <?php elseif ($fulltext_indexed) : ?>
+                    <p class="description">
+                        <?php
+                        printf(
+                            /* translators: %s: date/time the index was last built */
+                            esc_html__('Index last built: %s.', 'init-live-search'),
+                            esc_html($fulltext_indexed_at)
+                        );
+                        ?>
+                    </p>
+                    <p class="description">
+                        <?php esc_html_e('You can run this manually any time via WP-CLI:', 'init-live-search'); ?><br>
+                        <code>wp init-live-search fulltext-reindex</code>
+                    </p>
+                <?php endif; ?>
             </td>
         </tr>
         <tr data-native-locked="1">

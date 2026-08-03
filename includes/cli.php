@@ -109,6 +109,88 @@ class Init_Plugin_Suite_Live_Search_CLI {
 
         WP_CLI::success( sprintf( 'Done. Total posts indexed: %d.', $total ) );
     }
+
+    /**
+     * Rebuild the local FULLTEXT search index used when "FULLTEXT Search Index"
+     * is enabled under Settings > General. Required after enabling the option
+     * for the first time, and safe to re-run any time (does a full rebuild).
+     *
+     * ## OPTIONS
+     *
+     * [--batch-size=<number>]
+     * : Number of posts processed per batch.
+     * ---
+     * default: 200
+     * ---
+     *
+     * ## EXAMPLES
+     *
+     *     wp init-live-search fulltext-reindex
+     *     wp init-live-search fulltext-reindex --batch-size=500
+     *
+     * @subcommand fulltext-reindex
+     * @when after_wp_load
+     */
+    public function fulltext_reindex( $args, $assoc_args ) {
+        if ( ! function_exists( 'init_plugin_suite_live_search_fulltext_is_supported' ) ) {
+            WP_CLI::error( 'FULLTEXT index module is not loaded.' );
+        }
+
+        // Table creation is lazy — if this is the very first time the feature
+        // is ever touched (e.g. admin never opened Settings, went straight to
+        // WP-CLI), this creates the table and runs the capability check now.
+        init_plugin_suite_live_search_fulltext_maybe_upgrade();
+
+        if ( ! init_plugin_suite_live_search_fulltext_is_supported() ) {
+            WP_CLI::error( 'Your MySQL/MariaDB server does not support InnoDB FULLTEXT indexes on this table, or the index could not be created. FULLTEXT search index is unavailable — the plugin will keep using the standard database search.' );
+        }
+
+        global $wpdb;
+        $table      = init_plugin_suite_live_search_fulltext_table();
+        $post_types = init_plugin_suite_live_search_fulltext_get_indexable_post_types();
+        $batch_size = isset( $assoc_args['batch-size'] ) ? max( 1, (int) $assoc_args['batch-size'] ) : 200;
+
+        WP_CLI::log( sprintf( 'Rebuilding FULLTEXT index for post types [%s]...', implode( ', ', $post_types ) ) );
+
+        // Rebuild from scratch — simplest way to guarantee no stale rows are
+        // left behind (e.g. posts unpublished while the sync hook was off).
+        // $table is derived from $wpdb->prefix only, never from user input.
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $wpdb->query( "TRUNCATE TABLE {$table}" );
+
+        $paged = 1;
+        $total = 0;
+
+        do {
+            $query = new WP_Query( [
+                'post_type'      => $post_types,
+                'post_status'    => 'publish',
+                'posts_per_page' => $batch_size,
+                'paged'          => $paged,
+                'orderby'        => 'ID',
+                'order'          => 'ASC',
+                'no_found_rows'  => true,
+            ] );
+
+            if ( empty( $query->posts ) ) {
+                break;
+            }
+
+            foreach ( $query->posts as $post ) {
+                init_plugin_suite_live_search_fulltext_upsert_row( $post );
+            }
+
+            $total += count( $query->posts );
+            WP_CLI::log( sprintf( 'Batch %d: indexed %d posts (total: %d)', $paged, count( $query->posts ), $total ) );
+
+            $paged++;
+
+        } while ( count( $query->posts ) === $batch_size );
+
+        update_option( 'init_plugin_suite_live_search_fulltext_indexed', current_time( 'mysql' ), false );
+
+        WP_CLI::success( sprintf( 'Done. Total posts indexed: %d. FULLTEXT search index is now active.', $total ) );
+    }
 }
 
 WP_CLI::add_command( 'init-live-search', 'Init_Plugin_Suite_Live_Search_CLI' );

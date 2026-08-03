@@ -3,7 +3,7 @@
  * Plugin Name: Init Live Search
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
  * Description: A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API.
- * Version: 1.9.4
+ * Version: 1.9.5
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-live-search
@@ -18,7 +18,7 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',                '1.9.4');
+define('INIT_PLUGIN_SUITE_LS_VERSION',                '1.9.5');
 define('INIT_PLUGIN_SUITE_LS_SLUG',                   'init-live-search');
 define('INIT_PLUGIN_SUITE_LS_GROUP_GENERAL',          'init_live_search_group_general');
 define('INIT_PLUGIN_SUITE_LS_OPTION',                 'init_plugin_suite_live_search_settings');
@@ -286,7 +286,7 @@ function init_plugin_suite_live_search_add_settings_link($links) {
 // Includes
 if (is_dir(INIT_PLUGIN_SUITE_LS_INCLUDES_PATH)) {
     // Load internal modules (utils first, then main logic)
-    foreach (['meilisearch.php', 'search-core.php', 'related-ai.php', 'utils.php', 'predefined-dictionaries.php', 'rest-api.php', 'settings-page.php', 'tracking.php', 'shortcodes.php', 'hooks.php'] as $file) {
+    foreach (['meilisearch.php', 'fulltext-index.php', 'search-core.php', 'related-ai.php', 'utils.php', 'predefined-dictionaries.php', 'rest-api.php', 'settings-page.php', 'tracking.php', 'shortcodes.php', 'hooks.php'] as $file) {
         $path = INIT_PLUGIN_SUITE_LS_INCLUDES_PATH . $file;
         if (file_exists($path)) {
             require_once $path;
@@ -306,4 +306,18 @@ if (is_dir(INIT_PLUGIN_SUITE_LS_INCLUDES_PATH)) {
     if (file_exists($cli_path)) {
         require_once $cli_path;
     }
+}
+
+// Stop any pending background reindex batches on deactivation — they'd be a
+// no-op anyway (hook callback won't be registered while inactive), but this
+// keeps the site's cron queue clean.
+if (defined('INIT_PLUGIN_SUITE_LS_FULLTEXT_CRON_HOOK') || defined('INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK')) {
+    register_deactivation_hook(__FILE__, function () {
+        if (defined('INIT_PLUGIN_SUITE_LS_FULLTEXT_CRON_HOOK')) {
+            wp_clear_scheduled_hook(INIT_PLUGIN_SUITE_LS_FULLTEXT_CRON_HOOK);
+        }
+        if (defined('INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK')) {
+            wp_clear_scheduled_hook(INIT_PLUGIN_SUITE_LS_MEILI_CRON_HOOK);
+        }
+    });
 }
