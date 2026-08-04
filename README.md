@@ -1,10 +1,10 @@
 # Init Live Search – AI-Powered, Related Posts, Slash Commands
 
-> Fast, modern live search for WordPress. REST API-powered with optional Meilisearch integration, slash commands, SEO-aware search, ACF field support, WooCommerce integration, and custom UI styles.
+> Fast, modern live search for WordPress. REST API-powered with optional Meilisearch integration, Block Editor & Abilities API support, slash commands, SEO-aware search, ACF field support, WooCommerce integration, and custom UI styles.
 
 **Blazing-fast modal search for WordPress — no jQuery, no reloads, no limits.**
 
-[![Version](https://img.shields.io/badge/stable-v1.9.6-blue.svg)](https://wordpress.org/plugins/init-live-search/)
+[![Version](https://img.shields.io/badge/stable-v2.0.0-blue.svg)](https://wordpress.org/plugins/init-live-search/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -17,6 +17,18 @@ Whether you're building a blog, an eCommerce site, a headless frontend, or a hig
 Want typo-tolerant, sub-50ms relevance ranking on top of that? Connect your own self-hosted or cloud [Meilisearch](https://www.meilisearch.com/) instance — Init Live Search will automatically prefer it for search, and just as automatically fall back to the built-in database search if it's ever unreachable.
 
 ![Demo of Init Live Search](https://inithtml.com/wp-content/uploads/2025/05/Init-Live-Search-Demo.gif)
+
+## What's New in v2.0.0
+
+- **Abilities API support (WordPress 6.9+)**: registers two read-only abilities under the `init-live-search` category — `init-live-search/search-posts` (runs the plugin's search engine and returns matching results) and `init-live-search/get-related-posts` (returns posts related to a given post ID). Discoverable and executable via PHP, `wp_get_abilities()`, and — when a site opts in — the `wp-abilities/v1` REST namespace. Fully optional and backward-compatible: on WordPress versions older than 6.9, the integration silently does nothing
+- **Block Editor (Gutenberg) support**: three dynamic blocks, grouped under their own **Init Live Search** block category
+  - **Live Search Box** — the icon/input launcher, equivalent to `[init_live_search]`
+  - **Live Search: Related Posts** — keyword-based related posts, equivalent to `[init_live_search_related_posts]`
+  - **Live Search: AI Related Posts** — AI multi-signal related posts, equivalent to `[init_live_search_related_ai]`
+
+  Each block is registered via `block.json` with a PHP `render.php` that calls the exact same shortcode function as its shortcode counterpart, so output never diverges. A single no-build-step vanilla JS editor integration uses `wp.serverSideRender` for a live preview directly in the editor, and CSS is declared once via `block.json`'s `"style"` field so WordPress enqueues it automatically wherever needed
+- **Requires at least** raised from 5.9 to 6.9 to support the Abilities API integration. `Requires PHP` remains 7.4
+- **Fixed**: Block Editor inserter/sidebar strings now translate correctly on both the JS side (Jed-formatted JSON via `wp_set_script_translations()`) and the `block.json` metadata side (standard `.mo`/gettext)
 
 ## What's New in v1.7.x, v1.8.x & v1.9.x
 
@@ -46,6 +58,8 @@ Want typo-tolerant, sub-50ms relevance ranking on top of that? Connect your own 
 
 - Clean modal search interface (`Ctrl + /`, triple-click, or `data-ils`)
 - Powered by WordPress REST API — no `admin-ajax`, no jQuery
+- **Block Editor (Gutenberg) blocks**: Live Search Box, Related Posts, and AI Related Posts, each with a live server-side preview in the editor
+- **Abilities API support (WordPress 6.9+)**: search and related-posts exposed as discoverable, executable abilities via `wp_get_abilities()` and the `wp-abilities/v1` REST namespace
 - **Optional Meilisearch integration**: typo-tolerant, relevance-ranked external search with automatic fallback to local DB search
 - **Optional FULLTEXT search index**: MySQL FULLTEXT-backed matching for the local database search pipeline on large sites, with automatic background indexing via WP-Cron
 - **Cross-site Search**: query multiple domains seamlessly
@@ -63,6 +77,27 @@ Want typo-tolerant, sub-50ms relevance ranking on top of that? Connect your own 
 - **ACF support**: search custom fields
 - Built-in **Analytics**: log search terms (no personal data)
 - Developer-ready: filters, JS events, REST-first architecture
+
+## Block Editor (Gutenberg)
+
+Three dynamic blocks are available under their own **Init Live Search** category in the block inserter — no shortcodes needed if you prefer working entirely in the editor:
+
+| Block | Equivalent shortcode | Description |
+|-------|----------------------|--------------|
+| **Live Search Box** | `[init_live_search]` | The icon/input launcher that opens the search modal |
+| **Live Search: Related Posts** | `[init_live_search_related_posts]` | Keyword-based related posts |
+| **Live Search: AI Related Posts** | `[init_live_search_related_ai]` | AI multi-signal related posts |
+
+Each block shares the exact same rendering code as its shortcode, so switching between the Block Editor and shortcodes never changes the output. Block settings map directly to shortcode attributes, and a live preview (via `wp.serverSideRender`) is shown right in the editor as you configure it.
+
+## Abilities API (WordPress 6.9+)
+
+On WordPress 6.9 and above, Init Live Search registers two read-only abilities under the `init-live-search` category:
+
+- `init-live-search/search-posts` — runs the plugin's search engine and returns matching results
+- `init-live-search/get-related-posts` — returns posts related to a given post ID
+
+These are discoverable and executable via PHP (`wp_get_abilities()`), and — for sites that opt into exposing it — the `wp-abilities/v1` REST namespace, making it straightforward for AI agents and automated tools to query search and related-posts data through a standardized interface. This integration is fully optional: on WordPress versions older than 6.9, it silently does nothing and the rest of the plugin is unaffected.
 
 ## FULLTEXT Search Index (Optional)
 
@@ -132,7 +167,7 @@ Init Live Search works great out of the box with zero setup — the built-in dat
 
 ## Shortcodes
 
-Easily generate shortcodes using the built-in **Shortcode Builder UI** under *Settings → Init Live Search*.  
+Easily generate shortcodes using the built-in **Shortcode Builder UI** under *Settings → Init Live Search*. Prefer working in the Block Editor? Each shortcode below has an equivalent block — see [Block Editor (Gutenberg)](#block-editor-gutenberg) above.
 
 ### `[init_live_search]`  
 Display a search icon or input anywhere that opens the Init Live Search modal.
@@ -198,6 +233,11 @@ Display a list of AI-powered related posts using multi-signal scoring (tags, ser
    - Triple-clicking anywhere on the page (within 0.5s)
    - Clicking any element with a `data-ils` attribute
    - Visiting a URL with `#search` or `?modal=search&term=...`
+
+## Requirements
+
+- WordPress 6.9 or later (raised from 5.9 in v2.0.0, to support the Abilities API integration)
+- PHP 7.4 or later
 
 ## License
 
