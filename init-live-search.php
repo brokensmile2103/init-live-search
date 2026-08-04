@@ -3,12 +3,12 @@
  * Plugin Name: Init Live Search
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
  * Description: A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API.
- * Version: 1.9.6
+ * Version: 2.0.0
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-live-search
  * Domain Path: /languages
- * Requires at least: 5.9
+ * Requires at least: 6.9
  * Tested up to: 7.0
  * Requires PHP: 7.4
  * License: GPLv2 or later
@@ -18,7 +18,7 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',                '1.9.6');
+define('INIT_PLUGIN_SUITE_LS_VERSION',                '2.0.0');
 define('INIT_PLUGIN_SUITE_LS_SLUG',                   'init-live-search');
 define('INIT_PLUGIN_SUITE_LS_GROUP_GENERAL',          'init_live_search_group_general');
 define('INIT_PLUGIN_SUITE_LS_OPTION',                 'init_plugin_suite_live_search_settings');
@@ -286,7 +286,7 @@ function init_plugin_suite_live_search_add_settings_link($links) {
 // Includes
 if (is_dir(INIT_PLUGIN_SUITE_LS_INCLUDES_PATH)) {
     // Load internal modules (utils first, then main logic)
-    foreach (['meilisearch.php', 'fulltext-index.php', 'search-core.php', 'related-ai.php', 'utils.php', 'predefined-dictionaries.php', 'rest-api.php', 'settings-page.php', 'tracking.php', 'shortcodes.php', 'hooks.php'] as $file) {
+    foreach (['meilisearch.php', 'fulltext-index.php', 'search-core.php', 'related-ai.php', 'utils.php', 'predefined-dictionaries.php', 'rest-api.php', 'settings-page.php', 'tracking.php', 'shortcodes.php', 'blocks.php', 'abilities-api.php', 'hooks.php'] as $file) {
         $path = INIT_PLUGIN_SUITE_LS_INCLUDES_PATH . $file;
         if (file_exists($path)) {
             require_once $path;

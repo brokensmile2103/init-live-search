@@ -1,0 +1,49 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "init-live-search/related-posts",
+    "title": "Live Search: Related Posts",
+    "category": "init-live-search",
+    "icon": "admin-links",
+    "description": "Insert keyword-based related posts powered by Init Live Search.",
+    "keywords": ["related", "related posts", "init"],
+    "textdomain": "init-live-search",
+    "attributes": {
+        "postId": {
+            "type": "number",
+            "default": 0
+        },
+        "count": {
+            "type": "number",
+            "default": 5
+        },
+        "keyword": {
+            "type": "string",
+            "default": ""
+        },
+        "postType": {
+            "type": "string",
+            "default": "post"
+        },
+        "template": {
+            "type": "string",
+            "default": "default"
+        },
+        "loadCss": {
+            "type": "boolean",
+            "default": true
+        },
+        "showSchema": {
+            "type": "boolean",
+            "default": true
+        }
+    },
+    "supports": {
+        "html": false,
+        "className": false,
+        "customClassName": false
+    },
+    "editorScript": "init-live-search-blocks-editor",
+    "style": "init-live-search-related-posts",
+    "render": "file:./render.php"
+}

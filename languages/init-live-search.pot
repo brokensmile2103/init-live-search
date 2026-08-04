@@ -1,17 +1,1020 @@
+# Copyright (C) 2026 Init HTML
+# This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Init Live Search 1.9.3\n"
+"Project-Id-Version: Init Live Search 2.0.0\n"
 "Report-Msgid-Bugs-To: https://inithtml.com/plugin/init-live-search/\n"
 "Last-Translator: Init HTML <hello@inithtml.com>\n"
 "Language-Team: Vietnamese <vi@li.org>\n"
-"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-04T06:52:22+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: init-live-search\n"
 
-#: Description
+#. Plugin Name of the plugin
+#: init-live-search.php
+#: includes/abilities-api.php:20
+#: includes/blocks.php:36
+#: includes/settings-page.php:37
+#: includes/shortcodes.php:245
+msgid "Init Live Search"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: init-live-search.php
+msgid "https://inithtml.com/plugin/init-live-search/"
+msgstr ""
+
+#. Description of the plugin
+#: init-live-search.php
 msgid "A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API."
+msgstr ""
+
+#. Author of the plugin
+#: init-live-search.php
+msgid "Init HTML"
+msgstr ""
+
+#. Author URI of the plugin
+#: init-live-search.php
+msgid "https://inithtml.com/"
+msgstr ""
+
+#: includes/abilities-api.php:21
+msgid "Abilities exposed by the Init Live Search plugin."
+msgstr ""
+
+#: includes/abilities-api.php:32
+msgid "Search Posts"
+msgstr ""
+
+#: includes/abilities-api.php:33
+msgid "Searches posts using the Init Live Search engine (FULLTEXT index, Meilisearch, or LIKE fallback) and returns matching results."
+msgstr ""
+
+#: includes/abilities-api.php:40
+msgid "The search term."
+msgstr ""
+
+#: includes/abilities-api.php:61
+msgid "Get Related Posts"
+msgstr ""
+
+#: includes/abilities-api.php:62
+msgid "Returns posts related to a given post ID, using the same keyword-similarity matching as the [init_live_search_related_posts] shortcode."
+msgstr ""
+
+#: includes/abilities-api.php:69
+msgid "The reference post ID to find related posts for."
+msgstr ""
+
+#: includes/abilities-api.php:74
+msgid "Maximum number of related posts to return."
+msgstr ""
+
+#: includes/abilities-api.php:81
+msgid "Restrict related posts to a specific post type."
+msgstr ""
+
+#: includes/abilities-api.php:129
+msgid "A non-empty search term is required."
+msgstr ""
+
+#: includes/abilities-api.php:145
+msgid "A valid, published post ID is required."
+msgstr ""
+
+#: includes/ajax.php:612
+msgid "Missing Host or Index. Fill these in under Settings > Init Live Search > Meilisearch — enabling \"Use Meilisearch as the primary search source\" is not required to build the index."
+msgstr ""
+
+#: includes/ajax.php:617
+msgid "Missing Admin/Indexing Key."
+msgstr ""
+
+#: includes/meilisearch.php:167
+msgid "Please fill in Host, Index, and Search Key before testing."
+msgstr ""
+
+#. translators: %d: HTTP status code
+#: includes/meilisearch.php:192
+msgid "Meilisearch returned HTTP error %d. Please check your Host / Index / Key."
+msgstr ""
+
+#. translators: %d: HTTP status code
+#: includes/meilisearch.php:465
+msgid "HTTP error %d from Meilisearch."
+msgstr ""
+
+#: includes/meilisearch.php:486
+msgid "Missing Admin/Indexing Key, Host, or Index."
+msgstr ""
+
+#. translators: %s is the discount percentage (e.g. 20 for 20%)
+#: includes/rest-api.php:671
+msgid "Save %s%%"
+msgstr ""
+
+#. translators: %s is the monetary discount amount (e.g. $10)
+#: includes/rest-api.php:674
+msgid "Save %s"
+msgstr ""
+
+#. translators: %d is the number of remaining uses
+#: includes/rest-api.php:681
+msgid "Remaining: %d uses"
+msgstr ""
+
+#: includes/rest-api.php:683
+msgid "Unlimited uses"
+msgstr ""
+
+#. translators: %s is the expiration date
+#: includes/rest-api.php:688
+msgid "Expires on: %s"
+msgstr ""
+
+#: includes/rest-api.php:690
+msgid "No expiration"
+msgstr ""
+
+#: includes/settings-page.php:36
+#: includes/settings-page.php:68
+msgid "Init Live Search Settings"
+msgstr ""
+
+#: includes/settings-page.php:61
+#: includes/settings/general.php:9
+msgid "General Settings"
+msgstr ""
+
+#: includes/settings-page.php:62
+#: includes/settings/meilisearch.php:8
+msgid "Meilisearch"
+msgstr ""
+
+#: includes/settings-page.php:63
+msgid "Synonyms"
+msgstr ""
+
+#: includes/settings-page.php:64
+msgid "Analytics"
+msgstr ""
+
+#: includes/settings-page.php:86
+msgid "Invalid tab."
+msgstr ""
+
+#: includes/settings-page.php:150
+msgid "FULLTEXT search index could not be enabled: your MySQL/MariaDB server does not support InnoDB FULLTEXT indexes on this table. The plugin will keep using the standard database search."
+msgstr ""
+
+#: includes/settings-page.php:276
+msgid "Testing..."
+msgstr ""
+
+#: includes/settings-page.php:277
+msgid "Connected successfully"
+msgstr ""
+
+#: includes/settings-page.php:278
+msgid "documents"
+msgstr ""
+
+#: includes/settings-page.php:279
+msgid "Connection failed"
+msgstr ""
+
+#: includes/settings-page.php:280
+msgid "Unknown error"
+msgstr ""
+
+#: includes/settings-page.php:281
+msgid "Started — reindexing in the background…"
+msgstr ""
+
+#: includes/settings-page.php:282
+#: includes/settings/meilisearch.php:126
+msgid "Reindexing in the background (about 200 posts every 5 seconds)…"
+msgstr ""
+
+#: includes/settings-page.php:283
+msgid "Background reindex stopped after repeated errors:"
+msgstr ""
+
+#: includes/settings-page.php:284
+msgid "Index last built:"
+msgstr ""
+
+#. translators: %1$d: number of skipped posts, %2$s: comma-separated post IDs
+#: includes/settings-page.php:286
+#: includes/settings/meilisearch.php:154
+msgid "%1$d post(s) were too large to send to Meilisearch even individually and were skipped (post IDs: %2$s). Increase the payload size limit on Meilisearch (or any reverse proxy in front of it), or shorten these posts, then run Reindex Now again."
+msgstr ""
+
+#: includes/settings/analytics.php:31
+msgid "Search Analytics"
+msgstr ""
+
+#: includes/settings/analytics.php:34
+msgid "Below is a temporary log of recent search queries. No IPs or personal data are stored."
+msgstr ""
+
+#: includes/settings/analytics.php:42
+msgid "Group similar queries"
+msgstr ""
+
+#: includes/settings/analytics.php:45
+msgid "Clear All Logs"
+msgstr ""
+
+#: includes/settings/analytics.php:46
+msgid "Export CSV"
+msgstr ""
+
+#: includes/settings/analytics.php:70
+msgid "No data recorded yet."
+msgstr ""
+
+#: includes/settings/analytics.php:76
+msgid "Time"
+msgstr ""
+
+#: includes/settings/analytics.php:77
+msgid "Query"
+msgstr ""
+
+#: includes/settings/analytics.php:78
+msgid "Results"
+msgstr ""
+
+#: includes/settings/general.php:12
+msgid "Configure how the search modal is triggered, how matching and fallback behave, and how results are displayed on the frontend."
+msgstr ""
+
+#: includes/settings/general.php:22
+msgid "Search Triggers"
+msgstr ""
+
+#: includes/settings/general.php:25
+msgid "Post Types to Include"
+msgstr ""
+
+#: includes/settings/general.php:38
+msgid "Trigger methods to open modal"
+msgstr ""
+
+#: includes/settings/general.php:43
+msgid "Attach event to input[name=\"s\"]"
+msgstr ""
+
+#: includes/settings/general.php:47
+msgid "Triple click anywhere on the page"
+msgstr ""
+
+#: includes/settings/general.php:51
+msgid "Press Ctrl + / (or Cmd + / on Mac)"
+msgstr ""
+
+#: includes/settings/general.php:55
+msgid "Select one or more methods to trigger the search modal."
+msgstr ""
+
+#: includes/settings/general.php:60
+msgid "Search Behavior"
+msgstr ""
+
+#: includes/settings/general.php:63
+msgid "Enable Slash Commands?"
+msgstr ""
+
+#: includes/settings/general.php:67
+msgid "Allow search commands starting with \"/\" such as /recent, /id, /tag, etc."
+msgstr ""
+
+#: includes/settings/general.php:72
+msgid "Cross-site Search Domains"
+msgstr ""
+
+#: includes/settings/general.php:76
+msgid "Enter one site per line in the format: Site Name|https://example.com/"
+msgstr ""
+
+#: includes/settings/general.php:77
+msgid "When filled, your search will fetch results from these additional domains and merge them into one list."
+msgstr ""
+
+#: includes/settings/general.php:78
+msgid "Each external site must also have the Init Live Search plugin installed and active."
+msgstr ""
+
+#: includes/settings/general.php:83
+msgid "Default Slash Command on Modal Open"
+msgstr ""
+
+#: includes/settings/general.php:90
+msgid "None (do not preload anything)"
+msgstr ""
+
+#: includes/settings/general.php:91
+msgid "Default (/recent)"
+msgstr ""
+
+#: includes/settings/general.php:92
+msgid "Related Posts (use /related)"
+msgstr ""
+
+#: includes/settings/general.php:93
+msgid "Smart Detection (based on current page)"
+msgstr ""
+
+#: includes/settings/general.php:97
+msgid "Popular Posts (use /popular)"
+msgstr ""
+
+#: includes/settings/general.php:98
+msgid "Trending Posts (use /trending)"
+msgstr ""
+
+#: includes/settings/general.php:102
+msgid "Continue Reading (use /read)"
+msgstr ""
+
+#: includes/settings/general.php:116
+msgid "Choose a default slash command to run automatically when the search modal opens."
+msgstr ""
+
+#: includes/settings/general.php:117
+msgid "“Smart Detection” automatically detects based on current page: /related for posts, /product for shop pages, taxonomy-based commands, etc."
+msgstr ""
+
+#: includes/settings/general.php:118
+msgid "“Popular”, “Trending” and “Read” options are only available if their respective plugins are active."
+msgstr ""
+
+#: includes/settings/general.php:123
+msgid "Only run /related on Single pages?"
+msgstr ""
+
+#: includes/settings/general.php:127
+msgid "Only execute the /related command when viewing a single post page."
+msgstr ""
+
+#: includes/settings/general.php:132
+msgid "Exclude /related on pages with these slug keywords"
+msgstr ""
+
+#: includes/settings/general.php:136
+msgid "Enter one keyword per line. If the current page slug contains any of these keywords, /related will not auto-run."
+msgstr ""
+
+#: includes/settings/general.php:141
+msgid "Use WordPress Native Search?"
+msgstr ""
+
+#: includes/settings/general.php:145
+msgid "Bypass all custom search logic and use WordPress built-in WP_Query search instead."
+msgstr ""
+
+#: includes/settings/general.php:147
+msgid "Recommended for small sites or when using third-party search plugins (e.g. SearchWP, ElasticPress) that hook into WP_Query."
+msgstr ""
+
+#: includes/settings/general.php:151
+msgid "Search Mode"
+msgstr ""
+
+#: includes/settings/general.php:156
+msgid "Title Only"
+msgstr ""
+
+#: includes/settings/general.php:160
+msgid "Init Smart Tag-Aware Search"
+msgstr ""
+
+#: includes/settings/general.php:162
+msgid "This mode matches against post title and tag names. Ideal for content with rich tagging."
+msgstr ""
+
+#: includes/settings/general.php:165
+msgid "Title and Excerpt"
+msgstr ""
+
+#: includes/settings/general.php:169
+msgid "Title, Excerpt and Content"
+msgstr ""
+
+#: includes/settings/general.php:175
+msgid "FULLTEXT Search Index"
+msgstr ""
+
+#: includes/settings/general.php:204
+msgid "Use a MySQL FULLTEXT index for Title/Excerpt/Content matching instead of LIKE queries."
+msgstr ""
+
+#: includes/settings/general.php:207
+msgid "Recommended for large sites (many thousands of posts) on the standard database search pipeline — significantly faster than LIKE, with no external service required. Tag, SEO metadata, and ACF field matching are unaffected and keep working as before."
+msgstr ""
+
+#: includes/settings/general.php:211
+msgid "Not available: your MySQL/MariaDB server does not appear to support InnoDB FULLTEXT indexes on this table."
+msgstr ""
+
+#: includes/settings/general.php:215
+msgid "Re-check support"
+msgstr ""
+
+#: includes/settings/general.php:217
+msgid "Runs the capability check again — useful if this was a temporary server issue."
+msgstr ""
+
+#: includes/settings/general.php:222
+msgid "Settings saved. Checking indexing status…"
+msgstr ""
+
+#: includes/settings/general.php:230
+msgid "Building the index automatically in the background (about 300 posts every 5 seconds) — no action needed. Progress relies on WP-Cron, so it advances fastest on sites with regular visitor traffic."
+msgstr ""
+
+#: includes/settings/general.php:233
+#: includes/settings/general.php:263
+msgid "You can run this manually any time via WP-CLI:"
+msgstr ""
+
+#: includes/settings/general.php:238
+msgid "Background indexing isn't running right now — WP-Cron may be disabled on this site (DISABLE_WP_CRON)."
+msgstr ""
+
+#: includes/settings/general.php:242
+msgid "Run Now"
+msgstr ""
+
+#: includes/settings/general.php:244
+msgid "Processes a batch immediately (up to ~20 seconds), bypassing WP-Cron entirely. Click again if it isn't finished after one click."
+msgstr ""
+
+#: includes/settings/general.php:247
+msgid "Or run it manually via WP-CLI:"
+msgstr ""
+
+#. translators: %s: date/time the index was last built
+#: includes/settings/general.php:257
+#: includes/settings/meilisearch.php:143
+msgid "Index last built: %s."
+msgstr ""
+
+#: includes/settings/general.php:270
+msgid "Enable + / - Search Operators?"
+msgstr ""
+
+#: includes/settings/general.php:274
+msgid "Allow using +word to force match, -word to exclude."
+msgstr ""
+
+#: includes/settings/general.php:276
+msgid "Enable this if you want to support advanced users using must-have (+) and must-not-have (-) keyword operators."
+msgstr ""
+
+#: includes/settings/general.php:280
+msgid "Show Excerpt in Search Results?"
+msgstr ""
+
+#: includes/settings/general.php:284
+msgid "Display the post excerpt below each result item in the modal."
+msgstr ""
+
+#: includes/settings/general.php:286
+msgid "If disabled, excerpt will be omitted from results to simplify the UI."
+msgstr ""
+
+#: includes/settings/general.php:290
+msgid "Use First Image as Thumbnail Fallback?"
+msgstr ""
+
+#: includes/settings/general.php:299
+msgid "Automatically extract the first image from post content when no featured image is available."
+msgstr ""
+
+#: includes/settings/general.php:303
+msgid "Useful for older posts or sites that do not consistently use featured images."
+msgstr ""
+
+#: includes/settings/general.php:308
+msgid "Search in ACF Fields (Advanced)"
+msgstr ""
+
+#: includes/settings/general.php:311
+msgid "Optional. Enter comma-separated ACF field keys to include in search (e.g. company_name, project_code). If left blank, ACF fields will not be searched."
+msgstr ""
+
+#: includes/settings/general.php:315
+msgid "Search in SEO Metadata?"
+msgstr ""
+
+#: includes/settings/general.php:319
+msgid "Include SEO Title and Meta Description (Yoast, Rank Math, TSF, etc.) in search matching."
+msgstr ""
+
+#: includes/settings/general.php:321
+msgid "Enable this to improve accuracy by searching within SEO-optimized content written by the author."
+msgstr ""
+
+#: includes/settings/general.php:325
+msgid "Enable Synonym Expansion?"
+msgstr ""
+
+#: includes/settings/general.php:329
+msgid "Allow search terms to be expanded using built-in or custom-defined synonyms."
+msgstr ""
+
+#: includes/settings/general.php:332
+msgid "Enable this only after defining useful synonym mappings. Otherwise, it will have no effect."
+msgstr ""
+
+#: includes/settings/general.php:337
+msgid "Enable fallback matching?"
+msgstr ""
+
+#: includes/settings/general.php:341
+msgid "Try trimming or using bigrams if not enough results are found."
+msgstr ""
+
+#: includes/settings/general.php:346
+msgid "Enable Search Analytics?"
+msgstr ""
+
+#: includes/settings/general.php:350
+msgid "Log search queries (term, result count) for analytics purposes."
+msgstr ""
+
+#: includes/settings/general.php:352
+msgid "When enabled, search data will be stored temporarily using transients to help analyze usage trends. No IPs or personal data are stored."
+msgstr ""
+
+#: includes/settings/general.php:356
+msgid "Auto Redirect 404 to Best Match?"
+msgstr ""
+
+#: includes/settings/general.php:365
+msgid "When a 404 page is requested, automatically redirect to the most relevant post found by Init Live Search."
+msgstr ""
+
+#: includes/settings/general.php:368
+msgid "Leave unchecked to keep the default 404 behavior of your theme."
+msgstr ""
+
+#: includes/settings/general.php:373
+msgid "Performance & UX"
+msgstr ""
+
+#: includes/settings/general.php:376
+msgid "Debounce Time (ms)"
+msgstr ""
+
+#: includes/settings/general.php:382
+msgid "Max Results"
+msgstr ""
+
+#: includes/settings/general.php:385
+msgid "Maximum number of results to display in the modal."
+msgstr ""
+
+#: includes/settings/general.php:389
+msgid "Max Words to Trigger Highlight Search"
+msgstr ""
+
+#: includes/settings/general.php:392
+msgid "Set maximum word count allowed to trigger tooltip search on text selection. Set 0 to disable."
+msgstr ""
+
+#: includes/settings/general.php:396
+msgid "Enable Voice Input?"
+msgstr ""
+
+#: includes/settings/general.php:400
+msgid "Enable microphone input using the SpeechRecognition API (if supported)"
+msgstr ""
+
+#: includes/settings/general.php:405
+msgid "Cache results in localStorage?"
+msgstr ""
+
+#: includes/settings/general.php:409
+msgid "Enable caching search results in localStorage to improve performance and reduce repeated requests."
+msgstr ""
+
+#: includes/settings/general.php:414
+msgid "Styling & Suggestions"
+msgstr ""
+
+#: includes/settings/general.php:417
+msgid "Frontend CSS Style"
+msgstr ""
+
+#: includes/settings/general.php:422
+msgid "Default (modal-style)"
+msgstr ""
+
+#: includes/settings/general.php:426
+msgid "Full Screen Overlay"
+msgstr ""
+
+#: includes/settings/general.php:430
+msgid "Top Bar"
+msgstr ""
+
+#: includes/settings/general.php:434
+msgid "None (disable all built-in CSS, load manually)"
+msgstr ""
+
+#: includes/settings/general.php:438
+msgid "Choose how the frontend modal should be styled. You can disable all styles and provide your own if needed."
+msgstr ""
+
+#: includes/settings/general.php:443
+msgid "Auto Insert Related Posts?"
+msgstr ""
+
+#: includes/settings/general.php:448
+msgid "No (manual shortcode only)"
+msgstr ""
+
+#: includes/settings/general.php:452
+msgid "After post content"
+msgstr ""
+
+#: includes/settings/general.php:456
+msgid "Before comment form"
+msgstr ""
+
+#: includes/settings/general.php:460
+msgid "After comment form"
+msgstr ""
+
+#: includes/settings/general.php:464
+msgid "Automatically display related posts using the default shortcode layout at a predefined position in single post pages."
+msgstr ""
+
+#: includes/settings/general.php:465
+msgid "Use \"No\" if you prefer inserting shortcode manually."
+msgstr ""
+
+#: includes/settings/general.php:470
+msgid "Default UTM Parameter"
+msgstr ""
+
+#: includes/settings/general.php:473
+msgid "Optional. Set a default UTM parameter to include in search-related requests. Example: utm_source=search&utm_medium=plugin"
+msgstr ""
+
+#: includes/settings/general.php:477
+msgid "Suggested Keywords"
+msgstr ""
+
+#: includes/settings/general.php:480
+msgid "Generate Automatically"
+msgstr ""
+
+#: includes/settings/general.php:481
+msgid "Enter default search keywords for suggestions, separated by commas. You can also auto-generate."
+msgstr ""
+
+#: includes/settings/general.php:489
+msgid "Usage Instructions"
+msgstr ""
+
+#: includes/settings/general.php:491
+msgid "You can change the theme using one of these two ways:"
+msgstr ""
+
+#: includes/settings/general.php:494
+msgid "Add the dark class to the modal container:"
+msgstr ""
+
+#: includes/settings/general.php:498
+msgid "Or set the theme using a global config before the plugin initializes:"
+msgstr ""
+
+#: includes/settings/general.php:501
+msgid "Other values:"
+msgstr ""
+
+#: includes/settings/meilisearch.php:11
+msgid "Meilisearch is an optional, bring-your-own-server feature. You install and run Meilisearch yourself, then paste the connection details below. If the connection fails or is disabled, the plugin automatically falls back to the built-in local database search — your search never stops working just because Meilisearch has an issue."
+msgstr ""
+
+#: includes/settings/meilisearch.php:19
+msgid "Connection"
+msgstr ""
+
+#: includes/settings/meilisearch.php:22
+msgid "Enable Meilisearch"
+msgstr ""
+
+#: includes/settings/meilisearch.php:26
+msgid "Use Meilisearch as the primary search source (falls back to the database automatically on error)."
+msgstr ""
+
+#: includes/settings/meilisearch.php:31
+msgid "Host URL"
+msgstr ""
+
+#: includes/settings/meilisearch.php:37
+msgid "The full URL to your Meilisearch server (HTTPS recommended)."
+msgstr ""
+
+#: includes/settings/meilisearch.php:41
+msgid "Index Name"
+msgstr ""
+
+#: includes/settings/meilisearch.php:50
+msgid "Search API Key"
+msgstr ""
+
+#: includes/settings/meilisearch.php:55
+msgid "Use a key scoped to the \"search\" action only — this key is sent with every search request, so never use your master key here."
+msgstr ""
+
+#: includes/settings/meilisearch.php:59
+msgid "Admin / Indexing Key"
+msgstr ""
+
+#: includes/settings/meilisearch.php:63
+msgid "Currently defined via the INIT_LIVE_SEARCH_MEILI_ADMIN_KEY constant in wp-config.php (this takes priority over any value entered here)."
+msgstr ""
+
+#: includes/settings/meilisearch.php:70
+msgid "A key with document add/delete permissions, used to automatically sync posts when you publish, update, or delete them. Recommended: define this via the INIT_LIVE_SEARCH_MEILI_ADMIN_KEY constant in wp-config.php instead of storing it here for better security."
+msgstr ""
+
+#: includes/settings/meilisearch.php:76
+msgid "Request Timeout (ms)"
+msgstr ""
+
+#: includes/settings/meilisearch.php:81
+msgid "If Meilisearch does not respond within this time, the plugin automatically falls back to the database search."
+msgstr ""
+
+#: includes/settings/meilisearch.php:88
+msgid "Test Connection"
+msgstr ""
+
+#: includes/settings/meilisearch.php:100
+msgid "Reindexing"
+msgstr ""
+
+#: includes/settings/meilisearch.php:102
+msgid "New, updated, or deleted posts are synced to Meilisearch automatically while \"Enable Meilisearch\" above is checked. To index all existing content for the first time (or to rebuild the index), either click the button below (runs in the background, no server access needed) or run it yourself via WP-CLI."
+msgstr ""
+
+#: includes/settings/meilisearch.php:105
+msgid "Reindexing only needs Host and Index below — you can build or rebuild the index while \"Enable Meilisearch\" is still unchecked, e.g. to prepare a new index while the current search source keeps running. Just remember auto-sync on save/delete only starts once the checkbox above is enabled, so re-run Reindex Now (or enable the checkbox) to pick up anything edited in the meantime."
+msgstr ""
+
+#: includes/settings/meilisearch.php:110
+msgid "Reindex Now"
+msgstr ""
+
+#. translators: %s: error message returned by Meilisearch or the HTTP request
+#: includes/settings/meilisearch.php:133
+msgid "Background reindex stopped after repeated errors: %s"
+msgstr ""
+
+#: includes/settings/meilisearch.php:164
+msgid "Or run it manually any time via WP-CLI:"
+msgstr ""
+
+#: includes/settings/synonyms.php:8
+msgid "Synonym Configuration"
+msgstr ""
+
+#: includes/settings/synonyms.php:11
+msgid "You can define custom synonyms here. This will allow search terms to be expanded using your specific site vocabulary."
+msgstr ""
+
+#: includes/settings/synonyms.php:20
+msgid "Predefined Dictionaries"
+msgstr ""
+
+#: includes/settings/synonyms.php:24
+msgid "Select predefined synonym dictionaries"
+msgstr ""
+
+#: includes/settings/synonyms.php:33
+msgid "E-commerce & Shopping"
+msgstr ""
+
+#: includes/settings/synonyms.php:42
+msgid "Technology & IT"
+msgstr ""
+
+#: includes/settings/synonyms.php:51
+msgid "Business & Marketing"
+msgstr ""
+
+#: includes/settings/synonyms.php:60
+msgid "Health & Wellness"
+msgstr ""
+
+#: includes/settings/synonyms.php:69
+msgid "Travel & Tourism"
+msgstr ""
+
+#: includes/settings/synonyms.php:78
+msgid "Education & Learning"
+msgstr ""
+
+#: includes/settings/synonyms.php:87
+msgid "Food & Cooking"
+msgstr ""
+
+#: includes/settings/synonyms.php:96
+msgid "Sports & Fitness"
+msgstr ""
+
+#: includes/settings/synonyms.php:105
+msgid "Fashion & Style"
+msgstr ""
+
+#: includes/settings/synonyms.php:114
+msgid "Entertainment & Media"
+msgstr ""
+
+#: includes/settings/synonyms.php:118
+msgid "Select topic-specific synonym dictionaries to enhance search results. Each dictionary contains hundreds of related terms and synonyms."
+msgstr ""
+
+#: includes/settings/synonyms.php:119
+msgid "Note:"
+msgstr ""
+
+#: includes/settings/synonyms.php:120
+msgid "When at least one dictionary is selected, this feature will be automatically activated."
+msgstr ""
+
+#: includes/settings/synonyms.php:130
+msgid "Custom Synonym Map (JSON)"
+msgstr ""
+
+#: includes/settings/synonyms.php:138
+msgid "Enter a JSON object where each key maps to an array of synonyms. Example:"
+msgstr ""
+
+#: includes/settings/synonyms.php:144
+msgid "Add or Update Synonym"
+msgstr ""
+
+#: includes/settings/synonyms.php:146
+msgid "Keyword (e.g. reaction)"
+msgstr ""
+
+#: includes/settings/synonyms.php:147
+msgid "Synonym (e.g. tương tác)"
+msgstr ""
+
+#: includes/settings/synonyms.php:148
+msgid "Add / Update"
+msgstr ""
+
+#: includes/settings/synonyms.php:149
+msgid "Click to insert or update a keyword → synonym pair into the JSON above."
+msgstr ""
+
+#: includes/shortcodes.php:240
+msgid "Copy"
+msgstr ""
+
+#: includes/shortcodes.php:241
+msgid "Copied!"
+msgstr ""
+
+#: includes/shortcodes.php:242
+msgid "Close"
+msgstr ""
+
+#: includes/shortcodes.php:243
+msgid "Shortcode Preview"
+msgstr ""
+
+#: includes/shortcodes.php:244
+msgid "Shortcode Builder"
+msgstr ""
+
+#: includes/shortcodes.php:246
+#: assets/js/blocks-editor.js:61
+msgid "Type"
+msgstr ""
+
+#: includes/shortcodes.php:247
+#: assets/js/blocks-editor.js:73
+msgid "Placeholder (input mode)"
+msgstr ""
+
+#: includes/shortcodes.php:248
+msgid "Search..."
+msgstr ""
+
+#: includes/shortcodes.php:249
+#: assets/js/blocks-editor.js:81
+msgid "Label (icon mode)"
+msgstr ""
+
+#: includes/shortcodes.php:250
+#: assets/js/blocks-editor.js:88
+msgid "Custom CSS class"
+msgstr ""
+
+#: includes/shortcodes.php:251
+#: assets/js/blocks-editor.js:150
+msgid "Stroke Width"
+msgstr ""
+
+#: includes/shortcodes.php:252
+#: assets/js/blocks-editor.js:143
+msgid "Border Radius (input mode)"
+msgstr ""
+
+#: includes/shortcodes.php:253
+msgid "Related Posts"
+msgstr ""
+
+#: includes/shortcodes.php:254
+msgid "Post ID (optional)"
+msgstr ""
+
+#: includes/shortcodes.php:255
+#: assets/js/blocks-editor.js:221
+#: assets/js/blocks-editor.js:313
+msgid "Number of Posts"
+msgstr ""
+
+#: includes/shortcodes.php:256
+msgid "Post Type(s)"
+msgstr ""
+
+#: includes/shortcodes.php:257
+#: assets/js/blocks-editor.js:229
+msgid "Keyword (override)"
+msgstr ""
+
+#: includes/shortcodes.php:258
+#: assets/js/blocks-editor.js:243
+#: assets/js/blocks-editor.js:328
+msgid "Template"
+msgstr ""
+
+#: includes/shortcodes.php:259
+#: assets/js/blocks-editor.js:251
+#: assets/js/blocks-editor.js:336
+msgid "Load CSS"
+msgstr ""
+
+#: includes/shortcodes.php:260
+#: assets/js/blocks-editor.js:258
+#: assets/js/blocks-editor.js:343
+msgid "Output Schema"
+msgstr ""
+
+#: includes/shortcodes.php:261
+#: assets/js/blocks-editor.js:113
+msgid "Width"
+msgstr ""
+
+#: includes/shortcodes.php:262
+#: assets/js/blocks-editor.js:121
+msgid "Max Width"
+msgstr ""
+
+#: includes/shortcodes.php:263
+#: assets/js/blocks-editor.js:129
+msgid "Align"
+msgstr ""
+
+#: includes/shortcodes.php:264
+#: assets/js/blocks-editor.js:95
+msgid "Element ID"
+msgstr ""
+
+#: includes/shortcodes.php:265
+#: assets/js/blocks-editor.js:102
+msgid "ARIA Label"
+msgstr ""
+
+#: includes/shortcodes.php:266
+msgid "Search Button (input mode)"
+msgstr ""
+
+#: includes/shortcodes.php:267
+#: assets/js/blocks-editor.js:158
+msgid "Input name (input mode)"
+msgstr ""
+
+#. translators: %s is the post title used as fallback alt text
+#: includes/utils.php:442
+msgid "Image for: %s"
 msgstr ""
 
 #: init-live-search.php:129
@@ -194,919 +1197,131 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#. translators: %s is the discount percentage (e.g. 20 for 20%)
-#: includes/rest-api.php:671
-#, php-format
-msgid "Save %s%%"
+#: assets/js/blocks-editor.js:59
+msgid "Search Box Settings"
 msgstr ""
 
-#. translators: %s is the monetary discount amount (e.g. $10)
-#: includes/rest-api.php:674
-#, php-format
-msgid "Save %s"
+#: assets/js/blocks-editor.js:64
+msgid "Icon"
 msgstr ""
 
-#. translators: %d is the number of remaining uses
-#: includes/rest-api.php:681
-#, php-format
-msgid "Remaining: %d uses"
+#: assets/js/blocks-editor.js:65
+msgid "Input"
 msgstr ""
 
-#: includes/rest-api.php:683
-msgid "Unlimited uses"
+#: assets/js/blocks-editor.js:111
+msgid "Layout"
 msgstr ""
 
-#. translators: %s is the expiration date
-#: includes/rest-api.php:688
-#, php-format
-msgid "Expires on: %s"
+#: assets/js/blocks-editor.js:115
+msgid "e.g. 320px, 100%, 20rem"
 msgstr ""
 
-#: includes/rest-api.php:690
-msgid "No expiration"
+#: assets/js/blocks-editor.js:123
+msgid "e.g. 480px"
 msgstr ""
 
-#: includes/meilisearch.php:144
-msgid "Please fill in Host, Index, and Search Key before testing."
+#: assets/js/blocks-editor.js:132
+msgid "Default"
 msgstr ""
 
-#. translators: %d: HTTP status code
-#: includes/meilisearch.php:165
-#, php-format
-msgid "Meilisearch returned HTTP error %d. Please check your Host / Index / Key."
+#: assets/js/blocks-editor.js:133
+msgid "Left"
 msgstr ""
 
-#. translators: %s is the post title used as fallback alt text
-#: includes/utils.php:406
-#, php-format
-msgid "Image for: %s"
+#: assets/js/blocks-editor.js:134
+msgid "Center"
 msgstr ""
 
-#: includes/settings/general.php:14
-msgid "Search Triggers"
+#: assets/js/blocks-editor.js:135
+msgid "Right"
 msgstr ""
 
-#: includes/settings/general.php:17
-msgid "Post Types to Include"
+#: assets/js/blocks-editor.js:166
+msgid "Show Search Button (input mode)"
 msgstr ""
 
-#: includes/settings/general.php:30
-msgid "Trigger methods to open modal"
+#: assets/js/blocks-editor.js:211
+msgid "Related Posts Settings"
 msgstr ""
 
-#: includes/settings/general.php:35
-msgid "Attach event to input[name=\"s\"]"
+#: assets/js/blocks-editor.js:213
+#: assets/js/blocks-editor.js:305
+msgid "Post ID (0 = current post)"
 msgstr ""
 
-#: includes/settings/general.php:39
-msgid "Triple click anywhere on the page"
+#: assets/js/blocks-editor.js:236
+#: assets/js/blocks-editor.js:321
+msgid "Post Type"
 msgstr ""
 
-#: includes/settings/general.php:43
-msgid "Press Ctrl + / (or Cmd + / on Mac)"
+#: assets/js/blocks-editor.js:245
+#: assets/js/blocks-editor.js:330
+msgid "default, classic, compact, grid, or thumbright"
 msgstr ""
 
-#: includes/settings/general.php:47
-msgid "Select one or more methods to trigger the search modal."
+#: assets/js/blocks-editor.js:303
+msgid "AI Related Posts Settings"
 msgstr ""
 
-#: includes/settings/general.php:52
-msgid "Search Behavior"
-msgstr ""
-
-#: includes/settings/general.php:55
-msgid "Enable Slash Commands?"
-msgstr ""
-
-#: includes/settings/general.php:59
-msgid "Allow search commands starting with \"/\" such as /recent, /id, /tag, etc."
-msgstr ""
-
-#: includes/settings/general.php:64
-msgid "Cross-site Search Domains"
-msgstr ""
-
-#: includes/settings/general.php:68
-msgid "Enter one site per line in the format: Site Name|https://example.com/"
-msgstr ""
-
-#: includes/settings/general.php:69
-msgid "When filled, your search will fetch results from these additional domains and merge them into one list."
-msgstr ""
-
-#: includes/settings/general.php:70
-msgid "Each external site must also have the Init Live Search plugin installed and active."
-msgstr ""
-
-#: includes/settings/general.php:75
-msgid "Default Slash Command on Modal Open"
-msgstr ""
-
-#: includes/settings/general.php:82
-msgid "None (do not preload anything)"
-msgstr ""
-
-#: includes/settings/general.php:83
-msgid "Default (/recent)"
-msgstr ""
-
-#: includes/settings/general.php:84
-msgid "Related Posts (use /related)"
-msgstr ""
-
-#: includes/settings/general.php:85
-msgid "Smart Detection (based on current page)"
-msgstr ""
-
-#: includes/settings/general.php:89
-msgid "Popular Posts (use /popular)"
-msgstr ""
-
-#: includes/settings/general.php:90
-msgid "Trending Posts (use /trending)"
-msgstr ""
-
-#: includes/settings/general.php:94
-msgid "Continue Reading (use /read)"
-msgstr ""
-
-#: includes/settings/general.php:108
-msgid "Choose a default slash command to run automatically when the search modal opens."
-msgstr ""
-
-#: includes/settings/general.php:109
-msgid "“Smart Detection” automatically detects based on current page: /related for posts, /product for shop pages, taxonomy-based commands, etc."
-msgstr ""
-
-#: includes/settings/general.php:110
-msgid "“Popular”, “Trending” and “Read” options are only available if their respective plugins are active."
-msgstr ""
-
-#: includes/settings/general.php:115
-msgid "Only run /related on Single pages?"
-msgstr ""
-
-#: includes/settings/general.php:119
-msgid "Only execute the /related command when viewing a single post page."
-msgstr ""
-
-#: includes/settings/general.php:124
-msgid "Exclude /related on pages with these slug keywords"
-msgstr ""
-
-#: includes/settings/general.php:128
-msgid "Enter one keyword per line. If the current page slug contains any of these keywords, /related will not auto-run."
-msgstr ""
-
-#: includes/settings/general.php:133
-msgid "Use WordPress Native Search?"
-msgstr ""
-
-#: includes/settings/general.php:137
-msgid "Bypass all custom search logic and use WordPress built-in WP_Query search instead."
-msgstr ""
-
-#: includes/settings/general.php:139
-msgid "Recommended for small sites or when using third-party search plugins (e.g. SearchWP, ElasticPress) that hook into WP_Query."
-msgstr ""
-
-#: includes/settings/general.php:143
-msgid "Search Mode"
-msgstr ""
-
-#: includes/settings/general.php:148
-msgid "Title Only"
-msgstr ""
-
-#: includes/settings/general.php:152
-msgid "Init Smart Tag-Aware Search"
-msgstr ""
-
-#: includes/settings/general.php:154
-msgid "This mode matches against post title and tag names. Ideal for content with rich tagging."
-msgstr ""
-
-#: includes/settings/general.php:157
-msgid "Title and Excerpt"
-msgstr ""
-
-#: includes/settings/general.php:161
-msgid "Title, Excerpt and Content"
-msgstr ""
-
-#: includes/settings/general.php:167
-msgid "Enable + / - Search Operators?"
-msgstr ""
-
-#: includes/settings/general.php:171
-msgid "Allow using +word to force match, -word to exclude."
-msgstr ""
-
-#: includes/settings/general.php:173
-msgid "Enable this if you want to support advanced users using must-have (+) and must-not-have (-) keyword operators."
-msgstr ""
-
-#: includes/settings/general.php:177
-msgid "Show Excerpt in Search Results?"
-msgstr ""
-
-#: includes/settings/general.php:181
-msgid "Display the post excerpt below each result item in the modal."
-msgstr ""
-
-#: includes/settings/general.php:183
-msgid "If disabled, excerpt will be omitted from results to simplify the UI."
-msgstr ""
-
-#: includes/settings/general.php:187
-msgid "Use First Image as Thumbnail Fallback?"
-msgstr ""
-
-#: includes/settings/general.php:196
-msgid "Automatically extract the first image from post content when no featured image is available."
-msgstr ""
-
-#: includes/settings/general.php:200
-msgid "Useful for older posts or sites that do not consistently use featured images."
-msgstr ""
-
-#: includes/settings/general.php:205
-msgid "Search in ACF Fields (Advanced)"
-msgstr ""
-
-#: includes/settings/general.php:208
-msgid "Optional. Enter comma-separated ACF field keys to include in search (e.g. company_name, project_code). If left blank, ACF fields will not be searched."
-msgstr ""
-
-#: includes/settings/general.php:212
-msgid "Search in SEO Metadata?"
-msgstr ""
-
-#: includes/settings/general.php:216
-msgid "Include SEO Title and Meta Description (Yoast, Rank Math, TSF, etc.) in search matching."
-msgstr ""
-
-#: includes/settings/general.php:218
-msgid "Enable this to improve accuracy by searching within SEO-optimized content written by the author."
-msgstr ""
-
-#: includes/settings/general.php:222
-msgid "Enable Synonym Expansion?"
-msgstr ""
-
-#: includes/settings/general.php:226
-msgid "Allow search terms to be expanded using built-in or custom-defined synonyms."
-msgstr ""
-
-#: includes/settings/general.php:229
-msgid "Enable this only after defining useful synonym mappings. Otherwise, it will have no effect."
-msgstr ""
-
-#: includes/settings/general.php:234
-msgid "Enable fallback matching?"
-msgstr ""
-
-#: includes/settings/general.php:238
-msgid "Try trimming or using bigrams if not enough results are found."
-msgstr ""
-
-#: includes/settings/general.php:243
-msgid "Enable Search Analytics?"
-msgstr ""
-
-#: includes/settings/general.php:247
-msgid "Log search queries (term, result count) for analytics purposes."
-msgstr ""
-
-#: includes/settings/general.php:249
-msgid "When enabled, search data will be stored temporarily using transients to help analyze usage trends. No IPs or personal data are stored."
-msgstr ""
-
-#: includes/settings/general.php:253
-msgid "Auto Redirect 404 to Best Match?"
-msgstr ""
-
-#: includes/settings/general.php:262
-msgid "When a 404 page is requested, automatically redirect to the most relevant post found by Init Live Search."
-msgstr ""
-
-#: includes/settings/general.php:265
-msgid "Leave unchecked to keep the default 404 behavior of your theme."
-msgstr ""
-
-#: includes/settings/general.php:270
-msgid "Performance & UX"
-msgstr ""
-
-#: includes/settings/general.php:273
-msgid "Debounce Time (ms)"
-msgstr ""
-
-#: includes/settings/general.php:279
-msgid "Max Results"
-msgstr ""
-
-#: includes/settings/general.php:282
-msgid "Maximum number of results to display in the modal."
-msgstr ""
-
-#: includes/settings/general.php:286
-msgid "Max Words to Trigger Highlight Search"
-msgstr ""
-
-#: includes/settings/general.php:289
-msgid "Set maximum word count allowed to trigger tooltip search on text selection. Set 0 to disable."
-msgstr ""
-
-#: includes/settings/general.php:293
-msgid "Enable Voice Input?"
-msgstr ""
-
-#: includes/settings/general.php:297
-msgid "Enable microphone input using the SpeechRecognition API (if supported)"
-msgstr ""
-
-#: includes/settings/general.php:302
-msgid "Cache results in localStorage?"
-msgstr ""
-
-#: includes/settings/general.php:306
-msgid "Enable caching search results in localStorage to improve performance and reduce repeated requests."
-msgstr ""
-
-#: includes/settings/general.php:311
-msgid "Styling & Suggestions"
-msgstr ""
-
-#: includes/settings/general.php:314
-msgid "Frontend CSS Style"
-msgstr ""
-
-#: includes/settings/general.php:319
-msgid "Default (modal-style)"
-msgstr ""
-
-#: includes/settings/general.php:323
-msgid "Full Screen Overlay"
-msgstr ""
-
-#: includes/settings/general.php:327
-msgid "Top Bar"
-msgstr ""
-
-#: includes/settings/general.php:331
-msgid "None (disable all built-in CSS, load manually)"
-msgstr ""
-
-#: includes/settings/general.php:335
-msgid "Choose how the frontend modal should be styled. You can disable all styles and provide your own if needed."
-msgstr ""
-
-#: includes/settings/general.php:340
-msgid "Auto Insert Related Posts?"
-msgstr ""
-
-#: includes/settings/general.php:345
-msgid "No (manual shortcode only)"
-msgstr ""
-
-#: includes/settings/general.php:349
-msgid "After post content"
-msgstr ""
-
-#: includes/settings/general.php:353
-msgid "Before comment form"
-msgstr ""
-
-#: includes/settings/general.php:357
-msgid "After comment form"
-msgstr ""
-
-#: includes/settings/general.php:361
-msgid "Automatically display related posts using the default shortcode layout at a predefined position in single post pages."
-msgstr ""
-
-#: includes/settings/general.php:362
-msgid "Use \"No\" if you prefer inserting shortcode manually."
-msgstr ""
-
-#: includes/settings/general.php:367
-msgid "Default UTM Parameter"
-msgstr ""
-
-#: includes/settings/general.php:370
-msgid "Optional. Set a default UTM parameter to include in search-related requests. Example: utm_source=search&utm_medium=plugin"
-msgstr ""
-
-#: includes/settings/general.php:374
-msgid "Suggested Keywords"
-msgstr ""
-
-#: includes/settings/general.php:377
-msgid "Generate Automatically"
-msgstr ""
-
-#: includes/settings/general.php:378
-msgid "Enter default search keywords for suggestions, separated by commas. You can also auto-generate."
-msgstr ""
-
-#: includes/settings/general.php:386
-msgid "Usage Instructions"
-msgstr ""
-
-#: includes/settings/general.php:388
-msgid "You can change the theme using one of these two ways:"
-msgstr ""
-
-#: includes/settings/general.php:391
-msgid "Add the dark class to the modal container:"
-msgstr ""
-
-#: includes/settings/general.php:395
-msgid "Or set the theme using a global config before the plugin initializes:"
-msgstr ""
-
-#: includes/settings/general.php:398
-msgid "Other values:"
-msgstr ""
-
-#: includes/settings/meilisearch.php:12
-msgid "Meilisearch is an optional, bring-your-own-server feature. You install and run Meilisearch yourself, then paste the connection details below. If the connection fails or is disabled, the plugin automatically falls back to the built-in local database search — your search never stops working just because Meilisearch has an issue."
-msgstr ""
-
-#: includes/settings/meilisearch.php:17
-msgid "Connection"
-msgstr ""
-
-#: includes/settings/meilisearch.php:20
-msgid "Enable Meilisearch"
-msgstr ""
-
-#: includes/settings/meilisearch.php:24
-msgid "Use Meilisearch as the primary search source (falls back to the database automatically on error)."
-msgstr ""
-
-#: includes/settings/meilisearch.php:29
-msgid "Host URL"
-msgstr ""
-
-#: includes/settings/meilisearch.php:35
-msgid "The full URL to your Meilisearch server (HTTPS recommended)."
-msgstr ""
-
-#: includes/settings/meilisearch.php:39
-msgid "Index Name"
-msgstr ""
-
-#: includes/settings/meilisearch.php:48
-msgid "Search API Key"
-msgstr ""
-
-#: includes/settings/meilisearch.php:53
-msgid "Use a key scoped to the \"search\" action only — this key is sent with every search request, so never use your master key here."
-msgstr ""
-
-#: includes/settings/meilisearch.php:57
-msgid "Admin / Indexing Key"
-msgstr ""
-
-#: includes/settings/meilisearch.php:61
-msgid "Currently defined via the INIT_LIVE_SEARCH_MEILI_ADMIN_KEY constant in wp-config.php (this takes priority over any value entered here)."
-msgstr ""
-
-#: includes/settings/meilisearch.php:68
-msgid "A key with document add/delete permissions, used to automatically sync posts when you publish, update, or delete them. Recommended: define this via the INIT_LIVE_SEARCH_MEILI_ADMIN_KEY constant in wp-config.php instead of storing it here for better security."
-msgstr ""
-
-#: includes/settings/meilisearch.php:74
-msgid "Request Timeout (ms)"
-msgstr ""
-
-#: includes/settings/meilisearch.php:79
-msgid "If Meilisearch does not respond within this time, the plugin automatically falls back to the database search."
-msgstr ""
-
-#: includes/settings/meilisearch.php:86
-msgid "Test Connection"
-msgstr ""
-
-#: includes/settings/meilisearch.php:98
-msgid "Reindexing"
-msgstr ""
-
-#: includes/settings/meilisearch.php:100
-msgid "New, updated, or deleted posts are synced to Meilisearch automatically. To index all existing content for the first time (or to rebuild the index), run the following WP-CLI command on your server:"
-msgstr ""
-
-#: includes/settings/meilisearch.php:109
-msgid "Testing..."
-msgstr ""
-
-#: includes/settings/meilisearch.php:128
-msgid "Connected successfully"
-msgstr ""
-
-#: includes/settings/meilisearch.php:129
-msgid "documents"
-msgstr ""
-
-#: includes/settings/meilisearch.php:132
-msgid "Connection failed"
-msgstr ""
-
-#: includes/settings/meilisearch.php:137
-msgid "Unknown error"
-msgstr ""
-
-#: includes/settings/analytics.php:31
-msgid "Search Analytics"
-msgstr ""
-
-#: includes/settings/analytics.php:34
-msgid "Below is a temporary log of recent search queries. No IPs or personal data are stored."
-msgstr ""
-
-#: includes/settings/analytics.php:42
-msgid "Group similar queries"
-msgstr ""
-
-#: includes/settings/analytics.php:45
-msgid "Clear All Logs"
-msgstr ""
-
-#: includes/settings/analytics.php:46
-msgid "Export CSV"
-msgstr ""
-
-#: includes/settings/analytics.php:70
-msgid "No data recorded yet."
-msgstr ""
-
-#: includes/settings/analytics.php:76
-msgid "Time"
-msgstr ""
-
-#: includes/settings/analytics.php:77
-msgid "Query"
-msgstr ""
-
-#: includes/settings/analytics.php:78
-msgid "Results"
-msgstr ""
-
-#: includes/settings/synonyms.php:8
-msgid "Synonym Configuration"
-msgstr ""
-
-#: includes/settings/synonyms.php:9
-msgid "You can define custom synonyms here. This will allow search terms to be expanded using your specific site vocabulary."
-msgstr ""
-
-#: includes/settings/synonyms.php:17
-msgid "Predefined Dictionaries"
-msgstr ""
-
-#: includes/settings/synonyms.php:21
-msgid "Select predefined synonym dictionaries"
-msgstr ""
-
-#: includes/settings/synonyms.php:30
-msgid "E-commerce & Shopping"
-msgstr ""
-
-#: includes/settings/synonyms.php:39
-msgid "Technology & IT"
-msgstr ""
-
-#: includes/settings/synonyms.php:48
-msgid "Business & Marketing"
-msgstr ""
-
-#: includes/settings/synonyms.php:57
-msgid "Health & Wellness"
-msgstr ""
-
-#: includes/settings/synonyms.php:66
-msgid "Travel & Tourism"
-msgstr ""
-
-#: includes/settings/synonyms.php:75
-msgid "Education & Learning"
-msgstr ""
-
-#: includes/settings/synonyms.php:84
-msgid "Food & Cooking"
-msgstr ""
-
-#: includes/settings/synonyms.php:93
-msgid "Sports & Fitness"
-msgstr ""
-
-#: includes/settings/synonyms.php:102
-msgid "Fashion & Style"
-msgstr ""
-
-#: includes/settings/synonyms.php:111
-msgid "Entertainment & Media"
-msgstr ""
-
-#: includes/settings/synonyms.php:115
-msgid "Select topic-specific synonym dictionaries to enhance search results. Each dictionary contains hundreds of related terms and synonyms."
-msgstr ""
-
-#: includes/settings/synonyms.php:116
-msgid "Note:"
-msgstr ""
-
-#: includes/settings/synonyms.php:117
-msgid "When at least one dictionary is selected, this feature will be automatically activated."
-msgstr ""
-
-#: includes/settings/synonyms.php:127
-msgid "Custom Synonym Map (JSON)"
-msgstr ""
-
-#: includes/settings/synonyms.php:135
-msgid "Enter a JSON object where each key maps to an array of synonyms. Example:"
-msgstr ""
-
-#: includes/settings/synonyms.php:141
-msgid "Add or Update Synonym"
-msgstr ""
-
-#: includes/settings/synonyms.php:143
-msgid "Keyword (e.g. reaction)"
-msgstr ""
-
-#: includes/settings/synonyms.php:144
-msgid "Synonym (e.g. tương tác)"
-msgstr ""
-
-#: includes/settings/synonyms.php:145
-msgid "Add / Update"
-msgstr ""
-
-#: includes/settings/synonyms.php:146
-msgid "Click to insert or update a keyword → synonym pair into the JSON above."
-msgstr ""
-
-#: includes/settings-page.php:36 includes/settings-page.php:68
-msgid "Init Live Search Settings"
-msgstr ""
-
-#: includes/settings-page.php:37 includes/shortcodes.php:245
-msgid "Init Live Search"
-msgstr ""
-
-#: includes/settings-page.php:61
-msgid "General Settings"
-msgstr ""
-
-#: includes/general.php:9
-msgid "Configure how the search modal is triggered, how matching and fallback behave, and how results are displayed on the frontend."
-msgstr ""
-
-#: includes/settings-page.php:62
-msgid "Synonyms"
-msgstr ""
-
-#: includes/settings-page.php:63
-msgid "Analytics"
-msgstr ""
-
-#: includes/settings-page.php:64
-msgid "Meilisearch"
-msgstr ""
-
-#: includes/settings-page.php:86
-msgid "Invalid tab."
-msgstr ""
-
-#: includes/shortcodes.php:240
-msgid "Copy"
-msgstr ""
-
-#: includes/shortcodes.php:241
-msgid "Copied!"
-msgstr ""
-
-#: includes/shortcodes.php:242
-msgid "Close"
-msgstr ""
-
-#: includes/shortcodes.php:243
-msgid "Shortcode Preview"
-msgstr ""
-
-#: includes/shortcodes.php:244
-msgid "Shortcode Builder"
-msgstr ""
-
-#: includes/shortcodes.php:246
-msgid "Type"
-msgstr ""
-
-#: includes/shortcodes.php:247
-msgid "Placeholder (input mode)"
-msgstr ""
-
-#: includes/shortcodes.php:248
-msgid "Search..."
-msgstr ""
-
-#: includes/shortcodes.php:249
-msgid "Label (icon mode)"
-msgstr ""
-
-#: includes/shortcodes.php:250
-msgid "Custom CSS class"
-msgstr ""
-
-#: includes/shortcodes.php:251
-msgid "Stroke Width"
-msgstr ""
-
-#: includes/shortcodes.php:252
-msgid "Border Radius (input mode)"
-msgstr ""
-
-#: includes/shortcodes.php:253
-msgid "Related Posts"
-msgstr ""
-
-#: includes/shortcodes.php:254
-msgid "Post ID (optional)"
-msgstr ""
-
-#: includes/shortcodes.php:255
-msgid "Number of Posts"
-msgstr ""
-
-#: includes/shortcodes.php:256
-msgid "Post Type(s)"
-msgstr ""
-
-#: includes/shortcodes.php:257
-msgid "Keyword (override)"
-msgstr ""
-
-#: includes/shortcodes.php:258
-msgid "Template"
-msgstr ""
-
-#: includes/shortcodes.php:259
-msgid "Load CSS"
-msgstr ""
-
-#: includes/shortcodes.php:260
-msgid "Output Schema"
-msgstr ""
-
-#: includes/shortcodes.php:261
-msgid "Width"
-msgstr ""
-
-#: includes/shortcodes.php:262
-msgid "Max Width"
-msgstr ""
-
-#: includes/shortcodes.php:263
-msgid "Align"
-msgstr ""
-
-#: includes/shortcodes.php:264
-msgid "Element ID"
-msgstr ""
-
-#: includes/shortcodes.php:265
-msgid "ARIA Label"
-msgstr ""
-
-#: includes/shortcodes.php:266
-msgid "Search Button (input mode)"
-msgstr ""
-
-#: includes/shortcodes.php:267
-msgid "Input name (input mode)"
-msgstr ""
-
-#: includes/settings/general.php
-msgid "FULLTEXT Search Index"
-msgstr ""
-
-#: includes/settings/general.php
-msgid "Use a MySQL FULLTEXT index for Title/Excerpt/Content matching instead of LIKE queries."
-msgstr ""
-
-#: includes/settings/general.php
-msgid "Recommended for large sites (many thousands of posts) on the standard database search pipeline — significantly faster than LIKE, with no external service required. Tag, SEO metadata, and ACF field matching are unaffected and keep working as before."
-msgstr ""
-
-#: includes/settings/general.php
-msgid "Not available: your MySQL/MariaDB server does not appear to support InnoDB FULLTEXT indexes on this table."
-msgstr ""
-
-#: includes/settings/general.php
-msgid "Building the index automatically in the background (about 300 posts every 5 seconds) — no action needed. Progress relies on WP-Cron, so it advances fastest on sites with regular visitor traffic."
-msgstr ""
-
-#: includes/settings/general.php
-msgid "You can run this manually any time via WP-CLI:"
-msgstr ""
-
-#: includes/settings/general.php
-msgid "Background indexing isn't running right now (WP-Cron may be disabled on this site). Save this page again to retry automatically, or run it manually via WP-CLI:"
-msgstr ""
-
-#. translators: %s: date/time the index was last built
-#: includes/settings/general.php
-msgid "Index last built: %s."
-msgstr ""
-
-#: includes/settings-page.php
-msgid "FULLTEXT search index could not be enabled: your MySQL/MariaDB server does not support InnoDB FULLTEXT indexes on this table. The plugin will keep using the standard database search."
-msgstr ""
-
-#: includes/meilisearch.php
-msgid "Missing Admin/Indexing Key, Host, or Index."
-msgstr ""
-
-#. translators: %d: HTTP status code
-#: includes/meilisearch.php
-msgid "HTTP error %d from Meilisearch."
-msgstr ""
-
-#: includes/ajax.php
-msgid "Missing Host or Index. Fill these in under Settings > Init Live Search > Meilisearch — enabling \"Use Meilisearch as the primary search source\" is not required to build the index."
-msgstr ""
-
-#: includes/ajax.php
-msgid "Missing Admin/Indexing Key."
-msgstr ""
-
-#: includes/settings/meilisearch.php
-msgid "New, updated, or deleted posts are synced to Meilisearch automatically while \"Enable Meilisearch\" above is checked. To index all existing content for the first time (or to rebuild the index), either click the button below (runs in the background, no server access needed) or run it yourself via WP-CLI."
-msgstr ""
-
-#: includes/settings/meilisearch.php
-msgid "Reindexing only needs Host and Index below — you can build or rebuild the index while \"Enable Meilisearch\" is still unchecked, e.g. to prepare a new index while the current search source keeps running. Just remember auto-sync on save/delete only starts once the checkbox above is enabled, so re-run Reindex Now (or enable the checkbox) to pick up anything edited in the meantime."
-msgstr ""
-
-#: includes/settings/meilisearch.php
-msgid "Reindex Now"
-msgstr ""
-
-#: includes/settings/meilisearch.php
-msgid "Reindexing in the background (about 200 posts every 5 seconds)…"
-msgstr ""
+# --- Block metadata (block.json) — translated server-side via translate_settings_using_i18n_schema() ---
 
-#. translators: %s: error message returned by Meilisearch or the HTTP request
-#: includes/settings/meilisearch.php
-msgid "Background reindex stopped after repeated errors: %s"
+#: blocks/search-box/block.json
+msgctxt "block title"
+msgid "Live Search Box"
 msgstr ""
 
-#: includes/settings/meilisearch.php
-msgid "Or run it manually any time via WP-CLI:"
+#: blocks/search-box/block.json
+msgctxt "block description"
+msgid "Insert the Init Live Search icon or input launcher."
 msgstr ""
 
-#. translators: %1$d: number of skipped posts, %2$s: comma-separated post IDs
-#: includes/settings/meilisearch.php
-#: includes/settings-page.php
-msgid "%1$d post(s) were too large to send to Meilisearch even individually and were skipped (post IDs: %2$s). Increase the payload size limit on Meilisearch (or any reverse proxy in front of it), or shorten these posts, then run Reindex Now again."
+#: blocks/search-box/block.json
+msgctxt "block keyword"
+msgid "search"
 msgstr ""
 
-#: includes/settings-page.php
-msgid "Started — reindexing in the background…"
+#: blocks/search-box/block.json
+msgctxt "block keyword"
+msgid "live search"
 msgstr ""
 
-#: includes/settings-page.php
-msgid "Background reindex stopped after repeated errors:"
+#: blocks/related-ai/block.json blocks/related-posts/block.json blocks/search-box/block.json
+msgctxt "block keyword"
+msgid "init"
 msgstr ""
 
-#: includes/settings-page.php
-msgid "Index last built:"
+#: blocks/related-posts/block.json
+msgctxt "block title"
+msgid "Live Search: Related Posts"
 msgstr ""
 
-#: includes/settings/general.php
-msgid "Re-check support"
+#: blocks/related-posts/block.json
+msgctxt "block description"
+msgid "Insert keyword-based related posts powered by Init Live Search."
 msgstr ""
 
-#: includes/settings/general.php
-msgid "Runs the capability check again — useful if this was a temporary server issue."
+#: blocks/related-ai/block.json blocks/related-posts/block.json
+msgctxt "block keyword"
+msgid "related"
 msgstr ""
 
-#: includes/settings/general.php
-msgid "Background indexing isn't running right now — WP-Cron may be disabled on this site (DISABLE_WP_CRON)."
+#: blocks/related-ai/block.json blocks/related-posts/block.json
+msgctxt "block keyword"
+msgid "related posts"
 msgstr ""
 
-#: includes/settings/general.php
-msgid "Settings saved. Checking indexing status…"
+#: blocks/related-ai/block.json
+msgctxt "block title"
+msgid "Live Search: AI Related Posts"
 msgstr ""
 
-#: includes/settings/general.php
-msgid "Run Now"
+#: blocks/related-ai/block.json
+msgctxt "block description"
+msgid "Insert AI multi-signal related posts powered by Init Live Search."
 msgstr ""
 
-#: includes/settings/general.php
-msgid "Processes a batch immediately (up to ~20 seconds), bypassing WP-Cron entirely. Click again if it isn't finished after one click."
+#: blocks/related-ai/block.json
+msgctxt "block keyword"
+msgid "ai"
 msgstr ""

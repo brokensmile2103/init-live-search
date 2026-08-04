@@ -1,0 +1,73 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "init-live-search/search-box",
+    "title": "Live Search Box",
+    "category": "init-live-search",
+    "icon": "search",
+    "description": "Insert the Init Live Search icon or input launcher.",
+    "keywords": ["search", "live search", "init"],
+    "textdomain": "init-live-search",
+    "attributes": {
+        "boxType": {
+            "type": "string",
+            "default": "icon"
+        },
+        "placeholder": {
+            "type": "string",
+            "default": "Search..."
+        },
+        "label": {
+            "type": "string",
+            "default": ""
+        },
+        "htmlClass": {
+            "type": "string",
+            "default": ""
+        },
+        "htmlId": {
+            "type": "string",
+            "default": ""
+        },
+        "strokeWidth": {
+            "type": "string",
+            "default": "1"
+        },
+        "radius": {
+            "type": "string",
+            "default": "9999px"
+        },
+        "width": {
+            "type": "string",
+            "default": ""
+        },
+        "maxWidth": {
+            "type": "string",
+            "default": ""
+        },
+        "align": {
+            "type": "string",
+            "default": ""
+        },
+        "inputName": {
+            "type": "string",
+            "default": ""
+        },
+        "ariaLabel": {
+            "type": "string",
+            "default": ""
+        },
+        "showButton": {
+            "type": "boolean",
+            "default": true
+        }
+    },
+    "supports": {
+        "html": false,
+        "className": false,
+        "customClassName": false
+    },
+    "editorScript": "init-live-search-blocks-editor",
+    "style": "init-plugin-suite-live-search-style",
+    "render": "file:./render.php"
+}

@@ -1,0 +1,114 @@
+{
+    "translation-revision-date": "2026-07-20 06:08+0000",
+    "generator": "WP-CLI\/2.11.0",
+    "source": "assets\/js\/blocks-editor.js",
+    "domain": "messages",
+    "locale_data": {
+        "messages": {
+            "": {
+                "domain": "messages",
+                "lang": "vi",
+                "plural-forms": "nplurals=2; plural=(n != 1);"
+            },
+            "Type": [
+                "Ki\u1ec3u"
+            ],
+            "Placeholder (input mode)": [
+                "G\u1ee3i \u00fd nh\u1eadp (ch\u1ebf \u0111\u1ed9 \u00f4 nh\u1eadp)"
+            ],
+            "Label (icon mode)": [
+                "Nh\u00e3n (ch\u1ebf \u0111\u1ed9 icon)"
+            ],
+            "Custom CSS class": [
+                "L\u1edbp CSS t\u00f9y ch\u1ec9nh"
+            ],
+            "Stroke Width": [
+                "\u0110\u1ed9 d\u00e0y n\u00e9t v\u1ebd"
+            ],
+            "Border Radius (input mode)": [
+                "Bo g\u00f3c (ch\u1ebf \u0111\u1ed9 \u00f4 nh\u1eadp)"
+            ],
+            "Number of Posts": [
+                "S\u1ed1 l\u01b0\u1ee3ng b\u00e0i vi\u1ebft"
+            ],
+            "Keyword (override)": [
+                "T\u1eeb kh\u00f3a (ghi \u0111\u00e8)"
+            ],
+            "Template": [
+                "M\u1eabu"
+            ],
+            "Load CSS": [
+                "T\u1ea3i CSS m\u1eb7c \u0111\u1ecbnh"
+            ],
+            "Output Schema": [
+                "Xu\u1ea5t schema d\u1eef li\u1ec7u"
+            ],
+            "Width": [
+                "\u0110\u1ed9 r\u1ed9ng"
+            ],
+            "Max Width": [
+                "\u0110\u1ed9 r\u1ed9ng t\u1ed1i \u0111a"
+            ],
+            "Align": [
+                "Canh l\u1ec1"
+            ],
+            "Element ID": [
+                "ID ph\u1ea7n t\u1eed"
+            ],
+            "ARIA Label": [
+                "Nh\u00e3n ARIA"
+            ],
+            "Input name (input mode)": [
+                "T\u00ean input (ch\u1ebf \u0111\u1ed9 input)"
+            ],
+            "Search Box Settings": [
+                "C\u00e0i \u0111\u1eb7t \u00f4 t\u00ecm ki\u1ebfm"
+            ],
+            "Icon": [
+                "Bi\u1ec3u t\u01b0\u1ee3ng"
+            ],
+            "Input": [
+                "\u00d4 nh\u1eadp"
+            ],
+            "Layout": [
+                "B\u1ed1 c\u1ee5c"
+            ],
+            "e.g. 320px, 100%, 20rem": [
+                "vd: 320px, 100%, 20rem"
+            ],
+            "e.g. 480px": [
+                "vd: 480px"
+            ],
+            "Default": [
+                "M\u1eb7c \u0111\u1ecbnh"
+            ],
+            "Left": [
+                "Tr\u00e1i"
+            ],
+            "Center": [
+                "Gi\u1eefa"
+            ],
+            "Right": [
+                "Ph\u1ea3i"
+            ],
+            "Show Search Button (input mode)": [
+                "Hi\u1ec7n n\u00fat t\u00ecm ki\u1ebfm (ch\u1ebf \u0111\u1ed9 \u00f4 nh\u1eadp)"
+            ],
+            "Related Posts Settings": [
+                "C\u00e0i \u0111\u1eb7t b\u00e0i vi\u1ebft li\u00ean quan"
+            ],
+            "Post ID (0 = current post)": [
+                "ID b\u00e0i vi\u1ebft (0 = b\u00e0i hi\u1ec7n t\u1ea1i)"
+            ],
+            "Post Type": [
+                "Lo\u1ea1i b\u00e0i vi\u1ebft"
+            ],
+            "default, classic, compact, grid, or thumbright": [
+                "default, classic, compact, grid, ho\u1eb7c thumbright"
+            ],
+            "AI Related Posts Settings": [
+                "C\u00e0i \u0111\u1eb7t b\u00e0i vi\u1ebft li\u00ean quan (AI)"
+            ]
+        }
+    }
+}

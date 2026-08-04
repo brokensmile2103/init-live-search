@@ -1,10 +1,10 @@
 === Init Live Search – AI-Powered, Related Posts, Slash Commands ===
 Contributors: brokensmile.2103
 Tags: AI search, live search, meilisearch, related posts, woocommerce
-Requires at least: 5.9
+Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.9.6
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -415,56 +415,67 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
 
 == Changelog ==
 
+= 2.0.0 – August 04, 2026 =
+- **New: Abilities API support (WordPress 6.9+)**: registers two read-only abilities under the `init-live-search` category — `init-live-search/search-posts` (runs the plugin's search engine and returns matching results) and `init-live-search/get-related-posts` (returns posts related to a given post ID). Both are discoverable and executable via PHP, `wp_get_abilities()`, and — when a site opts in — the `wp-abilities/v1` REST namespace. Fully optional and backward-compatible: on WordPress versions older than 6.9, the integration silently does nothing
+- **New: Block Editor (Gutenberg) support**: three dynamic blocks, grouped under their own **Init Live Search** block category (instead of the generic "Widgets" category). Each block is registered via `block.json` (with a PHP `render.php` file wired through the `"render"` field, WP 6.1+) that calls the exact same shortcode function as its shortcode counterpart — no duplicated display logic, output always matches:
+  - **Live Search Box** — the icon/input launcher, equivalent to `[init_live_search]`
+  - **Live Search: Related Posts** — keyword-based related posts, equivalent to `[init_live_search_related_posts]`
+  - **Live Search: AI Related Posts** — AI multi-signal related posts, equivalent to `[init_live_search_related_ai]`
+  The editor integration is a single, no-build-step vanilla JavaScript file using `wp.serverSideRender` for a live preview directly in the editor. CSS for both the editor preview and the frontend is declared once via `block.json`'s `"style"` field (matching your chosen "CSS Style" setting), so WordPress enqueues it automatically wherever it's needed — no manual enqueue calls
+- **Changed**: `Requires at least` raised from 5.9 to 6.9 to support the Abilities API integration. `Requires PHP` remains 7.4
+- **Fixed**: Block Editor inserter/sidebar strings (block titles, descriptions, keywords, and settings labels) now translate correctly — both the JS-side strings (via a Jed-formatted JSON translation file, resolved through `wp_set_script_translations()` with an explicit path to this plugin's `languages/` directory) and the `block.json` metadata strings (via the standard PHP `.mo`/gettext mechanism)
+- `Tested up to: 7.1`
+
 = 1.9.6 – August 03, 2026 =
-- **Fixed: FULLTEXT background indexing showed a false "not running" error.** Right after enabling the checkbox, the status could briefly (and misleadingly) report that WP-Cron wasn't running — even though it was, mid-batch — because WP-Cron unschedules an event *before* running it, so a plain `wp_next_scheduled()` check could catch it in that gap. Status detection now also checks whether a batch is actively processing, and the page load immediately after clicking Save shows a neutral "Checking indexing status…" message instead of guessing right or wrong — it's simply too early to know at that point.
-- **Fixed: Meilisearch reindex could fail outright with `HTTP error 413 from Meilisearch`.** A batch's JSON payload size depends on post content, not just post count, so a fixed batch size that works on one site can exceed Meilisearch's (or a reverse proxy's) payload size limit on another. The background reindex, the "Reindex Now" button, and `wp init-live-search meili-reindex` now automatically split an oversized batch and retry with smaller payloads; if a single post is still too large on its own, it's skipped (with a warning listing the post ID) instead of blocking the entire reindex.
-- **Fixed**: the Meilisearch reindex progress indicator (Settings page + live polling) could stop early on the same kind of false "not running" signal described above, requiring a manual refresh to show accurate progress.
-- **Changed: reindexing no longer requires "Enable Meilisearch" to be checked.** The "Reindex Now" button, the background cron job, and `wp init-live-search meili-reindex` now only need Host and Index to be filled in — useful for building or testing a new index while the current search source (database or an existing Meilisearch index) keeps running, without switching it live first. Auto-sync on save/delete still only starts once the checkbox is enabled, as before.
+- **Fixed: FULLTEXT background indexing showed a false "not running" error.** Right after enabling the checkbox, the status could briefly (and misleadingly) report that WP-Cron wasn't running — even though it was, mid-batch — because WP-Cron unschedules an event *before* running it, so a plain `wp_next_scheduled()` check could catch it in that gap. Status detection now also checks whether a batch is actively processing, and the page load immediately after clicking Save shows a neutral "Checking indexing status…" message instead of guessing right or wrong — it's simply too early to know at that point
+- **Fixed: Meilisearch reindex could fail outright with `HTTP error 413 from Meilisearch`.** A batch's JSON payload size depends on post content, not just post count, so a fixed batch size that works on one site can exceed Meilisearch's (or a reverse proxy's) payload size limit on another. The background reindex, the "Reindex Now" button, and `wp init-live-search meili-reindex` now automatically split an oversized batch and retry with smaller payloads; if a single post is still too large on its own, it's skipped (with a warning listing the post ID) instead of blocking the entire reindex
+- **Fixed**: the Meilisearch reindex progress indicator (Settings page + live polling) could stop early on the same kind of false "not running" signal described above, requiring a manual refresh to show accurate progress
+- **Changed: reindexing no longer requires "Enable Meilisearch" to be checked.** The "Reindex Now" button, the background cron job, and `wp init-live-search meili-reindex` now only need Host and Index to be filled in — useful for building or testing a new index while the current search source (database or an existing Meilisearch index) keeps running, without switching it live first. Auto-sync on save/delete still only starts once the checkbox is enabled, as before
 
 = 1.9.5 – August 03, 2026 =
-- **Performance**: fixed N+1 queries when building search/related-posts result lists — post, postmeta, and term caches for the whole batch are now primed in one shot before rendering, instead of running fresh queries per result.
-- **New: FULLTEXT Search Index (opt-in)**: added an optional MySQL FULLTEXT-indexed table as a faster alternative to `LIKE '%term%'` for Title/Excerpt/Content matching on the standard database search pipeline — a major speed-up on sites with a large number of posts.
-- **Safety**: the FULLTEXT index is off by default and only takes effect once the server's support is confirmed and the index has been fully built; until then the plugin transparently keeps using the existing LIKE-based search.
+- **Performance**: fixed N+1 queries when building search/related-posts result lists — post, postmeta, and term caches for the whole batch are now primed in one shot before rendering, instead of running fresh queries per result
+- **New: FULLTEXT Search Index (opt-in)**: added an optional MySQL FULLTEXT-indexed table as a faster alternative to `LIKE '%term%'` for Title/Excerpt/Content matching on the standard database search pipeline — a major speed-up on sites with a large number of posts
+- **Safety**: the FULLTEXT index is off by default and only takes effect once the server's support is confirmed and the index has been fully built; until then the plugin transparently keeps using the existing LIKE-based search
 - **Auto-indexing**: once enabled, the FULLTEXT index builds itself automatically in the background via WP-Cron (~300 posts every 5 seconds) — no SSH/WP-CLI access required.
-- **WP-CLI**: added `wp init-live-search fulltext-reindex` to build or rebuild the FULLTEXT index manually/faster.
+- **WP-CLI**: added `wp init-live-search fulltext-reindex` to build or rebuild the FULLTEXT index manually/faster
 - **Unaffected**: Tag, SEO metadata, ACF field search, synonym expansion, and the +/- operators are untouched by the FULLTEXT index change and continue to work exactly as before.
-- **Meilisearch: "Reindex Now" button**: added to the Meilisearch settings tab so sites without WP-CLI/SSH access can build or rebuild the index too — runs in the background (~200 posts every 5 seconds) with a live progress status.
-- **Meilisearch: error backoff**: the background reindex automatically stops with a clear error message after 3 consecutive failed batches, instead of retrying forever against an external server.
-- **Meilisearch: manual-only by design**: unlike the FULLTEXT index, background reindexing never starts on its own — Meilisearch is a user-owned, potentially paid external service, so it only runs when explicitly started via the button or `wp init-live-search meili-reindex`.
+- **Meilisearch: "Reindex Now" button**: added to the Meilisearch settings tab so sites without WP-CLI/SSH access can build or rebuild the index too — runs in the background (~200 posts every 5 seconds) with a live progress status
+- **Meilisearch: error backoff**: the background reindex automatically stops with a clear error message after 3 consecutive failed batches, instead of retrying forever against an external server
+- **Meilisearch: manual-only by design**: unlike the FULLTEXT index, background reindexing never starts on its own — Meilisearch is a user-owned, potentially paid external service, so it only runs when explicitly started via the button or `wp init-live-search meili-reindex`
 
 = 1.9.4 – July 20, 2026 =
-- **Fixed**: the Search API Key and Admin/Indexing Key fields on the Meilisearch settings tab could be silently autofilled by the browser's saved password manager, risking accidental exposure of an unrelated saved password if the form was submitted without checking. These fields are now correctly excluded from autofill.
-- **Fixed**: the "Test Connection" button on the Meilisearch settings tab always displayed "? documents" instead of the actual estimated document count, due to a naming mismatch between the connection test response and the display script.
-- **Code Quality**: moved the Meilisearch "Test Connection" JavaScript out of an inline `<script>` block into `admin.js` (enqueued properly via `wp_enqueue_script`), in line with WordPress Coding Standards; translated strings are passed through via `wp_localize_script` so existing translations are unaffected.
+- **Fixed**: the Search API Key and Admin/Indexing Key fields on the Meilisearch settings tab could be silently autofilled by the browser's saved password manager, risking accidental exposure of an unrelated saved password if the form was submitted without checking. These fields are now correctly excluded from autofill
+- **Fixed**: the "Test Connection" button on the Meilisearch settings tab always displayed "? documents" instead of the actual estimated document count, due to a naming mismatch between the connection test response and the display script
+- **Code Quality**: moved the Meilisearch "Test Connection" JavaScript out of an inline `<script>` block into `admin.js` (enqueued properly via `wp_enqueue_script`), in line with WordPress Coding Standards; translated strings are passed through via `wp_localize_script` so existing translations are unaffected
 
 = 1.9.3 – July 20, 2026 =
-- **Meilisearch Integration (optional)**: added a new "Meilisearch" settings tab to connect a self-hosted (bring-your-own-server) Meilisearch instance as the primary search source. When enabled and reachable, search requests are answered by Meilisearch's typo-tolerant, relevance-ranked engine; if the request fails or times out for any reason, the plugin automatically falls back to the existing local database search — search never goes down solely because of a Meilisearch outage.
-- **Auto-sync on Save/Delete**: publishing, updating, trashing, or deleting a post now automatically pushes/removes the corresponding document in the configured Meilisearch index (non-blocking, does not slow down editor saves).
+- **Meilisearch Integration (optional)**: added a new "Meilisearch" settings tab to connect a self-hosted (bring-your-own-server) Meilisearch instance as the primary search source. When enabled and reachable, search requests are answered by Meilisearch's typo-tolerant, relevance-ranked engine; if the request fails or times out for any reason, the plugin automatically falls back to the existing local database search — search never goes down solely because of a Meilisearch outage
+- **Auto-sync on Save/Delete**: publishing, updating, trashing, or deleting a post now automatically pushes/removes the corresponding document in the configured Meilisearch index (non-blocking, does not slow down editor saves)
 - **WP-CLI Command**: added `wp init-live-search meili-reindex` to bulk-index (or rebuild) all published posts of the enabled post types into Meilisearch.
-- **Test Connection**: added a one-click connection test on the Meilisearch settings tab.
-- **Security**: the sensitive indexing/admin API key can be defined via the `INIT_LIVE_SEARCH_MEILI_ADMIN_KEY` constant in `wp-config.php` (recommended) instead of being stored in the database.
-- **i18n**: all new UI strings use English as the source (msgid) with the `init-live-search` text domain, per WordPress.org standards; `.pot` regenerated and the Vietnamese `.po`/`.mo` translation updated with 27 new/previously-missing strings translated.
+- **Test Connection**: added a one-click connection test on the Meilisearch settings tab
+- **Security**: the sensitive indexing/admin API key can be defined via the `INIT_LIVE_SEARCH_MEILI_ADMIN_KEY` constant in `wp-config.php` (recommended) instead of being stored in the database
+- **i18n**: all new UI strings use English as the source (msgid) with the `init-live-search` text domain, per WordPress.org standards; `.pot` regenerated and the Vietnamese `.po`/`.mo` translation updated with 27 new/previously-missing strings translated
 
 = 1.9.2 – July 17, 2026 =
-- **Race Condition Fix**: search requests in the modal (`script.js`) now use `AbortController` to cancel stale in-flight requests when the user keeps typing, preventing older/slower responses from overwriting newer search results.
-- **+/- Search Operator Redesign**: `+word`/`-word` now correctly *narrow* the results of the plain search terms instead of being merged into the same fuzzy/fallback pool. Plain words still drive the base search (with all existing fuzzy matching, synonyms, and fallback logic intact); `+word` requires the narrowed results to also contain that word, `-word` excludes results containing it — supporting multiple `+`/`-` operators in the same query (e.g. `wordpress -plugin -theme`).
-- **Predefined Dictionary Expansion**: significantly expanded the E-commerce, Technology, Business, and Health dictionaries (previously the thinnest of the 10 built-in dictionaries) with dozens of additional English/Vietnamese synonym pairs, bringing them in line with the other dictionaries.
-- **Dictionary Cleanup**: fixed 4 duplicate dictionary keys (`sale`, `visa`, `gym`, `vintage`) that were silently overwriting earlier synonym definitions.
-- **Minor Bug Fixes**: added missing optional chaining in `loadMoreRecent()` to prevent a potential crash when an item is missing its `data-url` attribute; normalized trailing-slash URL comparison in `loadMoreGeneric()` to prevent possible duplicate items when loading more results.
+- **Race Condition Fix**: search requests in the modal (`script.js`) now use `AbortController` to cancel stale in-flight requests when the user keeps typing, preventing older/slower responses from overwriting newer search results
+- **+/- Search Operator Redesign**: `+word`/`-word` now correctly *narrow* the results of the plain search terms instead of being merged into the same fuzzy/fallback pool. Plain words still drive the base search (with all existing fuzzy matching, synonyms, and fallback logic intact); `+word` requires the narrowed results to also contain that word, `-word` excludes results containing it — supporting multiple `+`/`-` operators in the same query (e.g. `wordpress -plugin -theme`)
+- **Predefined Dictionary Expansion**: significantly expanded the E-commerce, Technology, Business, and Health dictionaries (previously the thinnest of the 10 built-in dictionaries) with dozens of additional English/Vietnamese synonym pairs, bringing them in line with the other dictionaries
+- **Dictionary Cleanup**: fixed 4 duplicate dictionary keys (`sale`, `visa`, `gym`, `vintage`) that were silently overwriting earlier synonym definitions
+- **Minor Bug Fixes**: added missing optional chaining in `loadMoreRecent()` to prevent a potential crash when an item is missing its `data-url` attribute; normalized trailing-slash URL comparison in `loadMoreGeneric()` to prevent possible duplicate items when loading more results
 
 = 1.9.1 – July 07, 2026 =
-- **Related Posts Command Conditions**: added two new conditional settings for the "/related" default command — restrict auto-execution to single post pages only, and exclude specific URL slug keywords.
-- **Smart Default Command Guard**: frontend now validates `related_only_single` and `related_exclude_slugs` before auto-injecting `/related` into the search modal, preventing unwanted related searches on archives, pages, or excluded paths.
-- **Settings UX**: related command options are visually dimmed and non-interactive when "Related Posts" is not selected as the default slash command.
-- **Sanitization**: `related_only_single` and `related_exclude_slugs` are properly sanitized via the existing settings flow with keyword trimming and line-by-line validation.
+- **Related Posts Command Conditions**: added two new conditional settings for the "/related" default command — restrict auto-execution to single post pages only, and exclude specific URL slug keywords
+- **Smart Default Command Guard**: frontend now validates `related_only_single` and `related_exclude_slugs` before auto-injecting `/related` into the search modal, preventing unwanted related searches on archives, pages, or excluded paths
+- **Settings UX**: related command options are visually dimmed and non-interactive when "Related Posts" is not selected as the default slash command
+- **Sanitization**: `related_only_single` and `related_exclude_slugs` are properly sanitized via the existing settings flow with keyword trimming and line-by-line validation
 
 = 1.9.0 – May 12, 2026 =
-- **Thumbnail Fallback**: added new option "Use First Image as Thumbnail Fallback?" — automatically extracts the first image from post content when no featured image is available.
-- **WordPress-native Detection**: fallback engine now prioritizes parsing `wp-image-{ID}` classes and retrieves the proper WordPress thumbnail size using attachment metadata.
-- **Smart Fallback Chain**: if attachment lookup fails, the plugin gracefully falls back to the raw `<img src="">` URL before using the default thumbnail.
-- **Host Validation**: external image URLs are validated against the current site host/subdomain by default to prevent unwanted third-party hotlinks.
-- **Developer Extensibility**: introduced new filter `init_plugin_suite_live_search_allow_fallback_image_host` for customizing allowed fallback image hosts.
-- **Settings Integration**: added full admin setting, sanitization flow, and translation support for the new thumbnail fallback feature.
+- **Thumbnail Fallback**: added new option "Use First Image as Thumbnail Fallback?" — automatically extracts the first image from post content when no featured image is available
+- **WordPress-native Detection**: fallback engine now prioritizes parsing `wp-image-{ID}` classes and retrieves the proper WordPress thumbnail size using attachment metadata
+- **Smart Fallback Chain**: if attachment lookup fails, the plugin gracefully falls back to the raw `<img src="">` URL before using the default thumbnail
+- **Host Validation**: external image URLs are validated against the current site host/subdomain by default to prevent unwanted third-party hotlinks
+- **Developer Extensibility**: introduced new filter `init_plugin_suite_live_search_allow_fallback_image_host` for customizing allowed fallback image hosts
+- **Settings Integration**: added full admin setting, sanitization flow, and translation support for the new thumbnail fallback feature
 
 View full changelog (all versions): [Init Live Search – Changelog](https://en.inithtml.com/plugin/init-live-search/)
 
