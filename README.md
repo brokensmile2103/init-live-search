@@ -28,7 +28,6 @@ Want typo-tolerant, sub-50ms relevance ranking on top of that? Connect your own 
 
   Each block is registered via `block.json` with a PHP `render.php` that calls the exact same shortcode function as its shortcode counterpart, so output never diverges. A single no-build-step vanilla JS editor integration uses `wp.serverSideRender` for a live preview directly in the editor, and CSS is declared once via `block.json`'s `"style"` field so WordPress enqueues it automatically wherever needed
 - **Requires at least** raised from 5.9 to 6.9 to support the Abilities API integration. `Requires PHP` remains 7.4
-- **Fixed**: Block Editor inserter/sidebar strings now translate correctly on both the JS side (Jed-formatted JSON via `wp_set_script_translations()`) and the `block.json` metadata side (standard `.mo`/gettext)
 
 ## What's New in v1.7.x, v1.8.x & v1.9.x
 
