@@ -73,12 +73,29 @@ add_action('rest_api_init', function () {
 
 // Handle the main search REST endpoint, applies fallback, bigram, SEO, and ACF logic.
 function init_plugin_suite_live_search_search($request) {
-    $term = $request->get_param('term');
+    $term = (string) $request->get_param( 'term' );
+
+    // Giới hạn độ dài từ khoá từ request công khai (live search không cần hơn).
+    $max_length = (int) apply_filters( 'init_plugin_suite_live_search_rest_max_term_length', 100 );
+    if ( $max_length > 0 && mb_strlen( $term ) > $max_length ) {
+        $term = mb_substr( $term, 0, $max_length );
+    }
+
+    // force_mode chỉ nhận các mode hợp lệ (giá trị lạ trước đây rơi về nhánh default).
+    $force_mode = $request->get_param( 'force_mode' );
+    $force_mode = in_array( $force_mode, [ 'title', 'title_excerpt', 'title_content', 'title_tag' ], true ) ? $force_mode : null;
+
+    // Trước 2.0.1 endpoint bỏ qua `page` nên infinite scroll luôn nhận lại trang 1
+    // (trùng lặp, request thừa mỗi lần cuộn). Pipeline lấy tối đa 3 trang.
+    $paged = max( 1, min( 50, (int) $request->get_param( 'page' ) ) );
+
     $args = [
-        'force_mode'  => $request->get_param('force_mode'),
+        'force_mode'  => $force_mode,
         // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
-        'exclude'     => $request->get_param('exclude'),
+        'exclude'     => absint( $request->get_param( 'exclude' ) ),
         'no_fallback' => $request->get_param('no_fallback') ? true : false,
+        'paged'       => $paged,
+        'context'     => 'search',
     ];
     return rest_ensure_response(init_plugin_suite_live_search_get_results($term, $args));
 }
@@ -108,7 +125,7 @@ function init_plugin_suite_live_search_recent($request) {
 
     $paged = max(1, (int) $request->get_param('page'));
 
-    $cache_key = 'ils_recent_p' . $paged . '_' . md5(serialize($post_types) . $per_page);
+    $cache_key = 'ils_recent_p' . $paged . '_' . md5( wp_json_encode( $post_types ) . $per_page . init_plugin_suite_live_search_detect_lang() . init_plugin_suite_live_search_cache_salt() );
     $results = wp_cache_get($cache_key, 'init_plugin_suite_live_search');
 
     if ($results !== false) {
@@ -170,7 +187,7 @@ function init_plugin_suite_live_search_date($request) {
 
     $paged = max(1, (int) $request->get_param('page'));
 
-    $cache_key = 'ils_date_p' . $paged . '_' . md5($value . serialize($post_types) . $per_page);
+    $cache_key = 'ils_date_p' . $paged . '_' . md5( $value . wp_json_encode( $post_types ) . $per_page . init_plugin_suite_live_search_detect_lang() . init_plugin_suite_live_search_cache_salt() );
     $cached = wp_cache_get($cache_key, 'init_plugin_suite_live_search');
     if ($cached !== false) return rest_ensure_response($cached);
 
@@ -220,8 +237,15 @@ function init_plugin_suite_live_search_tax_query($request) {
         $taxonomy = 'post_tag';
     }
 
+    // Chỉ taxonomy công khai (trước đây nhận cả taxonomy nội bộ như
+    // product_visibility, nav_menu...). Filter cho phép mở thêm nếu cần.
     if (!$taxonomy || !$term_input || !taxonomy_exists($taxonomy)) {
         return rest_ensure_response([]);
+    }
+
+    $taxonomy_allowed = (bool) apply_filters( 'init_plugin_suite_live_search_allowed_taxonomy', is_taxonomy_viewable( $taxonomy ), $taxonomy );
+    if ( ! $taxonomy_allowed ) {
+        return rest_ensure_response( [] );
     }
 
     // Parse slug thành mảng
@@ -253,7 +277,7 @@ function init_plugin_suite_live_search_tax_query($request) {
     $paged = max(1, (int) $request->get_param('page'));
 
     // Cache
-    $cache_key = 'ils_tax_' . $taxonomy . '_p' . $paged . '_' . md5(serialize($term_ids) . serialize($post_types) . $per_page);
+    $cache_key = 'ils_tax_' . $taxonomy . '_p' . $paged . '_' . md5( wp_json_encode( $term_ids ) . wp_json_encode( $post_types ) . $per_page . init_plugin_suite_live_search_detect_lang() . init_plugin_suite_live_search_cache_salt() );
     $results = wp_cache_get($cache_key, 'init_plugin_suite_live_search');
     if ($results !== false) {
         return rest_ensure_response($results);
@@ -312,7 +336,7 @@ function init_plugin_suite_live_search_related($request) {
     $paged      = max(1, (int) $request->get_param('page'));
     $can_cache  = ($exclude_id === 0 && $paged === 1);
 
-    $cache_key = 'ils_related_p' . $paged . '_' . md5($clean);
+    $cache_key = 'ils_related_p' . $paged . '_' . md5( $clean . init_plugin_suite_live_search_detect_lang() . init_plugin_suite_live_search_cache_salt() );
     $results = $can_cache ? wp_cache_get($cache_key, 'init_plugin_suite_live_search') : false;
 
     if ($can_cache && $results !== false) {
@@ -321,9 +345,10 @@ function init_plugin_suite_live_search_related($request) {
 
     $results = init_plugin_suite_live_search_get_results($clean, [
         // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
-        'exclude'    => $exclude_id,
-        'paged'      => $paged,
-        'lang'       => init_plugin_suite_live_search_detect_lang(),
+        'exclude' => $exclude_id,
+        'paged'   => min( 50, $paged ),
+        'lang'    => init_plugin_suite_live_search_detect_lang(),
+        'context' => 'related',
     ]);
 
     if ($can_cache) {
@@ -341,15 +366,27 @@ function init_plugin_suite_live_search_get_reading_posts($request) {
 
     $ids = array_slice($ids, 0, 10);
 
+    // Mỗi ID được kiểm tra lại trong build_result_list(): chỉ bài đã publish,
+    // thuộc post type công khai (hoặc được bật trong Settings) mới được trả về.
+    // Trước 2.0.1 endpoint này trả cả bài nháp/riêng tư nếu biết ID.
     return rest_ensure_response(init_plugin_suite_live_search_get_results('', [
         'force_ids'  => $ids,
         'post_types' => ['any'],
         'limit'      => 10,
         'lang'       => init_plugin_suite_live_search_detect_lang(),
+        'context'    => 'read',
     ]));
 }
 
 // Return a random post URL from allowed post types.
+//
+// ORDER BY RAND() forces MySQL to read and sort the whole candidate set on
+// every call — very slow on large sites. When the query args are still the
+// plain defaults (nobody changed them through the query_args filter), pick a
+// random offset from the published-post count instead: two cheap indexed
+// queries, still a uniform pick. Any other case (filtered args, multilingual
+// plugins narrowing the query, a race with deletions) falls back to the
+// original ORDER BY RAND() query, so results are always valid.
 function init_plugin_suite_live_search_random($request) {
     $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
 
@@ -357,7 +394,7 @@ function init_plugin_suite_live_search_random($request) {
         ? array_map('sanitize_key', $options['post_types'])
         : ['post'];
 
-    $args = [
+    $default_args = [
         'post_type'           => $post_types,
         'posts_per_page'      => 1,
         'post_status'         => 'publish',
@@ -366,12 +403,46 @@ function init_plugin_suite_live_search_random($request) {
         'no_found_rows'       => true,
     ];
 
-    $args = apply_filters('init_plugin_suite_live_search_query_args', $args, 'random', $request);
+    $args = apply_filters( 'init_plugin_suite_live_search_query_args', $default_args, 'random', $request );
 
-    $query = new WP_Query($args);
-    if (empty($query->posts)) return rest_ensure_response([]);
+    $post_id = 0;
 
-    $post_id = $query->posts[0]->ID;
+    if ( $args === $default_args ) {
+        $total = 0;
+        foreach ( $post_types as $post_type ) {
+            $counts = wp_count_posts( $post_type );
+            $total += isset( $counts->publish ) ? (int) $counts->publish : 0;
+        }
+
+        if ( $total > 0 ) {
+            $fast_args = array_merge(
+                $default_args,
+                [
+                    'orderby'                => 'ID',
+                    'order'                  => 'ASC',
+                    'offset'                 => wp_rand( 0, $total - 1 ),
+                    'fields'                 => 'ids',
+                    'update_post_meta_cache' => false,
+                    'update_post_term_cache' => false,
+                ]
+            );
+            $fast      = new WP_Query( $fast_args );
+
+            if ( ! empty( $fast->posts ) ) {
+                $post_id = (int) $fast->posts[0];
+            }
+        }
+    }
+
+    if ( ! $post_id ) {
+        $query = new WP_Query( $args );
+        if ( empty( $query->posts ) ) {
+            return rest_ensure_response( [] );
+        }
+
+        $first   = $query->posts[0];
+        $post_id = is_object( $first ) ? (int) $first->ID : (int) $first;
+    }
 
     return rest_ensure_response([
         'url' => get_permalink($post_id),
@@ -445,7 +516,7 @@ function init_plugin_suite_live_search_products($request) {
     $sku          = sanitize_text_field($request->get_param('sku'));
     $min_price    = is_numeric($request->get_param('min_price')) ? floatval($request->get_param('min_price')) : null;
     $max_price    = is_numeric($request->get_param('max_price')) ? floatval($request->get_param('max_price')) : null;
-    $price_order  = strtolower($request->get_param('price_order'));
+    $price_order  = strtolower( (string) $request->get_param( 'price_order' ) );
     $brand        = sanitize_text_field($request->get_param('brand'));
     $attribute    = sanitize_text_field($request->get_param('attribute'));
     $variation    = sanitize_text_field($request->get_param('variation'));
@@ -457,21 +528,24 @@ function init_plugin_suite_live_search_products($request) {
         $price_order = 'desc';
     }
 
-    $cache_key = 'ils_product_' . md5(json_encode([
-        'term' => $term,
-        'sku' => $sku,
-        'on_sale' => $on_sale,
-        'in_stock' => $in_stock,
-        'min' => $min_price,
-        'max' => $max_price,
+    // (string) ở $price_order phía trên: tránh deprecation PHP 8.1+ (strtolower(null)).
+    $cache_parts = [
+        'term'        => $term,
+        'sku'         => $sku,
+        'on_sale'     => $on_sale,
+        'in_stock'    => $in_stock,
+        'min'         => $min_price,
+        'max'         => $max_price,
         'price_order' => $price_order,
-        'brand' => $brand,
-        'paged' => $paged,
-        'per_page' => $per_page,
-        'attribute' => $attribute,
-        'variation' => $variation,
-        'value'     => $value,
-    ]));
+        'brand'       => $brand,
+        'paged'       => $paged,
+        'per_page'    => $per_page,
+        'attribute'   => $attribute,
+        'variation'   => $variation,
+        'value'       => $value,
+        'salt'        => init_plugin_suite_live_search_cache_salt(),
+    ];
+    $cache_key   = 'ils_product_' . md5( wp_json_encode( $cache_parts ) );
 
     $results = wp_cache_get($cache_key, 'init_plugin_suite_live_search');
     if ($results !== false) {
@@ -618,13 +692,21 @@ function init_plugin_suite_live_search_coupon( $request ) {
         return rest_ensure_response( [] );
     }
 
+    // Lệnh /coupon chỉ xuất hiện khi "product" nằm trong Post Types to Include,
+    // nên endpoint cũng chỉ bật trong trường hợp đó (filter để bật/tắt thủ công).
+    $coupon_options = get_option( INIT_PLUGIN_SUITE_LS_OPTION, [] );
+    $coupon_enabled = ! empty( $coupon_options['post_types'] ) && is_array( $coupon_options['post_types'] ) && in_array( 'product', $coupon_options['post_types'], true );
+    if ( ! apply_filters( 'init_plugin_suite_live_search_coupon_enabled', $coupon_enabled ) ) {
+        return rest_ensure_response( [] );
+    }
+
     $options  = get_option( INIT_PLUGIN_SUITE_LS_OPTION, [] );
     $per_page = ( ! empty( $options['max_results'] ) && is_numeric( $options['max_results'] ) && $options['max_results'] > 0 )
         ? (int) $options['max_results']
         : 10;
 
     $paged     = max( 1, (int) $request->get_param( 'page' ) );
-    $cache_key = 'ils_coupon_p' . $paged . '_' . $per_page;
+    $cache_key = 'ils_coupon_p' . $paged . '_' . $per_page . '_' . md5( init_plugin_suite_live_search_cache_salt() );
     $results   = wp_cache_get( $cache_key, 'init_plugin_suite_live_search' );
 
     if ( false !== $results ) {
@@ -650,6 +732,13 @@ function init_plugin_suite_live_search_coupon( $request ) {
 
             $expiry = $coupon->get_date_expires();
             if ( $expiry && $expiry->getTimestamp() < time() ) {
+                continue;
+            }
+
+            // Coupon giới hạn theo email khách hàng là coupon "riêng tư" (tặng riêng
+            // từng người) — không liệt kê công khai. Filter để hiển thị lại nếu muốn.
+            $email_restrictions = (array) $coupon->get_email_restrictions();
+            if ( ! empty( $email_restrictions ) && ! apply_filters( 'init_plugin_suite_live_search_coupon_include_restricted', false, $coupon ) ) {
                 continue;
             }
 

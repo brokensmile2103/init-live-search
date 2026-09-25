@@ -95,6 +95,17 @@ function init_plugin_suite_live_search_extract_404_keyword() {
         return '';
     }
 
+    // Slug quá dài / quá nhiều từ gần như luôn là bot quét URL rác — bỏ qua để
+    // không chạy cả pipeline tìm kiếm cho chúng.
+    $max_length = (int) apply_filters( 'init_plugin_suite_live_search_404_max_keyword_length', 100 );
+    $max_words  = (int) apply_filters( 'init_plugin_suite_live_search_404_max_keyword_words', 10 );
+    if (
+        ( $max_length > 0 && mb_strlen( $keyword ) > $max_length )
+        || ( $max_words > 0 && init_plugin_suite_live_search_count_words( $keyword ) > $max_words )
+    ) {
+        return '';
+    }
+
     return $keyword;
 }
 
@@ -152,6 +163,38 @@ function init_plugin_suite_live_search_redirect_404_to_related_smart() {
         return;
     }
 
+    // Cache kết quả theo keyword: 404 thường bị bot gọi lặp lại, mỗi lần chạy
+    // lại cả pipeline search là rất tốn. Có object cache bền (Redis/Memcached)
+    // thì cache cả kết quả "không tìm thấy"; không có thì chỉ lưu transient
+    // cho kết quả tìm thấy (tránh phình bảng options vì URL rác của bot).
+    $cache_parts      = [
+        $keyword,
+        $post_types,
+        init_plugin_suite_live_search_detect_lang(),
+        md5( maybe_serialize( $options ) ),
+    ];
+    $cache_ttl        = (int) apply_filters( 'init_plugin_suite_live_search_404_cache_ttl', 12 * HOUR_IN_SECONDS );
+    $cache_key        = 'ils_404_' . md5( wp_json_encode( $cache_parts ) );
+    $use_object_cache = wp_using_ext_object_cache();
+
+    if ( $cache_ttl > 0 ) {
+        $cached = $use_object_cache
+            ? wp_cache_get( $cache_key, 'init_plugin_suite_live_search' )
+            : get_transient( $cache_key );
+
+        if ( false !== $cached ) {
+            $cached_id = (int) $cached;
+
+            if ( ! $cached_id ) {
+                return; // Đã biết là không có bài phù hợp.
+            }
+
+            if ( 'publish' === get_post_status( $cached_id ) && in_array( get_post_type( $cached_id ), $post_types, true ) ) {
+                init_plugin_suite_live_search_do_404_redirect( $cached_id );
+            }
+        }
+    }
+
     $target_id = 0;
 
     // Bước 1: Dùng Init Live Search trước (ưu tiên engine của plugin)
@@ -200,11 +243,30 @@ function init_plugin_suite_live_search_redirect_404_to_related_smart() {
         }
     }
 
+    if ( $cache_ttl > 0 ) {
+        if ( $use_object_cache ) {
+            wp_cache_set( $cache_key, (int) $target_id, 'init_plugin_suite_live_search', $cache_ttl );
+        } elseif ( $target_id ) {
+            set_transient( $cache_key, (int) $target_id, $cache_ttl );
+        }
+    }
+
     // Bước 3: Nếu tìm được bài phù hợp thì redirect
     if ( $target_id && get_post_status( $target_id ) === 'publish' ) {
-        wp_safe_redirect( get_permalink( $target_id ), 301 );
-        exit;
+        init_plugin_suite_live_search_do_404_redirect( $target_id );
     }
+}
+
+// Perform the 404 -> best match redirect. Status defaults to 301 (unchanged);
+// sites that prefer a temporary redirect can switch to 302 via the filter.
+function init_plugin_suite_live_search_do_404_redirect( $target_id ) {
+    $status = (int) apply_filters( 'init_plugin_suite_live_search_404_redirect_status', 301, $target_id );
+    if ( $status < 300 || $status > 399 ) {
+        $status = 301;
+    }
+
+    wp_safe_redirect( get_permalink( $target_id ), $status );
+    exit;
 }
 
 add_action( 'template_redirect', 'init_plugin_suite_live_search_redirect_404_to_related_smart', 9 );

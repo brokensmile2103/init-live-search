@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Init Live Search 2.0.0\n"
+"Project-Id-Version: Init Live Search 2.0.1\n"
 "Report-Msgid-Bugs-To: https://inithtml.com/plugin/init-live-search/\n"
 "Last-Translator: Init HTML <hello@inithtml.com>\n"
 "Language-Team: Vietnamese <vi@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-04T06:52:22+00:00\n"
+"POT-Creation-Date: 2026-09-25T13:17:17+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: init-live-search\n"
@@ -19,7 +19,7 @@ msgstr ""
 #: includes/abilities-api.php:20
 #: includes/blocks.php:36
 #: includes/settings-page.php:37
-#: includes/shortcodes.php:245
+#: includes/shortcodes.php:266
 msgid "Init Live Search"
 msgstr ""
 
@@ -41,6 +41,12 @@ msgstr ""
 #. Author URI of the plugin
 #: init-live-search.php
 msgid "https://inithtml.com/"
+msgstr ""
+
+#: blocks/search-box/render.php:8
+#: includes/shortcodes.php:10
+#: includes/shortcodes.php:269
+msgid "Search..."
 msgstr ""
 
 #: includes/abilities-api.php:21
@@ -95,49 +101,49 @@ msgstr ""
 msgid "Missing Admin/Indexing Key."
 msgstr ""
 
-#: includes/meilisearch.php:167
+#: includes/meilisearch.php:187
 msgid "Please fill in Host, Index, and Search Key before testing."
 msgstr ""
 
 #. translators: %d: HTTP status code
-#: includes/meilisearch.php:192
+#: includes/meilisearch.php:212
 msgid "Meilisearch returned HTTP error %d. Please check your Host / Index / Key."
 msgstr ""
 
 #. translators: %d: HTTP status code
-#: includes/meilisearch.php:465
+#: includes/meilisearch.php:485
 msgid "HTTP error %d from Meilisearch."
 msgstr ""
 
-#: includes/meilisearch.php:486
+#: includes/meilisearch.php:506
 msgid "Missing Admin/Indexing Key, Host, or Index."
 msgstr ""
 
 #. translators: %s is the discount percentage (e.g. 20 for 20%)
-#: includes/rest-api.php:671
+#: includes/rest-api.php:760
 msgid "Save %s%%"
 msgstr ""
 
 #. translators: %s is the monetary discount amount (e.g. $10)
-#: includes/rest-api.php:674
+#: includes/rest-api.php:763
 msgid "Save %s"
 msgstr ""
 
 #. translators: %d is the number of remaining uses
-#: includes/rest-api.php:681
+#: includes/rest-api.php:770
 msgid "Remaining: %d uses"
 msgstr ""
 
-#: includes/rest-api.php:683
+#: includes/rest-api.php:772
 msgid "Unlimited uses"
 msgstr ""
 
 #. translators: %s is the expiration date
-#: includes/rest-api.php:688
+#: includes/rest-api.php:777
 msgid "Expires on: %s"
 msgstr ""
 
-#: includes/rest-api.php:690
+#: includes/rest-api.php:779
 msgid "No expiration"
 msgstr ""
 
@@ -883,317 +889,317 @@ msgstr ""
 msgid "Click to insert or update a keyword → synonym pair into the JSON above."
 msgstr ""
 
-#: includes/shortcodes.php:240
+#: includes/shortcodes.php:35
+msgid "Open Search"
+msgstr ""
+
+#: includes/shortcodes.php:261
 msgid "Copy"
 msgstr ""
 
-#: includes/shortcodes.php:241
+#: includes/shortcodes.php:262
 msgid "Copied!"
 msgstr ""
 
-#: includes/shortcodes.php:242
+#: includes/shortcodes.php:263
 msgid "Close"
 msgstr ""
 
-#: includes/shortcodes.php:243
+#: includes/shortcodes.php:264
 msgid "Shortcode Preview"
 msgstr ""
 
-#: includes/shortcodes.php:244
+#: includes/shortcodes.php:265
 msgid "Shortcode Builder"
 msgstr ""
 
-#: includes/shortcodes.php:246
+#: includes/shortcodes.php:267
 #: assets/js/blocks-editor.js:61
 msgid "Type"
 msgstr ""
 
-#: includes/shortcodes.php:247
+#: includes/shortcodes.php:268
 #: assets/js/blocks-editor.js:73
 msgid "Placeholder (input mode)"
 msgstr ""
 
-#: includes/shortcodes.php:248
-msgid "Search..."
-msgstr ""
-
-#: includes/shortcodes.php:249
+#: includes/shortcodes.php:270
 #: assets/js/blocks-editor.js:81
 msgid "Label (icon mode)"
 msgstr ""
 
-#: includes/shortcodes.php:250
+#: includes/shortcodes.php:271
 #: assets/js/blocks-editor.js:88
 msgid "Custom CSS class"
 msgstr ""
 
-#: includes/shortcodes.php:251
+#: includes/shortcodes.php:272
 #: assets/js/blocks-editor.js:150
 msgid "Stroke Width"
 msgstr ""
 
-#: includes/shortcodes.php:252
+#: includes/shortcodes.php:273
 #: assets/js/blocks-editor.js:143
 msgid "Border Radius (input mode)"
 msgstr ""
 
-#: includes/shortcodes.php:253
+#: includes/shortcodes.php:274
 msgid "Related Posts"
 msgstr ""
 
-#: includes/shortcodes.php:254
+#: includes/shortcodes.php:275
 msgid "Post ID (optional)"
 msgstr ""
 
-#: includes/shortcodes.php:255
+#: includes/shortcodes.php:276
 #: assets/js/blocks-editor.js:221
 #: assets/js/blocks-editor.js:313
 msgid "Number of Posts"
 msgstr ""
 
-#: includes/shortcodes.php:256
+#: includes/shortcodes.php:277
 msgid "Post Type(s)"
 msgstr ""
 
-#: includes/shortcodes.php:257
+#: includes/shortcodes.php:278
 #: assets/js/blocks-editor.js:229
 msgid "Keyword (override)"
 msgstr ""
 
-#: includes/shortcodes.php:258
+#: includes/shortcodes.php:279
 #: assets/js/blocks-editor.js:243
 #: assets/js/blocks-editor.js:328
 msgid "Template"
 msgstr ""
 
-#: includes/shortcodes.php:259
+#: includes/shortcodes.php:280
 #: assets/js/blocks-editor.js:251
 #: assets/js/blocks-editor.js:336
 msgid "Load CSS"
 msgstr ""
 
-#: includes/shortcodes.php:260
+#: includes/shortcodes.php:281
 #: assets/js/blocks-editor.js:258
 #: assets/js/blocks-editor.js:343
 msgid "Output Schema"
 msgstr ""
 
-#: includes/shortcodes.php:261
+#: includes/shortcodes.php:282
 #: assets/js/blocks-editor.js:113
 msgid "Width"
 msgstr ""
 
-#: includes/shortcodes.php:262
+#: includes/shortcodes.php:283
 #: assets/js/blocks-editor.js:121
 msgid "Max Width"
 msgstr ""
 
-#: includes/shortcodes.php:263
+#: includes/shortcodes.php:284
 #: assets/js/blocks-editor.js:129
 msgid "Align"
 msgstr ""
 
-#: includes/shortcodes.php:264
+#: includes/shortcodes.php:285
 #: assets/js/blocks-editor.js:95
 msgid "Element ID"
 msgstr ""
 
-#: includes/shortcodes.php:265
+#: includes/shortcodes.php:286
 #: assets/js/blocks-editor.js:102
 msgid "ARIA Label"
 msgstr ""
 
-#: includes/shortcodes.php:266
+#: includes/shortcodes.php:287
 msgid "Search Button (input mode)"
 msgstr ""
 
-#: includes/shortcodes.php:267
+#: includes/shortcodes.php:288
 #: assets/js/blocks-editor.js:158
 msgid "Input name (input mode)"
 msgstr ""
 
 #. translators: %s is the post title used as fallback alt text
-#: includes/utils.php:442
+#: includes/utils.php:771
 msgid "Image for: %s"
 msgstr ""
 
-#: init-live-search.php:129
+#: init-live-search.php:133
 msgid "Show latest posts"
 msgstr ""
 
-#: init-live-search.php:133
+#: init-live-search.php:137
 msgid "Show most viewed posts (all time)"
 msgstr ""
 
-#: init-live-search.php:134
+#: init-live-search.php:138
 msgid "Show trending posts right now"
 msgstr ""
 
-#: init-live-search.php:135
+#: init-live-search.php:139
 msgid "Show most viewed posts today"
 msgstr ""
 
-#: init-live-search.php:136
+#: init-live-search.php:140
 msgid "Show most viewed posts this week"
 msgstr ""
 
-#: init-live-search.php:137
+#: init-live-search.php:141
 msgid "Show most viewed posts this month"
 msgstr ""
 
-#: init-live-search.php:141
+#: init-live-search.php:145
 msgid "Show posts you recently read (local only)"
 msgstr ""
 
-#: init-live-search.php:144
+#: init-live-search.php:148
 msgid "Find posts related to the current page"
 msgstr ""
 
-#: init-live-search.php:145
+#: init-live-search.php:149
 msgid "Show your favorited posts"
 msgstr ""
 
-#: init-live-search.php:146
+#: init-live-search.php:150
 msgid "Clear all favorite posts"
 msgstr ""
 
-#: init-live-search.php:150
+#: init-live-search.php:154
 msgid "Search all products"
 msgstr ""
 
-#: init-live-search.php:151
+#: init-live-search.php:155
 msgid "Show only products on sale"
 msgstr ""
 
-#: init-live-search.php:152
+#: init-live-search.php:156
 msgid "Show only in-stock products"
 msgstr ""
 
-#: init-live-search.php:153
+#: init-live-search.php:157
 msgid "Search product by SKU"
 msgstr ""
 
-#: init-live-search.php:154
+#: init-live-search.php:158
 msgid "Filter products by brand slug"
 msgstr ""
 
-#: init-live-search.php:155
+#: init-live-search.php:159
 msgid "Filter products by price range"
 msgstr ""
 
-#: init-live-search.php:156
+#: init-live-search.php:160
 msgid "Filter products by attribute (e.g. color)"
 msgstr ""
 
-#: init-live-search.php:157
+#: init-live-search.php:161
 msgid "Filter products by variation value"
 msgstr ""
 
-#: init-live-search.php:158
+#: init-live-search.php:162
 msgid "Show all available coupons"
 msgstr ""
 
-#: init-live-search.php:164
+#: init-live-search.php:168
 msgid "Open a random post"
 msgstr ""
 
-#: init-live-search.php:165
+#: init-live-search.php:169
 msgid "Filter by category"
 msgstr ""
 
-#: init-live-search.php:166
+#: init-live-search.php:170
 msgid "Filter by tag"
 msgstr ""
 
-#: init-live-search.php:167
+#: init-live-search.php:171
 msgid "Show list of categories"
 msgstr ""
 
-#: init-live-search.php:168
+#: init-live-search.php:172
 msgid "Show list of tags"
 msgstr ""
 
-#: init-live-search.php:169
+#: init-live-search.php:173
 msgid "Filter by date (Y, Y/m, or Y/m/d)"
 msgstr ""
 
-#: init-live-search.php:170
+#: init-live-search.php:174
 msgid "Go to post by ID"
 msgstr ""
 
-#: init-live-search.php:171
+#: init-live-search.php:175
 msgid "Show past search keywords"
 msgstr ""
 
-#: init-live-search.php:172
+#: init-live-search.php:176
 msgid "Clear past search keywords"
 msgstr ""
 
-#: init-live-search.php:173
+#: init-live-search.php:177
 msgid "Clear local cache"
 msgstr ""
 
-#: init-live-search.php:174
+#: init-live-search.php:178
 msgid "Reset search field"
 msgstr ""
 
-#: init-live-search.php:253
+#: init-live-search.php:261
 msgid "Type to search..."
 msgstr ""
 
-#: init-live-search.php:254
+#: init-live-search.php:262
 msgid "No results found."
 msgstr ""
 
-#: init-live-search.php:255
+#: init-live-search.php:263
 msgid "Error loading results."
 msgstr ""
 
-#: init-live-search.php:256
+#: init-live-search.php:264
 msgid "All"
 msgstr ""
 
-#: init-live-search.php:257
+#: init-live-search.php:265
 msgid "Cache cleared successfully."
 msgstr ""
 
-#: init-live-search.php:258
+#: init-live-search.php:266
 msgid "Favorite list has been cleared."
 msgstr ""
 
-#: init-live-search.php:259
+#: init-live-search.php:267
 msgid "Failed to clear cache."
 msgstr ""
 
-#: init-live-search.php:260
+#: init-live-search.php:268
 msgid "Quick search"
 msgstr ""
 
-#: init-live-search.php:261
+#: init-live-search.php:269
 msgid "views"
 msgstr ""
 
-#: init-live-search.php:262
+#: init-live-search.php:270
 msgid "Sale"
 msgstr ""
 
-#: init-live-search.php:263
+#: init-live-search.php:271
 msgid "Sold out"
 msgstr ""
 
-#: init-live-search.php:264
+#: init-live-search.php:272
 msgid "Supported Commands:"
 msgstr ""
 
-#: init-live-search.php:265
+#: init-live-search.php:273
 msgid "You haven't searched for anything yet."
 msgstr ""
 
-#: init-live-search.php:266
+#: init-live-search.php:274
 msgid "Past search keywords have been cleared."
 msgstr ""
 
-#: init-live-search.php:281
+#: init-live-search.php:289
 msgid "Settings"
 msgstr ""
 
@@ -1264,7 +1270,49 @@ msgstr ""
 msgid "AI Related Posts Settings"
 msgstr ""
 
-# --- Block metadata (block.json) — translated server-side via translate_settings_using_i18n_schema() ---
+#: blocks/related-ai/block.json
+msgctxt "block title"
+msgid "Live Search: AI Related Posts"
+msgstr ""
+
+#: blocks/related-ai/block.json
+msgctxt "block description"
+msgid "Insert AI multi-signal related posts powered by Init Live Search."
+msgstr ""
+
+#: blocks/related-ai/block.json
+#: blocks/related-posts/block.json
+msgctxt "block keyword"
+msgid "related"
+msgstr ""
+
+#: blocks/related-ai/block.json
+msgctxt "block keyword"
+msgid "ai"
+msgstr ""
+
+#: blocks/related-ai/block.json
+#: blocks/related-posts/block.json
+msgctxt "block keyword"
+msgid "related posts"
+msgstr ""
+
+#: blocks/related-ai/block.json
+#: blocks/related-posts/block.json
+#: blocks/search-box/block.json
+msgctxt "block keyword"
+msgid "init"
+msgstr ""
+
+#: blocks/related-posts/block.json
+msgctxt "block title"
+msgid "Live Search: Related Posts"
+msgstr ""
+
+#: blocks/related-posts/block.json
+msgctxt "block description"
+msgid "Insert keyword-based related posts powered by Init Live Search."
+msgstr ""
 
 #: blocks/search-box/block.json
 msgctxt "block title"
@@ -1284,44 +1332,4 @@ msgstr ""
 #: blocks/search-box/block.json
 msgctxt "block keyword"
 msgid "live search"
-msgstr ""
-
-#: blocks/related-ai/block.json blocks/related-posts/block.json blocks/search-box/block.json
-msgctxt "block keyword"
-msgid "init"
-msgstr ""
-
-#: blocks/related-posts/block.json
-msgctxt "block title"
-msgid "Live Search: Related Posts"
-msgstr ""
-
-#: blocks/related-posts/block.json
-msgctxt "block description"
-msgid "Insert keyword-based related posts powered by Init Live Search."
-msgstr ""
-
-#: blocks/related-ai/block.json blocks/related-posts/block.json
-msgctxt "block keyword"
-msgid "related"
-msgstr ""
-
-#: blocks/related-ai/block.json blocks/related-posts/block.json
-msgctxt "block keyword"
-msgid "related posts"
-msgstr ""
-
-#: blocks/related-ai/block.json
-msgctxt "block title"
-msgid "Live Search: AI Related Posts"
-msgstr ""
-
-#: blocks/related-ai/block.json
-msgctxt "block description"
-msgid "Insert AI multi-signal related posts powered by Init Live Search."
-msgstr ""
-
-#: blocks/related-ai/block.json
-msgctxt "block keyword"
-msgid "ai"
 msgstr ""

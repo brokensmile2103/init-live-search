@@ -26,6 +26,13 @@ function init_plugin_suite_live_search_get_related_ai_ids( $post_id, $limit = 5,
     $limit     = max( 1, intval( $limit ) );
     $post_type = sanitize_key( $post_type );
 
+    // post_type đến từ attribute shortcode/block: chỉ nhận type công khai hoặc
+    // đã bật trong Settings (tránh truy vấn shop_coupon, wp_block...).
+    $allowed_types = init_plugin_suite_live_search_filter_allowed_post_types( [ $post_type ] );
+    if ( empty( $allowed_types ) || 'any' === $allowed_types[0] ) {
+        return [];
+    }
+
     // algo version để invalidation cache khi đổi logic
     $algo_ver  = 'v2';
     $cache_key = 'init_related_ai_' . $algo_ver . '_' . $post_id . '_' . $limit . '_' . $post_type;
@@ -83,17 +90,25 @@ function init_plugin_suite_live_search_get_related_ai_ids( $post_id, $limit = 5,
 
     // Chuẩn hóa + lọc hợp lệ + tránh tự tham chiếu
     $candidates = array_values( array_unique( array_map( 'intval', (array) $candidates ) ) );
-    $candidates = array_filter( $candidates, function( $id ) use ( $post_id ) {
-        return $id && $id !== $post_id && get_post_status( $id ) === 'publish';
-    } );
+
+    // ==== Prime caches để tránh N+1 ====
+    // Prime TRƯỚC khi lọc theo status (trước đây get_post_status() chạy trên
+    // cache lạnh -> mỗi ứng viên 1 query riêng).
+    if ( ! empty( $candidates ) && function_exists( '_prime_post_caches' ) ) {
+        _prime_post_caches( $candidates, true, true ); // posts + meta
+    }
+
+    $candidates = array_values(
+        array_filter(
+            $candidates,
+            function ( $id ) use ( $post_id ) {
+                return $id && $id !== $post_id && 'publish' === get_post_status( $id );
+            }
+        )
+    );
 
     if ( empty( $candidates ) ) {
         return [];
-    }
-
-    // ==== Prime caches để tránh N+1 ====
-    if ( function_exists( '_prime_post_caches' ) ) {
-        _prime_post_caches( $candidates, true, true ); // posts + meta
     }
     if ( function_exists( 'update_object_term_cache' ) ) {
         update_object_term_cache( $candidates, $post_type ); // terms
@@ -103,14 +118,20 @@ function init_plugin_suite_live_search_get_related_ai_ids( $post_id, $limit = 5,
     $tags1    = wp_get_post_tags( $post_id, [ 'fields' => 'ids' ] );
     $title1   = get_the_title( $post_id );
     $bigrams1 = init_plugin_suite_live_search_extract_bigrams( $title1 );
-    $date1    = get_post_time( 'U', false, $post_id );
-    $nowU     = current_time( 'timestamp' );
+    // Mốc GMT cho cả 2 phía: mọi hiệu số (tuổi bài, khoảng cách ngày) giữ
+    // nguyên như bản cũ, nhưng bỏ current_time('timestamp') đã lỗi thời.
+    $date1 = get_post_time( 'U', true, $post_id );
+    $now_u = time();
 
-    $max_comments = 1;
-    $max_views    = 1;
+    $max_comments  = 1;
+    $max_views     = 1;
+    $comment_count = [];
+    $view_count    = [];
     foreach ( $candidates as $cid ) {
-        $max_comments = max( $max_comments, (int) get_comments_number( $cid ) );
-        $max_views    = max( $max_views,    (int) get_post_meta( $cid, '_init_view_count', true ) );
+        $comment_count[ $cid ] = (int) get_comments_number( $cid );
+        $view_count[ $cid ]    = (int) get_post_meta( $cid, '_init_view_count', true );
+        $max_comments          = max( $max_comments, $comment_count[ $cid ] );
+        $max_views             = max( $max_views, $view_count[ $cid ] );
     }
 
     $half_life_recency = (int) apply_filters( 'init_plugin_suite_live_search_ai_half_life_recency', 60 ); // days
@@ -143,15 +164,15 @@ function init_plugin_suite_live_search_get_related_ai_ids( $post_id, $limit = 5,
         }
 
         // engagement normalized (log)
-        $cmt = (int) get_comments_number( $cid );
+        $cmt                = $comment_count[ $cid ];
         $signals['comment'] = ( $max_comments > 0 ) ? ( log( 1 + $cmt ) / log( 1 + $max_comments ) ) : 0.0;
 
-        $views = (int) get_post_meta( $cid, '_init_view_count', true );
+        $views            = $view_count[ $cid ];
         $signals['views'] = ( $max_views > 0 ) ? ( log( 1 + $views ) / log( 1 + $max_views ) ) : 0.0;
 
         // freshness tách 2 thành phần
-        $date2     = get_post_time( 'U', false, $cid );
-        $age_days  = max( 0, ( $nowU - $date2 ) / DAY_IN_SECONDS );
+        $date2     = get_post_time( 'U', true, $cid );
+        $age_days  = max( 0, ( $now_u - $date2 ) / DAY_IN_SECONDS );
         $diff_days = abs( $date1 - $date2 ) / DAY_IN_SECONDS;
 
         $signals['recency']  = exp( - $age_days  / max( 1, $half_life_recency ) );
@@ -275,6 +296,40 @@ function init_plugin_suite_live_search_get_related_ai_ids( $post_id, $limit = 5,
         return $cache_tags[ $pid ];
     };
 
+    // Similarity giữa 2 bài (giữ nguyên công thức: max của category Jaccard,
+    // tag Jaccard và cosine bigram tiêu đề).
+    $pair_sim = function ( $a, $b ) use ( $get_cats, $get_tags, $get_bigrams ) {
+        $sim = 0.0;
+
+        // category Jaccard
+        $c1 = (array) $get_cats( $a );
+        $c2 = (array) $get_cats( $b );
+        if ( $c1 && $c2 ) {
+            $sim_c = count( array_intersect( $c1, $c2 ) ) / max( 1, count( array_unique( array_merge( $c1, $c2 ) ) ) );
+            $sim   = max( $sim, $sim_c );
+        }
+
+        // tag Jaccard
+        $t1 = (array) $get_tags( $a );
+        $t2 = (array) $get_tags( $b );
+        if ( $t1 && $t2 ) {
+            $sim_t = count( array_intersect( $t1, $t2 ) ) / max( 1, count( array_unique( array_merge( $t1, $t2 ) ) ) );
+            $sim   = max( $sim, $sim_t );
+        }
+
+        // title bigrams cosine
+        $bg1   = (array) $get_bigrams( $a );
+        $bg2   = (array) $get_bigrams( $b );
+        $sim_b = init_plugin_suite_live_search_cosine_similarity( $bg1, $bg2 );
+
+        return max( $sim, $sim_b );
+    };
+
+    // MMR tăng dần: max_sim[c] = similarity lớn nhất giữa ứng viên c và các bài
+    // ĐÃ chọn. Mỗi vòng chỉ cần so với bài vừa được chọn thêm, thay vì so lại
+    // với toàn bộ danh sách đã chọn — O(k·n) thay vì O(k²·n), kết quả y hệt.
+    $max_sim = array_fill_keys( $ranked, 0.0 );
+
     while ( count( $selected ) < $k && ! empty( $ranked ) ) {
         $best_id  = null;
         $best_val = -1;
@@ -283,34 +338,7 @@ function init_plugin_suite_live_search_get_related_ai_ids( $post_id, $limit = 5,
             $rel = (float) $scored[ $cand_id ];
 
             // diversity penalty: max similarity với các bài đã chọn
-            $div_pen = 0.0;
-            foreach ( $selected as $sel_id ) {
-                $sim = 0.0;
-
-                // category Jaccard
-                $c1 = (array) $get_cats( $cand_id );
-                $c2 = (array) $get_cats( $sel_id );
-                if ( $c1 && $c2 ) {
-                    $sim_c = count( array_intersect( $c1, $c2 ) ) / max( 1, count( array_unique( array_merge( $c1, $c2 ) ) ) );
-                    $sim = max( $sim, $sim_c );
-                }
-
-                // tag Jaccard
-                $t1 = (array) $get_tags( $cand_id );
-                $t2 = (array) $get_tags( $sel_id );
-                if ( $t1 && $t2 ) {
-                    $sim_t = count( array_intersect( $t1, $t2 ) ) / max( 1, count( array_unique( array_merge( $t1, $t2 ) ) ) );
-                    $sim = max( $sim, $sim_t );
-                }
-
-                // title bigrams cosine
-                $bg1 = (array) $get_bigrams( $cand_id );
-                $bg2 = (array) $get_bigrams( $sel_id );
-                $sim_b = init_plugin_suite_live_search_cosine_similarity( $bg1, $bg2 );
-                $sim = max( $sim, $sim_b );
-
-                $div_pen = max( $div_pen, $sim );
-            }
+            $div_pen = $max_sim[ $cand_id ];
 
             $mmr = $lambda * $rel - ( 1 - $lambda ) * $div_pen;
 
@@ -323,6 +351,12 @@ function init_plugin_suite_live_search_get_related_ai_ids( $post_id, $limit = 5,
         if ( $best_id === null ) break;
         $selected[] = $best_id;
         $ranked = array_values( array_diff( $ranked, [ $best_id ] ) );
+
+        if ( count( $selected ) < $k ) {
+            foreach ( $ranked as $cand_id ) {
+                $max_sim[ $cand_id ] = max( $max_sim[ $cand_id ], $pair_sim( $cand_id, $best_id ) );
+            }
+        }
     }
 
     // Optional hook cho “spice” hoặc reorder nhẹ

@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 $atts = [
     'type'         => ( isset( $attributes['boxType'] ) && 'input' === $attributes['boxType'] ) ? 'input' : 'icon',
-    'placeholder'  => isset( $attributes['placeholder'] ) ? (string) $attributes['placeholder'] : 'Search...',
+    'placeholder'  => isset( $attributes['placeholder'] ) ? (string) $attributes['placeholder'] : __( 'Search...', 'init-live-search' ),
     'label'        => isset( $attributes['label'] ) ? (string) $attributes['label'] : '',
     'class'        => isset( $attributes['htmlClass'] ) ? (string) $attributes['htmlClass'] : '',
     'id'           => isset( $attributes['htmlId'] ) ? (string) $attributes['htmlId'] : '',

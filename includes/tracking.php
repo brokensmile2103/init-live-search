@@ -10,6 +10,18 @@ function init_plugin_suite_live_search_track_query($results, $post_ids, $term, $
     $term = trim($term);
     if ($term === '') return $results; // Không log nếu trống
 
+    // Chỉ ghi nhận lượt tìm kiếm THẬT của người dùng (REST /search, trang đầu).
+    // Trước 2.0.1, filter này bắt cả Related Posts, redirect 404, Abilities API...
+    // -> mỗi lượt xem bài viết đều ghi 1 lần vào DB và làm sai số liệu thống kê.
+    $is_user_search = is_array( $args )
+        && isset( $args['context'] ) && 'search' === $args['context']
+        && empty( $args['force_ids'] )
+        && (int) ( $args['paged'] ?? 1 ) <= 1;
+
+    if ( ! apply_filters( 'init_plugin_suite_live_search_should_track', $is_user_search, $term, $args ) ) {
+        return $results;
+    }
+
     $log = [
         'query'   => sanitize_text_field($term),
         'results' => is_array($post_ids) ? count($post_ids) : 0,

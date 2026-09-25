@@ -156,40 +156,40 @@ class Init_Plugin_Suite_Live_Search_CLI {
 
         WP_CLI::log( sprintf( 'Rebuilding FULLTEXT index for post types [%s]...', implode( ', ', $post_types ) ) );
 
+        // Trong lúc rebuild, tắt cờ "indexed" để live search tạm dùng pipeline
+        // LIKE. Trước 2.0.1 bảng bị TRUNCATE trong khi cờ vẫn bật -> FULLTEXT
+        // trả rỗng (không fallback) và search "trắng" suốt thời gian rebuild.
+        delete_option( 'init_plugin_suite_live_search_fulltext_indexed' );
+
         // Rebuild from scratch — simplest way to guarantee no stale rows are
         // left behind (e.g. posts unpublished while the sync hook was off).
         // $table is derived from $wpdb->prefix only, never from user input.
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $wpdb->query( "TRUNCATE TABLE {$table}" );
 
-        $paged = 1;
-        $total = 0;
+        $batch_no = 1;
+        $last_id  = 0;
+        $total    = 0;
 
         do {
-            $query = new WP_Query( [
-                'post_type'      => $post_types,
-                'post_status'    => 'publish',
-                'posts_per_page' => $batch_size,
-                'paged'          => $paged,
-                'orderby'        => 'ID',
-                'order'          => 'ASC',
-                'no_found_rows'  => true,
-            ] );
+            $batch = init_plugin_suite_live_search_fulltext_index_batch( $last_id, $batch_size, $post_types );
 
-            if ( empty( $query->posts ) ) {
+            if ( 0 === $batch['count'] ) {
                 break;
             }
 
-            foreach ( $query->posts as $post ) {
-                init_plugin_suite_live_search_fulltext_upsert_row( $post );
+            $last_id = $batch['last_id'];
+            $total  += $batch['count'];
+            WP_CLI::log( sprintf( 'Batch %d: indexed %d posts (total: %d)', $batch_no, $batch['count'], $total ) );
+
+            ++$batch_no;
+
+            // Giải phóng object cache trong bộ nhớ giữa các batch — tránh RAM
+            // tăng dần khi index hàng trăm nghìn bài trong 1 tiến trình CLI.
+            if ( function_exists( 'wp_cache_supports' ) && wp_cache_supports( 'flush_runtime' ) ) {
+                wp_cache_flush_runtime();
             }
-
-            $total += count( $query->posts );
-            WP_CLI::log( sprintf( 'Batch %d: indexed %d posts (total: %d)', $paged, count( $query->posts ), $total ) );
-
-            $paged++;
-
-        } while ( count( $query->posts ) === $batch_size );
+        } while ( $batch['count'] === $batch_size );
 
         update_option( 'init_plugin_suite_live_search_fulltext_indexed', current_time( 'mysql' ), false );
 

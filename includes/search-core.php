@@ -6,8 +6,8 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
     global $wpdb;
 
     $args['lang'] = $args['lang'] ?? init_plugin_suite_live_search_detect_lang();
-    $term = sanitize_text_field($term);
-    $options = get_option(INIT_PLUGIN_SUITE_LS_OPTION, []);
+    $term         = init_plugin_suite_live_search_normalize_term( $term );
+    $options      = get_option( INIT_PLUGIN_SUITE_LS_OPTION, [] );
 
     $post_types = init_plugin_suite_live_search_resolve_post_types($options, $args);
     if (empty($post_types)) return [];
@@ -17,7 +17,7 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
     $offset = ($paged - 1) * $limit;
 
     if (!empty($args['force_ids'])) {
-        $post_ids = array_filter(array_map('absint', (array)$args['force_ids']));
+        $post_ids = array_values( array_filter( array_map( 'absint', (array) $args['force_ids'] ) ) );
     } else {
         if (!$term || strlen($term) < 2) return [];
 
@@ -35,20 +35,38 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
 
         if (is_array($meili_post_ids)) {
             $post_ids = $meili_post_ids;
+            // Meilisearch đã phân trang phía server (limit/offset) — không được
+            // cắt offset thêm lần nữa, nếu không trang 2+ luôn rỗng.
+            $offset = 0;
         } else {
             $like = '%' . $wpdb->esc_like($term) . '%';
             $placeholders = implode(', ', array_fill(0, count($post_types), '%s'));
 
-            $cache_key = 'init_plugin_suite_live_search_' . md5($term . serialize($post_types) . $search_mode . $limit . $paged);
-            $post_ids = ($paged === 1) ? wp_cache_get($cache_key, 'init_plugin_suite_live_search') : false;
+            // Kết quả pipeline không phụ thuộc $paged (luôn lấy tối đa internal_limit
+            // rồi cắt trang ở dưới), nên dùng chung 1 cache cho mọi trang. Key gồm
+            // đủ mọi yếu tố ảnh hưởng kết quả + salt last_changed (tự vô hiệu khi
+            // có bài/term thay đổi) — an toàn với Redis/Memcached.
+            $cache_parts = [
+                'term'        => $term,
+                'post_types'  => $post_types,
+                'mode'        => $search_mode,
+                'limit'       => $limit,
+                'lang'        => $args['lang'],
+                'no_fallback' => ! empty( $args['no_fallback'] ),
+                'fallback'    => $args['enable_fallback'] ?? null,
+                'options'     => md5( maybe_serialize( $options ) ),
+                'synonyms'    => md5( maybe_serialize( get_option( INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION, '' ) ) . maybe_serialize( get_option( INIT_PLUGIN_SUITE_LS_PREDEFINED_DICT_OPTION, [] ) ) ),
+                'salt'        => init_plugin_suite_live_search_cache_salt(),
+            ];
+            $cache_key   = 'init_plugin_suite_live_search_' . md5( wp_json_encode( $cache_parts ) );
+            $post_ids    = wp_cache_get( $cache_key, 'init_plugin_suite_live_search' );
 
             if ($post_ids === false) {
                 $post_ids = init_plugin_suite_live_search_resolve_post_ids(
                     $term, $like, $post_types, $placeholders, $search_mode, $limit, $paged, $options, $args
                 );
-                if ($paged === 1) {
-                    wp_cache_set($cache_key, $post_ids, 'init_plugin_suite_live_search', 300);
-                }
+                $post_ids = is_array( $post_ids ) ? array_values( $post_ids ) : [];
+                wp_cache_set( $cache_key, $post_ids, 'init_plugin_suite_live_search', 300 );
             }
         }
     }
@@ -79,7 +97,29 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
 
 // Fallback search by splitting query into single words and matching titles exactly
 function init_plugin_suite_live_search_fallback_single_words($wpdb, $term, $post_types, $placeholders, $search_mode, $limit) {
-    $words = array_filter(preg_split('/\s+/', $term));
+    $words = preg_split( '/\s+/u', trim( (string) $term ), -1, PREG_SPLIT_NO_EMPTY );
+    if ( empty( $words ) ) {
+        return [];
+    }
+
+    // Mỗi từ = 2 query REGEXP (title + SEO) quét toàn bảng. Loại từ 1 ký tự
+    // (nhiễu, khớp gần như mọi bài), bỏ trùng và giới hạn số từ để 1 câu dán
+    // dài không nổ thành hàng chục query. Có filter để nới nếu cần.
+    $max_words = (int) apply_filters( 'init_plugin_suite_live_search_fallback_max_words', 6, $term );
+    $unique    = [];
+    foreach ( $words as $word ) {
+        if ( mb_strlen( $word ) < 2 ) {
+            continue;
+        }
+        $key = mb_strtolower( $word );
+        if ( ! isset( $unique[ $key ] ) ) {
+            $unique[ $key ] = $word;
+        }
+    }
+    $words = array_values( $unique );
+    if ( $max_words > 0 ) {
+        $words = array_slice( $words, 0, $max_words );
+    }
     if (empty($words)) return [];
 
     $all_results = [];
@@ -104,26 +144,31 @@ function init_plugin_suite_live_search_fallback_single_words($wpdb, $term, $post
 
 // Resolve post IDs based on search term, fallback, and ACF fields
 function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_types, $placeholders, $search_mode, $limit, $paged, $options, $args) {
+    global $wpdb;
+    $internal_limit = min( $limit * 3, 300 );
+
     if (!empty($options['use_native_search'])) {
+        // Lấy internal_limit (thay vì $limit) để phân trang phía sau hoạt động;
+        // trang 1 giữ nguyên thứ tự/kết quả như trước.
         $query = new WP_Query([
-            's'              => $term,
-            'post_type'      => $post_types,
-            'post_status'    => 'publish',
-            'posts_per_page' => $limit,
-            'fields'         => 'ids',
+            's'                      => $term,
+            'post_type'              => $post_types,
+            'post_status'            => 'publish',
+            'posts_per_page'         => $internal_limit,
+            'fields'                 => 'ids',
+            'no_found_rows'          => true,
+            'update_post_meta_cache' => false,
+            'update_post_term_cache' => false,
         ]);
         return $query->posts;
     }
-
-    global $wpdb;
-    $internal_limit = min($limit * 3, 300);
 
     // Apply + / - operator logic only if enabled
     $enable_ops = !empty($options['enable_search_operators']);
     if ( $enable_ops ) {
         // Parse + / - operators into must_include / must_exclude
-        $words = preg_split('/\s+/', trim($term));
-        
+        $words = preg_split( '/\s+/u', trim( $term ), -1, PREG_SPLIT_NO_EMPTY );
+
         $must_have = [];
         $must_not_have = [];
         $normal = [];
@@ -205,19 +250,22 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
     $enable_fallback = apply_filters('init_plugin_suite_live_search_enable_fallback', $enable_fallback, $term, $args);
 
     if ($enable_fallback) {
-        $words = preg_split('/\s+/', trim($term));
+        $words        = preg_split( '/\s+/u', trim( $term ), -1, PREG_SPLIT_NO_EMPTY );
         $cut_attempts = 0;
         while (count($post_ids) < floor($limit / 2) && count($words) > 3 && $cut_attempts < 4) {
             array_pop($words);
             $short_term = implode(' ', $words);
             $like_short = '%' . $wpdb->esc_like($short_term) . '%';
-            $post_ids = init_plugin_suite_live_search_get_post_ids_by_mode(
+            $short_ids  = init_plugin_suite_live_search_get_post_ids_by_mode(
                 $wpdb, $short_term, $like_short, $post_types, $placeholders, $search_mode, $internal_limit
             );
+            // Nối thêm (không ghi đè): kết quả của câu đầy đủ / synonym đã tìm
+            // được ở trên luôn được giữ và xếp trước kết quả của câu bị cắt ngắn.
+            $post_ids = array_values( array_unique( array_merge( $post_ids, $short_ids ) ) );
             $cut_attempts++;
         }
 
-        if (count($post_ids) < floor($limit / 2) && str_word_count($term) >= 3) {
+        if ( count( $post_ids ) < floor( $limit / 2 ) && init_plugin_suite_live_search_count_words( $term ) >= 3 ) {
             $bi_terms = array_unique(init_plugin_suite_live_search_generate_bigrams($term));
             foreach (array_slice($bi_terms, 0, 10) as $bi_term) {
                 $like_bi = '%' . $wpdb->esc_like($bi_term) . '%';
@@ -226,7 +274,7 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
                 );
                 $post_ids = array_merge($post_ids, $more_ids);
             }
-            $post_ids = array_unique($post_ids);
+            $post_ids = array_values( array_unique( $post_ids ) );
         }
 
         $should_apply_single_word_fallback = true;
@@ -240,8 +288,7 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
         }
 
         if (count($post_ids) < $limit && in_array($search_mode, ['title', 'title_tag'], true) && $should_apply_single_word_fallback) {
-            $words = array_filter(preg_split('/\s+/', $term));
-            $word_count = count($words);
+            $word_count = init_plugin_suite_live_search_count_words( $term );
 
             $extra_ids = init_plugin_suite_live_search_fallback_single_words(
                 $wpdb, $term, $post_types, $placeholders, $search_mode, $limit
@@ -252,7 +299,7 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
             $post_ids = init_plugin_suite_live_search_ranked_merge_weighted([$post_ids, $extra_ids], [2, $extra_weight]);
         }
 
-        $post_ids = array_unique($post_ids);
+        $post_ids = array_values( array_unique( $post_ids ) );
     }
 
     // ACF field search
@@ -261,22 +308,25 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
         if (!empty($acf_fields)) {
             $acf_like = '%' . $wpdb->esc_like($term) . '%';
             $acf_placeholders = implode(', ', array_fill(0, count($acf_fields), '%s'));
+            // Lọc thêm post_type: trước đây thiếu điều kiện này nên ACF có thể trả
+            // về bài thuộc post type không nằm trong phạm vi tìm kiếm.
             // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
             $acf_ids = $wpdb->get_col($wpdb->prepare(
                 "
-                SELECT pm.post_id
+                SELECT DISTINCT pm.post_id
                 FROM {$wpdb->postmeta} pm
                 INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
                 WHERE pm.meta_key IN ($acf_placeholders)
                 AND pm.meta_value LIKE %s
                 AND p.post_status = 'publish'
-                LIMIT $internal_limit
+                AND p.post_type IN ($placeholders)
+                LIMIT %d
                 ",
-                ...array_merge($acf_fields, [$acf_like])
+                ...array_merge( $acf_fields, [ $acf_like ], $post_types, [ $internal_limit ] )
             ));
             // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $post_ids = array_unique(array_merge($post_ids, array_map('intval', $acf_ids)));
+            $post_ids = array_values( array_unique( array_merge( array_map( 'intval', $post_ids ), array_map( 'intval', $acf_ids ) ) ) );
         }
     }
 
@@ -284,6 +334,11 @@ function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_type
     // Cả 2 đều check trên field phù hợp với search_mode hiện tại (title / +excerpt / +content),
     // thay vì chỉ title như trước — để "-" loại đúng bài chứa từ đó dù nó nằm ở excerpt/content.
     if ( $enable_ops && (!empty($args['operator_must']) || !empty($args['operator_must_not'])) ) {
+        // Nạp sẵn post cache cho cả lô 1 lần, tránh mỗi bài 1 query (N+1).
+        if ( ! empty( $post_ids ) && function_exists( '_prime_post_caches' ) ) {
+            _prime_post_caches( array_map( 'intval', $post_ids ), false, false );
+        }
+
         $post_ids = array_values(array_filter($post_ids, function($post_id) use ($args, $search_mode) {
             $haystack = init_plugin_suite_live_search_get_operator_haystack($post_id, $search_mode);
 
@@ -522,10 +577,38 @@ function init_plugin_suite_live_search_get_seo_ids($wpdb, $term, $like, $post_ty
     // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 }
 
+// Build a "whole word" REGEXP pattern understood by the current DB server.
+// MySQL 8.0.4+ (ICU) and MariaDB (PCRE) support \b; MySQL 5.7 and older
+// (Henry Spencer regex) do not — there \b silently never matches, so the
+// single-word fallback returned nothing. Those servers need [[:<:]]/[[:>:]].
+function init_plugin_suite_live_search_word_regexp( $word ) {
+    static $legacy = null;
+
+    if ( null === $legacy ) {
+        global $wpdb;
+
+        $server_info = method_exists( $wpdb, 'db_server_info' ) ? (string) $wpdb->db_server_info() : '';
+
+        if ( false !== stripos( $server_info, 'mariadb' ) ) {
+            $legacy = false;
+        } else {
+            $version = (string) $wpdb->db_version();
+            $legacy  = '' !== $version && version_compare( $version, '8.0.4', '<' );
+        }
+
+        $legacy = (bool) apply_filters( 'init_plugin_suite_live_search_legacy_regexp', $legacy );
+    }
+
+    $escaped = preg_quote( (string) $word, '/' );
+
+    return $legacy
+        ? '[[:<:]]' . $escaped . '[[:>:]]'
+        : '\\b' . $escaped . '\\b';
+}
+
 // Get post IDs where the title matches an exact word using REGEXP
 function init_plugin_suite_live_search_get_ids_by_title_exact_word($wpdb, $word, $post_types, $placeholders, $limit) {
-    $escaped = preg_quote($word, '/');
-    $regexp = '\\b' . $escaped . '\\b';
+    $regexp = init_plugin_suite_live_search_word_regexp( $word );
 
     // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
@@ -554,7 +637,7 @@ function init_plugin_suite_live_search_get_seo_ids_by_word($wpdb, $word, $post_t
     $seo_title_keys = ['_yoast_wpseo_title', 'rank_math_title', '_aioseo_title', '_genesis_title', '_seopress_titles_title'];
     $keys = apply_filters('init_plugin_suite_live_search_seo_meta_keys', $seo_title_keys);
     $placeholders_meta = implode(', ', array_fill(0, count($keys), '%s'));
-    $escaped = '\\b' . preg_quote($word, '/') . '\\b';
+    $escaped           = init_plugin_suite_live_search_word_regexp( $word );
 
     // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
@@ -574,50 +657,69 @@ function init_plugin_suite_live_search_get_seo_ids_by_word($wpdb, $word, $post_t
     // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 }
 
-// Expand a search term by including its synonyms.
-function init_plugin_suite_live_search_expand_with_synonyms($term) {
-    $term = trim(mb_strtolower($term));
-    if ($term === '') return [$term];
+// Merged (predefined + user) synonym map, built once per request. It used to
+// be rebuilt — loading every dictionary and running array_merge_recursive() —
+// on every call, and a single search calls this several times.
+function init_plugin_suite_live_search_get_synonym_map() {
+    static $cache = null;
+
+    if ( null !== $cache ) {
+        return $cache;
+    }
 
     // Get custom synonyms from user input
     $user_map = [];
-    $raw = get_option(INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION, '{}');
-    $decoded = is_string($raw) ? json_decode($raw, true) : (is_array($raw) ? $raw : []);
+    $raw      = get_option( INIT_PLUGIN_SUITE_LS_SYNONYM_OPTION, '{}' );
+    $decoded  = is_string( $raw ) ? json_decode( $raw, true ) : ( is_array( $raw ) ? $raw : [] );
 
-    if (is_array($decoded)) {
-        foreach ($decoded as $key => $syns) {
-            $key = trim(mb_strtolower($key));
-            if (!is_array($syns)) continue;
-            $user_map[$key] = array_values(array_filter(array_map('trim', $syns)));
+    if ( is_array( $decoded ) ) {
+        foreach ( $decoded as $key => $syns ) {
+            $key = trim( mb_strtolower( (string) $key ) );
+            if ( ! is_array( $syns ) ) {
+                continue;
+            }
+            $user_map[ $key ] = array_values( array_filter( array_map( 'trim', $syns ) ) );
         }
     }
 
     // Get predefined dictionaries and merge with user synonyms
     $predefined_map = init_plugin_suite_live_search_get_predefined_synonyms();
-    $synonym_map = array_merge_recursive($predefined_map, $user_map);
+    $synonym_map    = array_merge_recursive( $predefined_map, $user_map );
 
     // Remove duplicates from merged arrays
-    foreach ($synonym_map as $key => $values) {
-        if (is_array($values)) {
-            $synonym_map[$key] = array_unique($values);
+    foreach ( $synonym_map as $key => $values ) {
+        if ( is_array( $values ) ) {
+            $synonym_map[ $key ] = array_unique( $values );
         }
     }
 
-    $synonym_map = apply_filters('init_plugin_suite_live_search_synonym_map', $synonym_map);
+    $cache = $synonym_map;
+
+    return $cache;
+}
+
+// Expand a search term by including its synonyms.
+function init_plugin_suite_live_search_expand_with_synonyms( $term ) {
+    $term = trim( mb_strtolower( $term ) );
+    if ( '' === $term ) {
+        return [ $term ];
+    }
+
+    $synonym_map = apply_filters( 'init_plugin_suite_live_search_synonym_map', init_plugin_suite_live_search_get_synonym_map() );
 
     $expanded = [$term];
 
     // Direct lookup
-    if (!empty($synonym_map[$term])) {
+    if ( ! empty( $synonym_map[ $term ] ) && is_array( $synonym_map[ $term ] ) ) {
         $expanded = array_merge($expanded, $synonym_map[$term]);
     }
 
     // Multi-word term lookup (check each word)
-    $words = preg_split('/\s+/', $term);
+    $words = preg_split( '/\s+/u', $term, -1, PREG_SPLIT_NO_EMPTY );
     if (count($words) > 1) {
         foreach ($words as $word) {
             $word = trim(mb_strtolower($word));
-            if (strlen($word) >= 3 && !empty($synonym_map[$word])) {
+            if ( strlen( $word ) >= 3 && ! empty( $synonym_map[ $word ] ) && is_array( $synonym_map[ $word ] ) ) {
                 $expanded = array_merge($expanded, $synonym_map[$word]);
             }
         }
@@ -627,9 +729,16 @@ function init_plugin_suite_live_search_expand_with_synonyms($term) {
 }
 
 // Find related post IDs based on a keyword and exclude a specific post.
+//
+// Used by the Related Posts shortcode/block, auto-insert, the Abilities API
+// and the 404 redirect. Up to 2.0.0 every call ran the whole search pipeline;
+// with auto-insert enabled that meant dozens of LIKE/REGEXP queries on EVERY
+// single post view (wp_cache is per-request on hosts without Redis/Memcached).
+// Results for a given post are now cached in a transient (default 12h,
+// filterable via init_plugin_suite_live_search_related_cache_ttl, 0 disables).
+// The key includes the settings hash, so changing settings takes effect
+// immediately; IDs are re-validated (still published) at render time.
 function init_plugin_suite_live_search_find_related_ids( $keyword, $exclude_id, $limit = 5, $post_type = '' ) {
-    global $wpdb;
-
     // Làm sạch y chang REST
     $keyword = sanitize_text_field( $keyword );
     if ( strlen( $keyword ) < 3 ) return [];
@@ -640,21 +749,54 @@ function init_plugin_suite_live_search_find_related_ids( $keyword, $exclude_id, 
     $keyword = trim( preg_replace( '/[^\p{L}\p{N}\s]+/u', '', $keyword ) );
     if ( strlen( $keyword ) < 3 ) return [];
 
+    $exclude_id = absint( $exclude_id );
+    $limit      = max( 1, (int) $limit );
+    $lang       = init_plugin_suite_live_search_detect_lang();
+
+    $ttl       = 0;
+    $cache_key = '';
+
+    if ( $exclude_id > 0 ) {
+        $ttl = (int) apply_filters( 'init_plugin_suite_live_search_related_cache_ttl', 12 * HOUR_IN_SECONDS, $exclude_id, $keyword, $limit, $post_type );
+
+        if ( $ttl > 0 ) {
+            $cache_parts = [
+                'v'       => 1,
+                'keyword' => $keyword,
+                'post_id' => $exclude_id,
+                'limit'   => $limit,
+                'type'    => is_array( $post_type ) ? implode( ',', $post_type ) : (string) $post_type,
+                'lang'    => $lang,
+                'options' => md5( maybe_serialize( get_option( INIT_PLUGIN_SUITE_LS_OPTION, [] ) ) ),
+            ];
+            $cache_key   = 'ils_rel_' . md5( wp_json_encode( $cache_parts ) );
+
+            $cached = get_transient( $cache_key );
+            if ( is_array( $cached ) ) {
+                return array_map( 'intval', $cached );
+            }
+        }
+    }
+
     $args = [
         // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
         'exclude'    => $exclude_id,
         'paged'      => 1,
-        'lang'       => init_plugin_suite_live_search_detect_lang(),
+        'lang'       => $lang,
         'post_type'  => $post_type,
         'force_mode' => 'title',
+        'context'    => 'related',
     ];
 
     $raw_results = init_plugin_suite_live_search_get_results( $keyword, $args );
 
-    if ( empty( $raw_results ) || ! is_array( $raw_results ) ) {
-        return [];
+    $post_ids = ( ! empty( $raw_results ) && is_array( $raw_results ) )
+        ? array_slice( array_map( 'intval', array_column( $raw_results, 'id' ) ), 0, $limit )
+        : [];
+
+    if ( '' !== $cache_key ) {
+        set_transient( $cache_key, $post_ids, $ttl );
     }
 
-    $post_ids = array_column( $raw_results, 'id' );
-    return array_slice( $post_ids, 0, $limit );
+    return $post_ids;
 }

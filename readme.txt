@@ -2,9 +2,9 @@
 Contributors: brokensmile.2103
 Tags: AI search, live search, meilisearch, related posts, woocommerce
 Requires at least: 6.9
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ Fast REST API live search with optional FULLTEXT index, Meilisearch, AI-powered 
 
 == Description ==
 
-Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. Init Live Search is a modern, lightweight, and fully accessible live search solution for WordPress — now with an optional **MySQL FULLTEXT search index**, optional **Meilisearch** integration, tag-aware matching, SEO metadata support, ACF integration, WooCommerce product filters, and customizable UI presets.
+Deliver an ultra-responsive search experience to your visitors — no page reloads, no jQuery, no lag. Init Live Search is a modern, lightweight, and fully accessible live search solution for WordPress — now with native **Block Editor (Gutenberg)** blocks and **Abilities API** support (WordPress 6.9+), an optional **MySQL FULLTEXT search index**, optional **Meilisearch** integration, tag-aware matching, SEO metadata support, ACF integration, WooCommerce product filters, and customizable UI presets.
 
 It replaces the default `<input name="s">` with a clean, intuitive search modal powered entirely by the WordPress REST API. Everything loads in real-time — with zero disruption to browsing flow.
 
@@ -20,65 +20,35 @@ Perfect for content-heavy blogs, WooCommerce stores, or even headless sites. Eve
 
 Want typo-tolerant, sub-50ms relevance ranking on top of that? Connect your own self-hosted or cloud **Meilisearch** instance in a few clicks — Init Live Search will automatically prefer it for search, and just as automatically fall back to the built-in database search if it's ever unreachable. Your visitors never see a broken search box.
 
+Prefer working entirely in the Block Editor? Three dynamic blocks — **Live Search Box**, **Related Posts**, and **AI Related Posts** — live under their own **Init Live Search** category in the block inserter, each with a live server-side preview as you configure it, and each sharing the exact same rendering code as its shortcode counterpart. For AI agents and automated tools, two read-only abilities (search and related posts) are also exposed through the standard WordPress **Abilities API** on WordPress 6.9+.
+
 It also brings AI-powered related posts and an advanced keyword generator — giving your visitors smarter ways to discover content.
 
 This plugin is part of the [Init Plugin Suite](https://en.inithtml.com/init-plugin-suite-minimalist-powerful-and-free-wordpress-plugins/) — a collection of minimalist, fast, and developer-focused tools for WordPress.
 
 GitHub repository: [https://github.com/brokensmile2103/init-live-search](https://github.com/brokensmile2103/init-live-search)
 
-== What's New in Version 1.8.x & 1.9.x ==
+== What's New in Version 2.0.x ==
 
-- **Optional FULLTEXT Search Index (1.9.5)**: opt-in MySQL FULLTEXT-indexed table for Title/Excerpt/Content, replacing slow `LIKE '%term%'` scans on large sites. Off by default, auto-builds in the background via WP-Cron once enabled (no SSH/WP-CLI needed), with `wp init-live-search fulltext-reindex` available for a manual/faster build. See "FULLTEXT Search Index" below for details.
-
-- **Optional Meilisearch Integration**: connect your own Meilisearch server (self-hosted or cloud) as the primary search engine
-  - Typo-tolerant, relevance-ranked, sub-50ms search results straight from Meilisearch
-  - Automatic, transparent fallback to the local database search whenever Meilisearch is disabled, unreachable, or misconfigured — search availability is never compromised
-  - New **Meilisearch** settings tab: Host URL, Index Name, Search Key, Admin/Indexing Key, request timeout, one-click "Test Connection", and (1.9.5) a one-click **"Reindex Now"** button for sites without WP-CLI/SSH access
-  - Posts are synced automatically on publish/update/trash/delete (non-blocking — won't slow down the editor)
-  - WP-CLI command `wp init-live-search meili-reindex` for bulk-indexing or rebuilding the entire index
-  - Sensitive indexing key can be defined via the `INIT_LIVE_SEARCH_MEILI_ADMIN_KEY` constant in `wp-config.php` instead of the database, for extra security
-
-- **AI-Powered Related Posts**: brand new `[init_live_search_related_ai]` shortcode  
-  - Uses multi-signal scoring (tags, series, title bigrams, same_keyword via ACF, category, views, comments, freshness)  
-  - Shares templates with `[init_live_search_related_posts]` (no extra styling needed)  
-  - Fully filterable via new developer hooks: `ai_candidates`, `ai_signals`, `ai_weights`, `ai_score`
-
-- **Advanced Keyword Generator**: upgraded algorithm for admin keyword suggestions  
-  - Replaced TF-IDF with **BM25** term weighting  
-  - Added **NPMI** (fixed probability base) and **Log-Likelihood Ratio (Dunning)** for collocation strength  
-  - Generates **bigrams and trigrams** for richer, more specific keyword suggestions  
-  - **Cross-document frequency penalty** down-ranks phrases that are too generic across the site  
-  - **MMR (Maximal Marginal Relevance)** selection ensures diverse, non-redundant final keywords  
-  - Title-only source: clean signal, no excerpt noise, works reliably across all site types  
-  - Unicode-safe, locale-aware stop words (Vietnamese & English), and soft fallback mode
-
-- **404 Smart Redirect**
-  - Added "Auto Redirect 404 to Best Match" mode driven by Init Live Search scoring
-  - Fully respects "Post Types to Include" settings
-  - Uses unified resolver + filters for extensible post-type handling
-  - Safety checks to avoid loops, invalid targets, and cross-type mismatches
-
-- **Developer Filters Expansion**  
-  - New filters added for AI related posts and keyword signals  
-  - Complete list now includes over 20 filters (`*_fallback`, `*_post_ids`, `*_results`, `*_weights`, `*_commands`, etc.)  
-  - Developers can hook into candidate pools, signal scores, and schema output with fine-grained control
-
-- **Performance Optimizations**  
-  - Smarter candidate pooling for related posts (recent + context-based)  
-  - Pre-cached scoring loop for AI signals to minimize queries  
-  - Safer regex handling in keyword processing to avoid PCRE errors  
-  - Reduced memory footprint in bigram statistics without sacrificing accuracy
-
-- **Backward Compatible Enhancements**  
-  - `[init_live_search_related_posts]` and `[init_live_search_related_ai]` now share the same rendering pipeline  
-  - Existing templates, schema, and CSS continue to work without modification  
-  - Auto insert related posts still works and can be switched to AI mode via shortcode override
+- **Much lighter Related Posts**: keyword-based related posts (shortcode, block, auto-insert) are now cached per post, so a normal post view no longer runs the whole search pipeline. AI Related Posts' diversity step is ~3× faster with identical output
+- **FULLTEXT fix**: searches containing common English words (e.g. "how to install", "the best laptop") no longer return zero results when the FULLTEXT index is enabled
+- **Search pagination works**: infinite scroll now loads real next pages (for both the database search and Meilisearch) instead of repeating page 1
+- **Smarter, faster fallbacks**: Meilisearch outages fall back to the database instantly instead of waiting for the timeout on every search; 404 smart redirects are cached; `/random` no longer uses `ORDER BY RAND()`; excerpts no longer run the full `the_content` filter chain
+- **Better Vietnamese & Unicode matching**: decomposed (NFD) input from macOS/iOS keyboards now matches, snippets are accent-insensitive like highlighting, and word counting is Unicode-aware
+- **Security hardening**: drafts, private posts, password-protected content, non-public post types/taxonomies and email-restricted WooCommerce coupons can no longer be exposed through public endpoints; cross-site results are sanitized in the browser
+- **Accurate Search Analytics**: only real visitor searches are logged (related posts, 404 redirects and API calls are no longer counted)
+- Frontend script now loads with `defer`; browser result cache now expires (1 hour by default) and never breaks search when storage is full or blocked
+- **Abilities API support (WordPress 6.9+)**: search and related-posts exposed as two read-only, discoverable abilities (`init-live-search/search-posts`, `init-live-search/get-related-posts`) — optional and fully backward-compatible on older WordPress versions
+- **Block Editor (Gutenberg) support**: three new blocks — Live Search Box, Related Posts, AI Related Posts — under their own block category, each with a live editor preview and sharing the same rendering code as their shortcode counterparts
+- **Requires at least** raised from 5.9 to 6.9 to support the Abilities API. `Requires PHP` remains 7.4
 
 == Features ==
 
 Packed with everything a modern live search needs — and more:
 
 - Live search via REST API (no admin-ajax, no jQuery)
+- **NEW:** Block Editor (Gutenberg) blocks — Live Search Box, Related Posts, and AI Related Posts — under their own block category, each with a live server-side preview in the editor
+- **NEW:** Abilities API support (WordPress 6.9+) — search and related posts exposed as discoverable, executable abilities via `wp_get_abilities()` and the `wp-abilities/v1` REST namespace
 - **NEW:** Optional MySQL FULLTEXT search index — faster Title/Excerpt/Content matching than `LIKE` queries on the built-in database search, auto-builds in the background
 - **NEW:** Optional Meilisearch integration — typo-tolerant, relevance-ranked external search with automatic fallback to local DB search
 - Smart tag-aware search mode (title + tag match)
@@ -236,6 +206,12 @@ Modify WP_Query arguments for different commands.
 **`init_plugin_suite_live_search_ai_weights`**  
 Adjust AI scoring weights for related posts.  
 
+**`init_plugin_suite_live_search_related_cache_ttl`**  
+Cache lifetime (seconds) of keyword-based related posts per post. Return `0` to disable.  
+
+**`init_plugin_suite_live_search_use_legacy_excerpt`**  
+Return `true` to build fallback excerpts through `get_the_excerpt()` / `the_content` like versions before 2.0.1.  
+
 (...and more in the full docs)
 
 == REST API Endpoints ==
@@ -380,7 +356,7 @@ Yes. You can:
 Yes. The modal is responsive with mobile optimizations like excerpt clamping and floating mic button.
 
 = Is result caching supported? =  
-Yes. It uses `localStorage` to cache search results and reduce repeat queries.
+Yes. It uses `localStorage` to cache search results and reduce repeat queries. Cached results expire after 1 hour by default (filter `init_plugin_suite_live_search_client_cache_ttl`), and the `/clear` command wipes them instantly.
 
 = Does the plugin track user data? =  
 Only if **Search Analytics** is enabled. It logs:  
@@ -414,6 +390,36 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 2.0.1 – September 25, 2026 =
+- **Fixed: FULLTEXT search returned no results for queries containing common English words.** With the FULLTEXT index enabled, any query containing an InnoDB stopword ("how", "the", "what", "about"…) — e.g. "how to install" — returned nothing at all, because InnoDB never indexes stopwords and every word was marked as required. Stopwords are no longer required terms, and if nothing remains the search falls back to LIKE; the list is adjustable via `init_plugin_suite_live_search_fulltext_stopwords`
+- **Fixed: infinite scroll re-requested page 1 on every scroll.** The `/search` endpoint ignored the `page` parameter, so "load more" kept receiving the same results. Pagination now works (up to 3 pages, as designed), and "load more" uses the configured Max Results instead of a hard-coded 10
+- **Fixed**: with Meilisearch enabled, pages 2+ of search and related results were always empty because the offset was applied twice
+- **Fixed**: `wp init-live-search fulltext-reindex` made search return nothing while the index was being rebuilt; search now temporarily uses LIKE until the rebuild finishes
+- **Fixed**: the single-word fallback silently returned nothing on MySQL 5.7 and older, which do not support `\b` in REGEXP; the correct word-boundary syntax is now picked per server (MySQL 8.0.4+ and MariaDB are unchanged)
+- **Fixed**: the "shorten the phrase" fallback overwrote results already found (including synonym matches) instead of adding to them
+- **Fixed**: ACF field matches ignored the Post Types to Include setting
+- **Fixed**: object-cache keys missed the language, `no_fallback` and current settings, so sites with Redis/Memcached could receive results in the wrong language; cached results now also refresh automatically whenever posts or terms change
+- **Fixed**: PHP 8.1+ deprecation notice on `/product` requests without a price order; result IDs are now always returned as integers (as the Abilities API schema expects)
+- **Fixed**: uninstall left analytics chunks, Meilisearch settings, dictionary settings and cache transients behind; multisite networks are now cleaned site by site
+- **Security**: `/read` could return the title, link and excerpt of drafts and private posts by ID. Every result list (REST, blocks, shortcodes, abilities) now only contains published posts of public or admin-enabled post types — filter `init_plugin_suite_live_search_is_result_visible`
+- **Security**: password-protected posts are searchable by title only — no snippet is built from their content and the FULLTEXT index no longer stores it
+- **Security**: `post_type` passed through shortcode/block attributes or the Abilities API is limited to public or admin-enabled post types (e.g. `shop_coupon` or `wp_block` can no longer be queried); `/tax` only accepts public taxonomies (filter `init_plugin_suite_live_search_allowed_taxonomy`)
+- **Security**: `/coupon` skips email-restricted (customer-specific) coupons and only responds when `product` is enabled — filters `init_plugin_suite_live_search_coupon_include_restricted` and `init_plugin_suite_live_search_coupon_enabled`
+- **Security**: cross-site search results are sanitized in the browser (only `<mark>` highlighting is kept, links must be http/https), and HTML stripping no longer uses `innerHTML`
+- **Performance: Related Posts no longer run a full search on every page view.** Keyword-based related posts (shortcode, block, auto-insert, Abilities API) are now cached per post for 12 hours and re-checked before display — filter `init_plugin_suite_live_search_related_cache_ttl` (`0` disables)
+- **Performance**: Search Analytics now only logs real visitor searches — related posts, 404 redirects and API calls were previously counted too, causing a database write on every post view (filter `init_plugin_suite_live_search_should_track`)
+- **Performance**: Meilisearch circuit breaker — after a timeout or 5xx error, Meilisearch is skipped for 60 seconds and search falls back to the database instantly instead of waiting for the timeout on every request (filter `init_plugin_suite_live_search_meili_circuit_ttl`); only document IDs are requested from Meilisearch
+- **Performance**: fallback excerpts for posts without a manual excerpt no longer run the full `the_content` filter chain (shortcodes, page builders, embeds) for every result — return `true` from `init_plugin_suite_live_search_use_legacy_excerpt` to restore the previous behaviour
+- **Performance**: 404 smart redirect results are cached and junk bot URLs are ignored (filters `init_plugin_suite_live_search_404_cache_ttl`, `init_plugin_suite_live_search_404_redirect_status`); `/random` picks a random offset instead of `ORDER BY RAND()`
+- **Performance**: AI Related Posts diversification (MMR) is now O(k·n) instead of O(k²·n) — identical results, about 3× faster; candidate caches are primed before filtering
+- **Performance**: FULLTEXT background indexing and `wp init-live-search fulltext-reindex` use keyset pagination (`ID > last`) instead of OFFSET — faster on large sites and no skipped posts; an in-progress 2.0.0 build resumes automatically
+- **Performance**: single-word fallback capped at 6 distinct words (filter `init_plugin_suite_live_search_fallback_max_words`); synonym dictionaries built once per request; +/- operator filtering and Related Posts templates prime caches in one query; faster keyword highlighting with identical output
+- **Performance**: the frontend script now loads with `defer`, and scroll handling is passive and frame-throttled
+- **Improved: better Vietnamese & Unicode matching.** Search terms are normalized to Unicode NFC, so Vietnamese typed on macOS/iOS keyboards now matches; snippets are case- and accent-insensitive (consistent with highlighting) and never cut a word in half; word counting is Unicode-aware. Search terms are length-capped (filters `init_plugin_suite_live_search_max_term_length`, `init_plugin_suite_live_search_rest_max_term_length`)
+- **Improved**: deterministic ranking when results have equal scores (best position in any source list first), instead of PHP-version-dependent ordering
+- **Changed**: the browser result cache (`localStorage`) now expires after 1 hour (filter `init_plugin_suite_live_search_client_cache_ttl`, `0` = never) and no longer breaks search when storage is full or blocked
+- **i18n**: `.pot` regenerated; 1 new string ("Open Search") and 3 previously missing strings translated in the Vietnamese `.po`/`.mo`
 
 = 2.0.0 – August 04, 2026 =
 - **New: Abilities API support (WordPress 6.9+)**: registers two read-only abilities under the `init-live-search` category — `init-live-search/search-posts` (runs the plugin's search engine and returns matching results) and `init-live-search/get-related-posts` (returns posts related to a given post ID). Both are discoverable and executable via PHP, `wp_get_abilities()`, and — when a site opts in — the `wp-abilities/v1` REST namespace. Fully optional and backward-compatible: on WordPress versions older than 6.9, the integration silently does nothing

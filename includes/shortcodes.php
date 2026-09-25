@@ -7,7 +7,7 @@ function init_plugin_suite_live_search_shortcode( $atts ) {
     $atts = shortcode_atts(
         [
             'type'         => 'icon',      // icon | input
-            'placeholder'  => 'Search...',
+            'placeholder'  => __( 'Search...', 'init-live-search' ),
             'label'        => '',
             'class'        => '',
             'id'           => '',
@@ -32,7 +32,7 @@ function init_plugin_suite_live_search_shortcode( $atts ) {
     $placeholder  = $atts['placeholder'];
     $label        = $atts['label'];
     $name_attr    = trim( $atts['name'] ) !== '' ? $atts['name'] : 'ils';
-    $aria_label   = trim( $atts['aria_label'] ) !== '' ? $atts['aria_label'] : ( $label ? $label : 'Open Search' );
+    $aria_label   = trim( $atts['aria_label'] ) !== '' ? $atts['aria_label'] : ( $label ? $label : __( 'Open Search', 'init-live-search' ) );
     $show_button  = ( $atts['button'] !== 'hide' );
 
     // allow units: px, %, rem, em, vw, vh, ch
@@ -188,6 +188,27 @@ function init_plugin_suite_live_search_related_ai_shortcode( $atts ) {
 
 // Shortcode render
 function init_plugin_suite_live_search_render_related( $related_ids, $atts ) {
+    if ( empty( $related_ids ) || ! is_array( $related_ids ) ) {
+        return '';
+    }
+
+    // Nạp cache post/meta/term/thumbnail cho cả danh sách 1 lần (template gọi
+    // get_the_title/get_permalink/get_the_post_thumbnail cho từng bài -> N+1),
+    // rồi kiểm tra lại từng bài: ID có thể đến từ cache (transient) nên bài đã
+    // bị gỡ/chuyển nháp sau đó không được hiển thị.
+    $related_ids = array_values( array_filter( array_map( 'intval', $related_ids ) ) );
+    init_plugin_suite_live_search_prime_result_caches( $related_ids );
+
+    $options     = get_option( INIT_PLUGIN_SUITE_LS_OPTION, [] );
+    $related_ids = array_values(
+        array_filter(
+            $related_ids,
+            function ( $id ) use ( $options ) {
+                return init_plugin_suite_live_search_is_result_visible( $id, $options );
+            }
+        )
+    );
+
     if ( empty( $related_ids ) ) return '';
     $wrapper_class = count($related_ids) >= 10 ? 'ils-related-list ils-related--columns' : 'ils-related-list';
 

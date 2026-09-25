@@ -3,13 +3,13 @@
  * Plugin Name: Init Live Search
  * Plugin URI: https://inithtml.com/plugin/init-live-search/
  * Description: A fast, lightweight, and extensible live search modal for WordPress. Built with Vanilla JS and powered by the REST API.
- * Version: 2.0.0
+ * Version: 2.0.1
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-live-search
  * Domain Path: /languages
  * Requires at least: 6.9
- * Tested up to: 7.0
+ * Tested up to: 7.1
  * Requires PHP: 7.4
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -18,7 +18,7 @@
 defined('ABSPATH') || exit;
 
 // Main Constants
-define('INIT_PLUGIN_SUITE_LS_VERSION',                '2.0.0');
+define( 'INIT_PLUGIN_SUITE_LS_VERSION', '2.0.1' );
 define('INIT_PLUGIN_SUITE_LS_SLUG',                   'init-live-search');
 define('INIT_PLUGIN_SUITE_LS_GROUP_GENERAL',          'init_live_search_group_general');
 define('INIT_PLUGIN_SUITE_LS_OPTION',                 'init_plugin_suite_live_search_settings');
@@ -99,12 +99,16 @@ add_action('wp_enqueue_scripts', function () {
     }
 
     // Enqueue JS
+    // defer: không chặn render trang (script chỉ cần chạy sau khi DOM parse xong).
     wp_enqueue_script(
         'init-plugin-suite-live-search-script',
         INIT_PLUGIN_SUITE_LS_ASSETS_URL . 'js/script.js',
         [],
         INIT_PLUGIN_SUITE_LS_VERSION,
-        true
+        [
+            'in_footer' => true,
+            'strategy'  => 'defer',
+        ]
     );
 
     // Debounce
@@ -243,6 +247,10 @@ add_action('wp_enqueue_scripts', function () {
         'voice_auto_restart' => false,
         'voice_auto_stop'    => true,
         'max_select_word'    => (int) ($options['max_select_word'] ?? 8),
+        // Số kết quả mỗi trang (JS dùng để biết còn trang sau hay không, thay cho số 10 cố định).
+        'per_page'              => max( 1, (int) ( $options['max_results'] ?? 10 ) ),
+        // TTL (giây) của cache kết quả trong localStorage. 0 = không hết hạn (hành vi cũ).
+        'cache_ttl'             => max( 0, (int) apply_filters( 'init_plugin_suite_live_search_client_cache_ttl', HOUR_IN_SECONDS ) ),
         'enable_slash'       => $enable_slash,
         'utm'                => isset($options['default_utm']) ? sanitize_text_field($options['default_utm']) : '',
         'trigger'            => $trigger,

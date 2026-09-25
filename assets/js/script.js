@@ -16,6 +16,81 @@ document.addEventListener('DOMContentLoaded', function () {
     let isLoadingMore = false;
     let activeFilter = '*';
 
+    // ===== Safe storage helpers =====
+    // localStorage có thể bị chặn (Safari chế độ riêng tư, cookie bị tắt) hoặc
+    // đầy quota -> getItem/setItem ném exception và làm hỏng cả luồng search.
+    function lsGet(key) {
+        try { return window.localStorage.getItem(key); } catch (e) { return null; }
+    }
+
+    function lsSet(key, value) {
+        try { window.localStorage.setItem(key, value); return true; } catch (e) { return false; }
+    }
+
+    function lsRemove(key) {
+        try { window.localStorage.removeItem(key); } catch (e) { /* ignore */ }
+    }
+
+    function lsKeys() {
+        try { return Object.keys(window.localStorage); } catch (e) { return []; }
+    }
+
+    function purgeResultCache() {
+        try {
+            for (let i = window.localStorage.length - 1; i >= 0; i--) {
+                const key = window.localStorage.key(i);
+                if (key && key.startsWith('ils-cache-')) {
+                    window.localStorage.removeItem(key);
+                }
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    // Cache kết quả có hạn dùng (cache_ttl giây, 0 = không hết hạn như bản cũ).
+    // Định dạng mới: {"__ils":1,"t":<ms>,"d":<data>}. Dữ liệu định dạng cũ
+    // (không có mốc thời gian) được coi là hết hạn khi có TTL -> tải lại 1 lần.
+    const cacheTtlMs = Math.max(0, parseInt(InitPluginSuiteLiveSearch.cache_ttl, 10) || 0) * 1000;
+
+    function cacheGet(key) {
+        const raw = lsGet(key);
+        if (!raw) return null;
+
+        let parsed;
+        try {
+            parsed = JSON.parse(raw);
+        } catch (e) {
+            lsRemove(key);
+            return null;
+        }
+
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && parsed.__ils === 1) {
+            if (cacheTtlMs > 0 && (Date.now() - (parsed.t || 0)) > cacheTtlMs) {
+                lsRemove(key);
+                return null;
+            }
+            return parsed.d;
+        }
+
+        if (cacheTtlMs > 0) {
+            lsRemove(key);
+            return null;
+        }
+
+        return parsed;
+    }
+
+    function cacheSet(key, data) {
+        const payload = JSON.stringify({ __ils: 1, t: Date.now(), d: data });
+        if (lsSet(key, payload)) return;
+
+        // Đầy quota: dọn cache kết quả cũ của plugin rồi thử lại đúng 1 lần.
+        purgeResultCache();
+        lsSet(key, payload);
+    }
+
+    // Số kết quả mỗi trang theo Settings (trước đây cố định 10).
+    const perPage = Math.max(1, parseInt(InitPluginSuiteLiveSearch.per_page, 10) || 10);
+
     // AbortController cho lần search hiện tại (tránh race condition khi gõ nhanh).
     // Mỗi lần handleSearch() chạy sẽ abort request search trước đó (nếu còn đang chạy).
     let searchAbortController = null;
@@ -263,12 +338,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
         modalInitialized = true;
 
+        // passive + gộp theo khung hình (requestAnimationFrame): tránh đọc layout
+        // (scrollHeight...) hàng chục lần mỗi giây khi cuộn trên mobile.
+        let scrollTicking = false;
         resultsContainer.addEventListener('scroll', () => {
-            const threshold = 200;
-            if (resultsContainer.scrollTop + resultsContainer.clientHeight >= resultsContainer.scrollHeight - threshold) {
-                loadMoreResults();
-            }
-        });
+            if (scrollTicking) return;
+            scrollTicking = true;
+            window.requestAnimationFrame(() => {
+                scrollTicking = false;
+                const threshold = 200;
+                if (resultsContainer.scrollTop + resultsContainer.clientHeight >= resultsContainer.scrollHeight - threshold) {
+                    loadMoreResults();
+                }
+            });
+        }, { passive: true });
 
         let selectedIndex = -1;
 
@@ -392,15 +475,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 const favBtn = activeItem.querySelector('.ils-fav-btn');
                 if (!favBtn) return;
 
-                if (e.key === 'ArrowRight' && !localStorage.getItem(favKey)) {
-                    localStorage.setItem(favKey, Date.now());
+                if (e.key === 'ArrowRight' && !lsGet(favKey)) {
+                    lsSet(favKey, Date.now());
                     favBtn.classList.add('active', 'flash');
                     setTimeout(() => favBtn.classList.remove('flash'), 400);
                     e.preventDefault();
                 }
 
-                if (e.key === 'ArrowLeft' && localStorage.getItem(favKey)) {
-                    localStorage.removeItem(favKey);
+                if (e.key === 'ArrowLeft' && lsGet(favKey)) {
+                    lsRemove(favKey);
                     favBtn.classList.remove('active');
                     favBtn.classList.add('flash');
                     setTimeout(() => favBtn.classList.remove('flash'), 400);
@@ -463,7 +546,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             return;
                         }
 
-                        if (data.length < 10) hasMoreResults = false;
+                        if (data.length < perPage) hasMoreResults = false;
 
                         const prevUrls = Array.from(resultsContainer.querySelectorAll('.ils-item'))
                             .map(el => el.getAttribute('data-url')?.replace(/\/$/, ''));
@@ -515,7 +598,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             return;
                         }
 
-                        if (data.length < 10) hasMoreResults = false;
+                        if (data.length < perPage) hasMoreResults = false;
 
                         const prevUrls = new Set(
                             Array.from(resultsContainer.querySelectorAll('.ils-item'))
@@ -558,7 +641,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
 
-                    if (data.length < 10) hasMoreResults = false;
+                    if (data.length < perPage) hasMoreResults = false;
 
                     const prevUrls = new Set(
                         Array.from(resultsContainer.querySelectorAll('.ils-item'))
@@ -593,7 +676,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   return;
               }
 
-              if (data.length < 10) hasMoreResults = false;
+              if (data.length < perPage) hasMoreResults = false;
 
               const prevUrls = Array.from(resultsContainer.querySelectorAll('.ils-item'))
                   .map(el => el.getAttribute('data-url')?.replace(/\/$/, ''));
@@ -668,7 +751,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                if (data.length < 10) hasMoreResults = false;
+                if (data.length < perPage) hasMoreResults = false;
 
                 const prev = Array.from(resultsContainer.querySelectorAll('.ils-item'))
                     .map(el => el.getAttribute('data-url')?.replace(/\/$/, ''));
@@ -704,7 +787,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                if (data.length < 10) hasMoreResults = false;
+                if (data.length < perPage) hasMoreResults = false;
 
                 const prev = Array.from(resultsContainer.querySelectorAll('.ils-item'))
                     .map(el => el.getAttribute('data-url'));
@@ -858,7 +941,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 for (let i = localStorage.length - 1; i >= 0; i--) {
                     const key = localStorage.key(i);
                     if (key && key.startsWith(prefix)) {
-                        localStorage.removeItem(key);
+                        lsRemove(key);
                     }
                 }
                 showMessage(InitPluginSuiteLiveSearch.i18n.cache_cleared);
@@ -883,7 +966,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (cmd === 'history_clear') {
-            localStorage.removeItem('ils-history');
+            lsRemove('ils-history');
             showMessage(InitPluginSuiteLiveSearch.i18n.history_cleared);
             return true;
         }
@@ -917,9 +1000,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const cacheKey = `ils-cache-/recent`;
 
             if (InitPluginSuiteLiveSearch.use_cache) {
-                const cached = localStorage.getItem(cacheKey);
+                const cached = cacheGet(cacheKey);
                 if (cached) {
-                    const data = JSON.parse(cached);
+                    const data = cached;
                     setCommand('recent');
                     renderResults(data);
                     return true;
@@ -939,7 +1022,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
                     if (InitPluginSuiteLiveSearch.use_cache) {
-                        localStorage.setItem(cacheKey, JSON.stringify(data));
+                        cacheSet(cacheKey, data);
                     }
                     setCommand('recent');
                     renderResults(data);
@@ -955,9 +1038,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const cacheKey = `ils-cache-coupon`;
 
             if (InitPluginSuiteLiveSearch.use_cache) {
-                const cached = localStorage.getItem(cacheKey);
+                const cached = cacheGet(cacheKey);
                 if (cached) {
-                    const data = JSON.parse(cached);
+                    const data = cached;
                     setCommand('coupon');
                     renderResults(data);
                     return true;
@@ -975,7 +1058,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     if (InitPluginSuiteLiveSearch.use_cache) {
-                        localStorage.setItem(cacheKey, JSON.stringify(data));
+                        cacheSet(cacheKey, data);
                     }
 
                     setCommand('coupon');
@@ -992,15 +1075,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const cacheKey = `ils-cache-${cmd}`;
 
             if (InitPluginSuiteLiveSearch.use_cache) {
-                const cached = localStorage.getItem(cacheKey);
+                const cached = cacheGet(cacheKey);
                 if (cached) {
                     try {
-                        const data = JSON.parse(cached);
+                        const data = cached;
                         setCommand(cmd);
                         renderResults(data);
                         return true;
                     } catch (e) {
-                        localStorage.removeItem(cacheKey);
+                        lsRemove(cacheKey);
                     }
                 }
             }
@@ -1015,7 +1098,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     if (InitPluginSuiteLiveSearch.use_cache) {
-                        localStorage.setItem(cacheKey, JSON.stringify(data));
+                        cacheSet(cacheKey, data);
                     }
 
                     setCommand(cmd);
@@ -1037,14 +1120,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const cacheKey = `ils-cache-related-${pageTitle}`;
             if (InitPluginSuiteLiveSearch.use_cache) {
-                const cached = localStorage.getItem(cacheKey);
+                const cached = cacheGet(cacheKey);
                 if (cached) {
                     try {
                         setCommand('related', 'title', pageTitle);
-                        renderResults(JSON.parse(cached));
+                        renderResults(cached);
                         return true;
                     } catch (e) {
-                        localStorage.removeItem(cacheKey);
+                        lsRemove(cacheKey);
                     }
                 }
             }
@@ -1061,7 +1144,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     if (InitPluginSuiteLiveSearch.use_cache) {
-                        localStorage.setItem(cacheKey, JSON.stringify(data));
+                        cacheSet(cacheKey, data);
                     }
 
                     setCommand('related', 'title', pageTitle);
@@ -1076,11 +1159,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (cmd === 'read') {
             const prefix = 'init_rp_';
-            const allKeys = Object.keys(localStorage)
+            const allKeys = lsKeys()
                 .filter(k => k.startsWith(prefix))
                 .map(k => ({
                     key: k,
-                    time: parseInt(localStorage.getItem(k), 10)
+                    time: parseInt(lsGet(k), 10)
                 }))
                 .filter(item => !isNaN(item.time))
                 .sort((a, b) => b.time - a.time);
@@ -1119,11 +1202,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (cmd === 'fav') {
             const prefix = 'ils-fav-';
-            const allKeys = Object.keys(localStorage)
+            const allKeys = lsKeys()
                 .filter(k => k.startsWith(prefix))
                 .map(k => ({
                     id: parseInt(k.replace(prefix, ''), 10),
-                    time: parseInt(localStorage.getItem(k), 10) || 0
+                    time: parseInt(lsGet(k), 10) || 0
                 }))
                 .filter(item => item.id > 0)
                 .sort((a, b) => b.time - a.time);
@@ -1159,14 +1242,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (cmd === 'fav_clear') {
             const prefix = 'ils-fav-';
-            const keys = Object.keys(localStorage).filter(k => k.startsWith(prefix));
+            const keys = lsKeys().filter(k => k.startsWith(prefix));
 
             if (!keys.length) {
                 showMessage(InitPluginSuiteLiveSearch.i18n.no_results);
                 return true;
             }
 
-            keys.forEach(k => localStorage.removeItem(k));
+            keys.forEach(k => lsRemove(k));
             showMessage(InitPluginSuiteLiveSearch.i18n.fav_cleared);
             return true;
         }
@@ -1314,13 +1397,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const cacheKey = `ils-cache-taxonomy-${taxonomy}`;
 
             if (InitPluginSuiteLiveSearch.use_cache) {
-                const cached = localStorage.getItem(cacheKey);
+                const cached = cacheGet(cacheKey);
                 if (cached) {
                     try {
-                        renderTaxonomyList(JSON.parse(cached));
+                        renderTaxonomyList(cached);
                         return true;
                     } catch (e) {
-                        localStorage.removeItem(cacheKey);
+                        lsRemove(cacheKey);
                     }
                 }
             }
@@ -1336,7 +1419,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     if (InitPluginSuiteLiveSearch.use_cache) {
-                        localStorage.setItem(cacheKey, JSON.stringify(data));
+                        cacheSet(cacheKey, data);
                     }
 
                     renderTaxonomyList(data);
@@ -1355,14 +1438,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const cacheKey = `ils-cache-date-${normalized}`;
 
             if (InitPluginSuiteLiveSearch.use_cache) {
-                const cached = localStorage.getItem(cacheKey);
+                const cached = cacheGet(cacheKey);
                 if (cached) {
                     try {
                         setCommand('date', 'value', normalized);
-                        renderResults(JSON.parse(cached));
+                        renderResults(cached);
                         return true;
                     } catch (e) {
-                        localStorage.removeItem(cacheKey);
+                        lsRemove(cacheKey);
                     }
                 }
             }
@@ -1380,7 +1463,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
                     if (InitPluginSuiteLiveSearch.use_cache) {
-                        localStorage.setItem(cacheKey, JSON.stringify(data));
+                        cacheSet(cacheKey, data);
                     }
 
                     setCommand('date', 'value', normalized);
@@ -1408,14 +1491,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Check cache
             if (InitPluginSuiteLiveSearch.use_cache) {
-                const cached = localStorage.getItem(cacheKey);
+                const cached = cacheGet(cacheKey);
                 if (cached) {
                     try {
                         setCommand('tax', 'taxonomy', taxonomy, { term: normalizedArg });
-                        renderResults(JSON.parse(cached));
+                        renderResults(cached);
                         return true;
                     } catch (e) {
-                        localStorage.removeItem(cacheKey);
+                        lsRemove(cacheKey);
                     }
                 }
             }
@@ -1444,7 +1527,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }));
 
                     if (InitPluginSuiteLiveSearch.use_cache) {
-                        localStorage.setItem(cacheKey, JSON.stringify(data));
+                        cacheSet(cacheKey, data);
                     }
 
                     setCommand('tax', 'taxonomy', taxonomy, { term: normalizedArg });
@@ -1499,10 +1582,73 @@ document.addEventListener('DOMContentLoaded', function () {
         resultsContainer.innerHTML = `<div class="ils-message">${msg}</div>`;
     }
 
+    // DOMParser tạo document "trơ": không tải ảnh, không chạy onerror/script.
+    // (Gán innerHTML vào div tách rời vẫn kích hoạt <img onerror> -> XSS.)
     function stripHtml(html) {
-        const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = html;
-        return tempDiv.textContent || tempDiv.innerText || "";
+        if (html === null || html === undefined || html === '') return '';
+        const doc = new DOMParser().parseFromString(String(html), 'text/html');
+        return doc.body ? (doc.body.textContent || '') : '';
+    }
+
+    function escapeHtml(str) {
+        return String(str === null || str === undefined ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // Giữ lại DUY NHẤT thẻ <mark> (highlight), mọi thứ khác thành text đã escape.
+    function sanitizeMarkOnly(html) {
+        if (html === null || html === undefined || html === '') return '';
+        const doc = new DOMParser().parseFromString(String(html), 'text/html');
+        const walk = (node) => {
+            let out = '';
+            node.childNodes.forEach(child => {
+                if (child.nodeType === 3) {
+                    out += escapeHtml(child.nodeValue);
+                } else if (child.nodeType === 1) {
+                    const inner = walk(child);
+                    out += child.nodeName === 'MARK' ? `<mark>${inner}</mark>` : inner;
+                }
+            });
+            return out;
+        };
+        return doc.body ? walk(doc.body) : '';
+    }
+
+    function safeHttpUrl(url, fallback = '#') {
+        try {
+            const u = new URL(String(url || ''), window.location.href);
+            return (u.protocol === 'http:' || u.protocol === 'https:') ? u.href : fallback;
+        } catch (e) {
+            return fallback;
+        }
+    }
+
+    // Kết quả từ site khác (cross-site search) là dữ liệu KHÔNG tin cậy: chỉ
+    // giữ các field cần hiển thị, escape toàn bộ, URL phải là http(s).
+    function sanitizeRemoteItem(item, site) {
+        const clean = {
+            id: parseInt(item && item.id, 10) || 0,
+            title: sanitizeMarkOnly(item && item.title),
+            url: safeHttpUrl(item && item.url),
+            type: escapeHtml(stripHtml(item && item.type)),
+            post_type: escapeHtml(stripHtml(item && item.post_type)),
+            thumb: safeHttpUrl(item && item.thumb, InitPluginSuiteLiveSearch.default_thumb),
+            date: escapeHtml(stripHtml(item && item.date)),
+            category: escapeHtml(stripHtml(item && item.category)),
+            excerpt: sanitizeMarkOnly(item && item.excerpt),
+            _origin: escapeHtml(site.label),
+            _origin_url: site.url
+        };
+        if (item && item.price !== undefined) clean.price = escapeHtml(stripHtml(item.price));
+        if (item && item.regular_price !== undefined) clean.regular_price = escapeHtml(stripHtml(item.regular_price));
+        if (item && typeof item.on_sale === 'boolean') clean.on_sale = item.on_sale;
+        if (item && typeof item.stock_status === 'string') clean.stock_status = escapeHtml(item.stock_status);
+        if (item && item.add_to_cart_url) clean.add_to_cart_url = safeHttpUrl(item.add_to_cart_url);
+        return clean;
     }
 
     function addUtm(url) {
@@ -1531,13 +1677,13 @@ document.addEventListener('DOMContentLoaded', function () {
         let history = [];
 
         try {
-            const raw = localStorage.getItem(key);
+            const raw = lsGet(key);
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed)) {
                 history = parsed;
             }
         } catch (e) {
-            localStorage.removeItem(key);
+            lsRemove(key);
         }
 
         const normalized = term.toLowerCase().trim();
@@ -1549,19 +1695,19 @@ document.addEventListener('DOMContentLoaded', function () {
         history.unshift(term.trim());
         if (history.length > 30) history.length = 30;
 
-        localStorage.setItem(key, JSON.stringify(history));
+        lsSet(key, JSON.stringify(history));
     }
 
     function renderHistoryPills(limit = 10) {
         let terms = [];
         try {
-            const raw = localStorage.getItem('ils-history');
+            const raw = lsGet('ils-history');
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed)) {
                 terms = parsed.slice(0, limit);
             }
         } catch (e) {
-            localStorage.removeItem('ils-history');
+            lsRemove('ils-history');
         }
 
         if (!terms.length) return false;
@@ -1602,7 +1748,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const getFavKey = (id) => 'ils-fav-' + id;
-        const isFav = (id) => localStorage.getItem(getFavKey(id)) !== null;
+        const isFav = (id) => lsGet(getFavKey(id)) !== null;
 
         const fragment = document.createDocumentFragment();
 
@@ -1748,11 +1894,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.location.href = finalUrl;
                     return;
                 } else {
-                    if (localStorage.getItem(favKey)) {
-                        localStorage.removeItem(favKey);
+                    if (lsGet(favKey)) {
+                        lsRemove(favKey);
                         btn.classList.remove('active');
                     } else {
-                        localStorage.setItem(favKey, Date.now());
+                        lsSet(favKey, Date.now());
                         btn.classList.add('active');
                     }
                 }
@@ -1881,10 +2027,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const cacheKey = `ils-cache-${term}`;
         if (InitPluginSuiteLiveSearch.use_cache) {
-            const cached = localStorage.getItem(cacheKey);
+            const cached = cacheGet(cacheKey);
             if (cached) {
                 setCommand('search', 'term', term);
-                renderResults(JSON.parse(cached));
+                renderResults(cached);
                 return;
             }
         }
@@ -1900,11 +2046,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const extraFetches = crossSites.map(site => {
             return fetch(`${site.url}/wp-json/initlise/v1/search?term=${encodeURIComponent(term)}${paramExtras}`, { signal })
                 .then(res => res.json())
-                .then(data => data.map(item => ({
-                    ...item,
-                    _origin: site.label,
-                    _origin_url: site.url
-                })))
+                .then(data => (Array.isArray(data) ? data : []).map(item => sanitizeRemoteItem(item, site)))
                 .catch(() => []);
         });
 
@@ -1919,7 +2061,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 renderResults(primaryData);
 
                 if (InitPluginSuiteLiveSearch.use_cache) {
-                    localStorage.setItem(cacheKey, JSON.stringify(primaryData));
+                    cacheSet(cacheKey, primaryData);
                 }
             }
 
@@ -1942,9 +2084,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         renderResults(extraData, true);
 
                         if (InitPluginSuiteLiveSearch.use_cache) {
-                            const existing = JSON.parse(localStorage.getItem(cacheKey) || '[]');
+                            const existing = (cacheGet(cacheKey) || []);
                             const updated = existing.concat(extraData);
-                            localStorage.setItem(cacheKey, JSON.stringify(updated));
+                            cacheSet(cacheKey, updated);
                         }
                     }
 

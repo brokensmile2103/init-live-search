@@ -236,8 +236,9 @@ function init_plugin_suite_live_search_fulltext_get_min_token_size() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function init_plugin_suite_live_search_fulltext_build_boolean_query( $term, $min_token_size ) {
-    $words  = preg_split( '/\s+/u', trim( (string) $term ) );
-    $tokens = [];
+    $words     = preg_split( '/\s+/u', trim( (string) $term ) );
+    $tokens    = [];
+    $stopwords = init_plugin_suite_live_search_fulltext_get_stopwords();
 
     foreach ( (array) $words as $word ) {
         // Bỏ các ký tự có ý nghĩa đặc biệt trong BOOLEAN MODE để tránh vỡ cú
@@ -246,6 +247,15 @@ function init_plugin_suite_live_search_fulltext_build_boolean_query( $term, $min
         $clean = trim( $clean );
 
         if ( $clean === '' || mb_strlen( $clean ) < $min_token_size ) {
+            continue;
+        }
+
+        // InnoDB bỏ qua stopword khi đánh index, nên "+how*" / "+the*" không
+        // bao giờ khớp và làm CẢ câu query trả rỗng (đã kiểm chứng trên
+        // MySQL/MariaDB) — "how to install" từng không ra kết quả nào. Bỏ các
+        // từ này khỏi điều kiện bắt buộc; nếu không còn từ nào, trả '' để
+        // caller fallback về LIKE như với từ quá ngắn.
+        if ( isset( $stopwords[ mb_strtolower( $clean ) ] ) ) {
             continue;
         }
 
@@ -259,6 +269,28 @@ function init_plugin_suite_live_search_fulltext_build_boolean_query( $term, $min
     }
 
     return implode( ' ', $tokens );
+}
+
+// InnoDB default full-text stopword list (INFORMATION_SCHEMA.INNODB_FT_DEFAULT_STOPWORD),
+// as a lookup map. Sites using a custom innodb_ft_server_stopword_table can
+// adjust it via the filter.
+function init_plugin_suite_live_search_fulltext_get_stopwords() {
+    static $map = null;
+
+    if ( null === $map ) {
+        $defaults = explode(
+            ' ',
+            'a about an are as at be by com de en for from how i in is it la of on or that the this to was what when where who will with und www'
+        );
+        $list     = apply_filters( 'init_plugin_suite_live_search_fulltext_stopwords', $defaults );
+
+        $map = [];
+        foreach ( (array) $list as $word ) {
+            $map[ mb_strtolower( (string) $word ) ] = true;
+        }
+    }
+
+    return $map;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -338,6 +370,10 @@ function init_plugin_suite_live_search_fulltext_upsert_row( $post ) {
 
     $table = init_plugin_suite_live_search_fulltext_table();
 
+    // Bài có mật khẩu: chỉ index tiêu đề (giống cách WordPress xử lý) — không
+    // đưa nội dung/excerpt được bảo vệ vào bảng tìm kiếm.
+    $is_protected = '' !== (string) $post->post_password;
+
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->replace(
         $table,
@@ -345,8 +381,8 @@ function init_plugin_suite_live_search_fulltext_upsert_row( $post ) {
             'post_id'    => $post->ID,
             'post_type'  => $post->post_type,
             'title'      => (string) $post->post_title,
-            'excerpt'    => (string) $post->post_excerpt,
-            'content'    => wp_strip_all_tags( strip_shortcodes( (string) $post->post_content ) ),
+            'excerpt'    => $is_protected ? '' : (string) $post->post_excerpt,
+            'content'    => $is_protected ? '' : wp_strip_all_tags( strip_shortcodes( (string) $post->post_content ) ),
             'updated_at' => current_time( 'mysql' ),
         ],
         [ '%d', '%s', '%s', '%s', '%s', '%s' ]
@@ -414,6 +450,72 @@ add_action( 'before_delete_post', 'init_plugin_suite_live_search_fulltext_handle
 // có thể chạy chậm hơn 5 giây/đợt — lệnh WP-CLI vẫn luôn có sẵn để chạy tay,
 // đẩy nhanh bất cứ lúc nào.
 // ─────────────────────────────────────────────────────────────────────────
+
+// Index one batch of published posts with ID > $after_id (keyset pagination).
+//
+// Replaces the old 'paged' (LIMIT/OFFSET) WP_Query loop used by both the
+// WP-Cron job and the WP-CLI command:
+// - OFFSET makes MySQL walk every skipped row again on each batch (quadratic
+// on large sites); "ID > last_id" uses the primary key directly.
+// - With OFFSET, posts published/deleted during a rebuild shift the pages and
+// some posts were silently skipped; keyset pagination cannot skip rows.
+// - Only the ID list is queried here; post rows are primed in one query and
+// no meta/term caches are loaded (they are never used for indexing).
+//
+// @return array{count:int,last_id:int}
+function init_plugin_suite_live_search_fulltext_index_batch( $after_id, $batch_size, $post_types ) {
+    global $wpdb;
+
+    $after_id   = max( 0, (int) $after_id );
+    $batch_size = max( 1, (int) $batch_size );
+    $post_types = array_values( array_filter( array_map( 'sanitize_key', (array) $post_types ) ) );
+
+    if ( empty( $post_types ) ) {
+        return [
+            'count'   => 0,
+            'last_id' => $after_id,
+        ];
+    }
+
+    $placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+
+    // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $ids = $wpdb->get_col( $wpdb->prepare(
+        "
+        SELECT ID FROM {$wpdb->posts}
+        WHERE post_status = 'publish'
+        AND post_type IN ($placeholders)
+        AND ID > %d
+        ORDER BY ID ASC
+        LIMIT %d
+        ",
+        ...array_merge( $post_types, [ $after_id, $batch_size ] )
+    ) );
+    // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+    $ids = array_map( 'intval', (array) $ids );
+
+    if ( empty( $ids ) ) {
+        return [
+            'count'   => 0,
+            'last_id' => $after_id,
+        ];
+    }
+
+    if ( function_exists( '_prime_post_caches' ) ) {
+        _prime_post_caches( $ids, false, false );
+    }
+
+    foreach ( $ids as $id ) {
+        init_plugin_suite_live_search_fulltext_upsert_row( $id );
+    }
+
+    return [
+        'count'   => count( $ids ),
+        'last_id' => (int) end( $ids ),
+    ];
+}
 
 define( 'INIT_PLUGIN_SUITE_LS_FULLTEXT_CRON_HOOK', 'init_plugin_suite_live_search_fulltext_cron_batch' );
 
@@ -556,38 +658,37 @@ function init_plugin_suite_live_search_fulltext_cron_run_batch() {
     $post_types = init_plugin_suite_live_search_fulltext_get_indexable_post_types();
 
     $state = get_option( 'init_plugin_suite_live_search_fulltext_cron_state', false );
-    if ( ! is_array( $state ) || empty( $state['paged'] ) ) {
+    if ( ! is_array( $state ) || ( empty( $state['paged'] ) && ! isset( $state['last_id'] ) ) ) {
         // Lượt đầu tiên của 1 lần build mới — dọn sạch bảng để tránh sót dữ
         // liệu cũ (bài đã unpublish trong khi tính năng chưa từng bật, v.v.).
         // $table is derived from $wpdb->prefix only, never from user input.
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $wpdb->query( "TRUNCATE TABLE {$table}" );
-        $state = [ 'paged' => 1, 'total' => 0 ];
+        $state = [
+            'last_id' => 0,
+            'total'   => 0,
+        ];
+    } elseif ( ! isset( $state['last_id'] ) ) {
+        // Tiến trình đang chạy dở từ bản 2.0.0 (phân trang theo 'paged'): các
+        // bài được index theo thứ tự ID tăng dần, nên ID lớn nhất đã có trong
+        // bảng chính là điểm để chạy tiếp — không cần build lại từ đầu.
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $state['last_id'] = (int) $wpdb->get_var( "SELECT MAX(post_id) FROM {$table}" );
+        $state['total']   = (int) ( $state['total'] ?? 0 );
+        unset( $state['paged'] );
     }
 
-    $query = new WP_Query( [
-        'post_type'      => $post_types,
-        'post_status'    => 'publish',
-        'posts_per_page' => $batch_size,
-        'paged'          => $state['paged'],
-        'orderby'        => 'ID',
-        'order'          => 'ASC',
-        'no_found_rows'  => true,
-    ] );
+    $batch = init_plugin_suite_live_search_fulltext_index_batch( $state['last_id'], $batch_size, $post_types );
 
-    foreach ( $query->posts as $post ) {
-        init_plugin_suite_live_search_fulltext_upsert_row( $post );
-    }
+    $state['total']  += $batch['count'];
+    $state['last_id'] = $batch['last_id'];
 
-    $state['total'] += count( $query->posts );
-
-    if ( count( $query->posts ) === $batch_size ) {
+    if ( $batch['count'] === $batch_size ) {
         // Còn bài viết chưa xử lý — hẹn đợt kế tiếp sau 5 giây. Schedule
         // TRƯỚC khi xoá lock (không phải sau) để không có khoảnh khắc nào
         // cả 2 tín hiệu (lock + wp_next_scheduled) cùng "trống" — is_active()
         // nhờ vậy luôn thấy ít nhất 1 tín hiệu đúng, kể cả khi UI đọc đúng
         // lúc giao nhau giữa 2 lượt batch.
-        $state['paged']++;
         update_option( 'init_plugin_suite_live_search_fulltext_cron_state', $state, false );
 
         if ( ! wp_next_scheduled( INIT_PLUGIN_SUITE_LS_FULLTEXT_CRON_HOOK ) ) {

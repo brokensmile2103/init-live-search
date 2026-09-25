@@ -130,7 +130,7 @@ function init_plugin_suite_live_search_ability_search_posts( $input ) {
         );
     }
 
-    return init_plugin_suite_live_search_get_results( $term );
+    return init_plugin_suite_live_search_get_results( $term, [ 'context' => 'ability' ] );
 }
 
 // Execute callback for init-live-search/get-related-posts.
@@ -139,7 +139,7 @@ function init_plugin_suite_live_search_ability_get_related_posts( $input ) {
     $count     = isset( $input['count'] ) ? absint( $input['count'] ) : 5;
     $post_type = isset( $input['post_type'] ) && is_string( $input['post_type'] ) ? sanitize_key( $input['post_type'] ) : 'post';
 
-    if ( ! $post_id || 'publish' !== get_post_status( $post_id ) ) {
+    if ( ! $post_id || ! init_plugin_suite_live_search_is_result_visible( $post_id ) ) {
         return new WP_Error(
             'init_live_search_invalid_post_id',
             __( 'A valid, published post ID is required.', 'init-live-search' )

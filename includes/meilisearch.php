@@ -85,16 +85,26 @@ function init_plugin_suite_live_search_meili_get_post_ids( $term, $post_types, $
     $paged  = max( 1, (int) $paged );
     $offset = ( $paged - 1 ) * $limit;
 
-    $cache_key = 'init_plugin_suite_live_search_meili_' . md5( $term . serialize( $post_types ) . $limit . $paged );
+    $cache_key = 'init_plugin_suite_live_search_meili_' . md5( wp_json_encode( [ $term, $post_types, $limit, $paged, $host, $index, init_plugin_suite_live_search_cache_salt() ] ) );
     $cached    = wp_cache_get( $cache_key, 'init_plugin_suite_live_search' );
     if ( $cached !== false ) {
         return $cached;
     }
 
+    // Circuit breaker: sau 1 lần Meilisearch không phản hồi (timeout/lỗi mạng/5xx),
+    // bỏ qua Meilisearch trong một khoảng ngắn và fallback về DB NGAY — thay vì
+    // bắt mọi lượt search phải chờ hết timeout (mặc định 3 giây) mới fallback.
+    $breaker_key = 'init_plugin_suite_live_search_meili_down';
+    if ( get_transient( $breaker_key ) ) {
+        return apply_filters( 'init_plugin_suite_live_search_meili_failure', false, new WP_Error( 'init_live_search_meili_circuit_open', 'Meilisearch temporarily skipped after a recent failure.' ), $term, $args );
+    }
+
     $body = [
-        'q'      => $term,
-        'limit'  => $limit,
-        'offset' => $offset,
+        'q'                    => $term,
+        'limit'                => $limit,
+        'offset'               => $offset,
+        // Chỉ cần id — giảm đáng kể dung lượng response (không kéo content về).
+        'attributesToRetrieve' => [ 'id' ],
     ];
 
     if ( ! empty( $post_types ) ) {
@@ -122,7 +132,12 @@ function init_plugin_suite_live_search_meili_get_post_ids( $term, $post_types, $
         ]
     );
 
+    $breaker_ttl = (int) apply_filters( 'init_plugin_suite_live_search_meili_circuit_ttl', MINUTE_IN_SECONDS );
+
     if ( is_wp_error( $response ) ) {
+        if ( $breaker_ttl > 0 ) {
+            set_transient( $breaker_key, 1, $breaker_ttl );
+        }
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
             // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- gated by WP_DEBUG, intentional debug-only logging
             error_log( 'Init Live Search / Meilisearch request failed: ' . $response->get_error_message() );
@@ -130,8 +145,13 @@ function init_plugin_suite_live_search_meili_get_post_ids( $term, $post_types, $
         return apply_filters( 'init_plugin_suite_live_search_meili_failure', false, $response, $term, $args );
     }
 
-    $code = wp_remote_retrieve_response_code( $response );
+    $code = (int) wp_remote_retrieve_response_code( $response );
     if ( $code < 200 || $code >= 300 ) {
+        // Chỉ lỗi phía server (5xx) mới kích hoạt breaker; 4xx (sai key/index)
+        // phản hồi tức thì nên không làm chậm search.
+        if ( $code >= 500 && $breaker_ttl > 0 ) {
+            set_transient( $breaker_key, 1, $breaker_ttl );
+        }
         return apply_filters( 'init_plugin_suite_live_search_meili_failure', false, $response, $term, $args );
     }
 
@@ -581,4 +601,13 @@ function init_plugin_suite_live_search_meili_cron_run_batch() {
         init_plugin_suite_live_search_meili_cron_finish( $state['total'] );
         delete_transient( 'init_plugin_suite_live_search_meili_cron_lock' );
     }
+}
+
+// Settings saved (new host/key...) -> clear the circuit breaker so the new
+// configuration is tried immediately instead of after the cool-down.
+add_action( 'update_option_' . INIT_PLUGIN_SUITE_LS_MEILI_OPTION, 'init_plugin_suite_live_search_meili_reset_circuit' );
+add_action( 'add_option_' . INIT_PLUGIN_SUITE_LS_MEILI_OPTION, 'init_plugin_suite_live_search_meili_reset_circuit' );
+
+function init_plugin_suite_live_search_meili_reset_circuit() {
+    delete_transient( 'init_plugin_suite_live_search_meili_down' );
 }
