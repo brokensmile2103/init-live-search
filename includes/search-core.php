@@ -47,6 +47,7 @@ function init_plugin_suite_live_search_get_results($term, $args = []) {
             // đủ mọi yếu tố ảnh hưởng kết quả + salt last_changed (tự vô hiệu khi
             // có bài/term thay đổi) — an toàn với Redis/Memcached.
             $cache_parts = [
+                'native'      => init_plugin_suite_live_search_use_native_search( $options, $args ),
                 'term'        => $term,
                 'post_types'  => $post_types,
                 'mode'        => $search_mode,
@@ -142,12 +143,26 @@ function init_plugin_suite_live_search_fallback_single_words($wpdb, $term, $post
     return init_plugin_suite_live_search_ranked_merge_weighted($all_results, $weights);
 }
 
+// Whether this request should be answered by WP_Query instead of the plugin
+// pipeline. "Use WordPress Native Search" applies to user searches only: Related
+// Posts (shortcode, block, /related, ability) always run the plugin logic,
+// because WP_Query matches the WHOLE title and so finds nothing but the post
+// itself — the plugin's fallbacks (shortened phrase, bigrams, single words)
+// are what make a title usable as a query.
+function init_plugin_suite_live_search_use_native_search( $options, $args ) {
+    if ( empty( $options['use_native_search'] ) ) {
+        return false;
+    }
+
+    return 'related' !== ( $args['context'] ?? '' );
+}
+
 // Resolve post IDs based on search term, fallback, and ACF fields
 function init_plugin_suite_live_search_resolve_post_ids($term, $like, $post_types, $placeholders, $search_mode, $limit, $paged, $options, $args) {
     global $wpdb;
     $internal_limit = min( $limit * 3, 300 );
 
-    if (!empty($options['use_native_search'])) {
+    if ( init_plugin_suite_live_search_use_native_search( $options, $args ) ) {
         // Lấy internal_limit (thay vì $limit) để phân trang phía sau hoạt động;
         // trang 1 giữ nguyên thứ tự/kết quả như trước.
         $query = new WP_Query([
@@ -761,7 +776,7 @@ function init_plugin_suite_live_search_find_related_ids( $keyword, $exclude_id, 
 
         if ( $ttl > 0 ) {
             $cache_parts = [
-                'v'       => 1,
+                'v'       => 2,
                 'keyword' => $keyword,
                 'post_id' => $exclude_id,
                 'limit'   => $limit,
@@ -795,7 +810,9 @@ function init_plugin_suite_live_search_find_related_ids( $keyword, $exclude_id, 
         : [];
 
     if ( '' !== $cache_key ) {
-        set_transient( $cache_key, $post_ids, $ttl );
+        // An empty list is remembered for an hour at most, so a settings fix
+        // is never stuck behind the whole TTL.
+        set_transient( $cache_key, $post_ids, empty( $post_ids ) ? min( $ttl, HOUR_IN_SECONDS ) : $ttl );
     }
 
     return $post_ids;
