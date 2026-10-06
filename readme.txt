@@ -4,7 +4,7 @@ Tags: AI search, live search, meilisearch, related posts, woocommerce
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -390,6 +390,10 @@ Yes. It auto-detects the active language when Polylang or WPML is installed. You
    - Visiting a URL with `#search` or `?modal=search&term=your+keyword`
 
 == Changelog ==
+
+= 2.0.2 – October 6, 2026 =
+- **Fixed: Related Posts returned nothing when "Use WordPress Native Search" was enabled** (`[init_live_search_related_posts]`, the Related Posts block, the `/related` slash command and the `get-related-posts` ability). WP_Query only matches the full title, so the only hit was the current post. Related Posts now always use the plugin's own matching (shortened phrase, bigrams, single words), whatever the native search setting
+- **Fixed**: results cached by 2.0.1 are discarded, and an empty Related Posts result is cached for 1 hour at most (not 12)
 
 = 2.0.1 – September 25, 2026 =
 - **Fixed: FULLTEXT search returned no results for queries containing common English words.** With the FULLTEXT index enabled, any query containing an InnoDB stopword ("how", "the", "what", "about"…) — e.g. "how to install" — returned nothing at all, because InnoDB never indexes stopwords and every word was marked as required. Stopwords are no longer required terms, and if nothing remains the search falls back to LIKE; the list is adjustable via `init_plugin_suite_live_search_fulltext_stopwords`
